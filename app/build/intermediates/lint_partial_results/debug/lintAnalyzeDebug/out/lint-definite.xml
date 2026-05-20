@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.9.1" type="incidents">
+
+    <incident
+        id="DefaultLocale"
+        severity="warning"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nexusblock/ui/viewmodel/DashboardViewModel.kt"
+            line="70"
+            column="35"
+            startOffset="2774"
+            endLine="70"
+            endColumn="77"
+            endOffset="2816"/>
+    </incident>
+
+    <incident
+        id="DefaultLocale"
+        severity="warning"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nexusblock/ui/viewmodel/DashboardViewModel.kt"
+            line="71"
+            column="30"
+            startOffset="2846"
+            endLine="71"
+            endColumn="67"
+            endOffset="2883"/>
+    </incident>
+
+    <incident
+        id="DefaultLocale"
+        severity="warning"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nexusblock/ui/viewmodel/DashboardViewModel.kt"
+            line="110"
+            column="39"
+            startOffset="4121"
+            endLine="110"
+            endColumn="88"
+            endOffset="4170"/>
+    </incident>
+
+    <incident
+        id="DefaultLocale"
+        severity="warning"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nexusblock/ui/viewmodel/DashboardViewModel.kt"
+            line="111"
+            column="35"
+            startOffset="4205"
+            endLine="111"
+            endColumn="80"
+            endOffset="4250"/>
+    </incident>
+
+    <incident
+        id="DefaultLocale"
+        severity="warning"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nexusblock/ui/viewmodel/DashboardViewModel.kt"
+            line="112"
+            column="30"
+            startOffset="4280"
+            endLine="112"
+            endColumn="70"
+            endOffset="4320"/>
+    </incident>
+
+    <incident
+        id="ImplicitSamInstance"
+        severity="warning"
+        message="This argument is a new instance so `stopService` will not remove anything">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nexusblock/service/VpnWatchdogService.kt"
+            line="40"
+            column="33"
+            startOffset="1227"
+            endLine="40"
+            endColumn="80"
+            endOffset="1274"/>
+    </incident>
+
+    <incident
+        id="ProtectedPermissions"
+        severity="error"
+        message="Permission is only granted to system apps">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*manifest*0}"
+            line="17"
+            column="22"
+            startOffset="1038"
+            endLine="17"
+            endColumn="72"
+            endOffset="1088"/>
+    </incident>
+
+    <incident
+        id="VectorRaster"
+        severity="warning"
+        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable/ic_banner.xml"
+            line="3"
+            column="20"
+            startOffset="125"
+            endLine="3"
+            endColumn="25"
+            endOffset="130"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of com.google.guava:guava than 33.0.0-jre is available: 33.3.1-jre">
+        <fix-replace
+            description="Change to 33.3.1-jre"
+            family="Update versions"
+            oldString="33.0.0-jre"
+            replacement="33.3.1-jre"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="63"
+            column="20"
+            startOffset="1603"
+            endLine="63"
+            endColumn="55"
+            endOffset="1638"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of com.google.dagger:hilt-android than 2.52 is available: 2.54">
+        <fix-replace
+            description="Change to 2.54"
+            family="Update versions"
+            oldString="2.52"
+            replacement="2.54"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="81"
+            column="20"
+            startOffset="2433"
+            endLine="81"
+            endColumn="57"
+            endOffset="2470"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of org.bouncycastle:bcprov-jdk18on than 1.77 is available: 1.79">
+        <fix-replace
+            description="Change to 1.79"
+            family="Update versions"
+            oldString="1.77"
+            replacement="1.79"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="114"
+            column="20"
+            startOffset="3658"
+            endLine="114"
+            endColumn="58"
+            endOffset="3696"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of org.bouncycastle:bcpkix-jdk18on than 1.77 is available: 1.79">
+        <fix-replace
+            description="Change to 1.79"
+            family="Update versions"
+            oldString="1.77"
+            replacement="1.79"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="115"
+            column="20"
+            startOffset="3717"
+            endLine="115"
+            endColumn="58"
+            endOffset="3755"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-serialization-json than 1.6.2 is available: 1.8.1">
+        <fix-replace
+            description="Change to 1.8.1"
+            family="Update versions"
+            oldString="1.6.2"
+            replacement="1.8.1"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="118"
+            column="20"
+            startOffset="3845"
+            endLine="118"
+            endColumn="76"
+            endOffset="3901"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-android than 1.7.3 is available: 1.9.0">
+        <fix-replace
+            description="Change to 1.9.0"
+            family="Update versions"
+            oldString="1.7.3"
+            replacement="1.9.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="121"
+            column="20"
+            startOffset="3985"
+            endLine="121"
+            endColumn="76"
+            endOffset="4041"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-test than 1.7.3 is available: 1.9.0">
+        <fix-replace
+            description="Change to 1.9.0"
+            family="Update versions"
+            oldString="1.7.3"
+            replacement="1.9.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="125"
+            column="24"
+            startOffset="4127"
+            endLine="125"
+            endColumn="77"
+            endOffset="4180"/>
+    </incident>
+
+    <incident
+        id="TrustAllX509TrustManager"
+        severity="warning"
+        message="`checkServerTrusted` is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers">
+        <location
+            file="$GRADLE_USER_HOME/caches/modules-2/files-2.1/org.bouncycastle/bcpkix-jdk18on/1.77/ed953791ba0229747dd0fd9911e3d76a462acfd3/bcpkix-jdk18on-1.77.jar"/>
+    </incident>
+
+    <incident
+        id="TrustAllX509TrustManager"
+        severity="warning"
+        message="`checkClientTrusted` is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers">
+        <location
+            file="$GRADLE_USER_HOME/caches/modules-2/files-2.1/org.littleshoot/littleproxy/1.1.2/a52a858007f6efbced829a944a827a63fe39d9b2/littleproxy-1.1.2.jar"/>
+    </incident>
+
+    <incident
+        id="TrustAllX509TrustManager"
+        severity="warning"
+        message="`checkServerTrusted` is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers">
+        <location
+            file="$GRADLE_USER_HOME/caches/modules-2/files-2.1/org.littleshoot/littleproxy/1.1.2/a52a858007f6efbced829a944a827a63fe39d9b2/littleproxy-1.1.2.jar"/>
+    </incident>
+
+    <incident
+        id="ObsoleteSdkInt"
+        severity="warning"
+        message="Unnecessary; `SDK_INT` is always >= 24">
+        <fix-data conditional="true"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nexusblock/service/NexusVpnService.kt"
+            line="197"
+            column="13"
+            startOffset="6191"
+            endLine="197"
+            endColumn="59"
+            endOffset="6237"/>
+    </incident>
+
+    <incident
+        id="StaticFieldLeak"
+        severity="warning"
+        message="This field leaks a context object">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nexusblock/ui/viewmodel/BlocklistViewModel.kt"
+            line="20"
+            column="5"
+            startOffset="630"
+            endLine="20"
+            endColumn="57"
+            endOffset="682"/>
+    </incident>
+
+    <incident
+        id="StaticFieldLeak"
+        severity="warning"
+        message="This field leaks a context object">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nexusblock/ui/viewmodel/DashboardViewModel.kt"
+            line="49"
+            column="5"
+            startOffset="1846"
+            endLine="49"
+            endColumn="57"
+            endOffset="1898"/>
+    </incident>
+
+    <incident
+        id="StaticFieldLeak"
+        severity="warning"
+        message="This field leaks a context object">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nexusblock/ui/viewmodel/SettingsViewModel.kt"
+            line="25"
+            column="5"
+            startOffset="779"
+            endLine="25"
+            endColumn="57"
+            endOffset="831"/>
+    </incident>
+
+    <incident
+        id="MonochromeLauncherIcon"
+        severity="warning"
+        message="The application adaptive icon is missing a monochrome tag">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-anydpi-v26/ic_launcher.xml"
+            line="2"
+            column="1"
+            startOffset="39"
+            endLine="5"
+            endColumn="17"
+            endOffset="247"/>
+    </incident>
+
+    <incident
+        id="MonochromeLauncherIcon"
+        severity="warning"
+        message="The application adaptive roundIcon is missing a monochrome tag">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-anydpi-v26/ic_launcher_round.xml"
+            line="2"
+            column="1"
+            startOffset="39"
+            endLine="5"
+            endColumn="17"
+            endOffset="247"/>
+    </incident>
+
+    <incident
+        id="UseKtx"
+        severity="warning"
+        message="Use the KTX extension function `String.toUri` instead?">
+        <fix-replace
+            description="Replace with the toUri extension function"
+            family="Replace with the toUri extension function"
+            robot="true"
+            independent="true"
+            oldString="Uri.parse(&quot;package:${context.packageName}&quot;)"
+            replacement="&quot;package:${context.packageName}&quot;.toUri()"
+            reformat="value"
+            imports="androidx.core.net.toUri"
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nexusblock/ui/viewmodel/SettingsViewModel.kt"
+                startOffset="2071"
+                endOffset="2114"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nexusblock/ui/viewmodel/SettingsViewModel.kt"
+            line="60"
+            column="20"
+            startOffset="2071"
+            endLine="60"
+            endColumn="63"
+            endOffset="2114"/>
+    </incident>
+
+    <incident
+        id="UseKtx"
+        severity="warning"
+        message="Use the KTX extension function `String.toUri` instead?">
+        <fix-replace
+            description="Replace with the toUri extension function"
+            family="Replace with the toUri extension function"
+            robot="true"
+            independent="true"
+            oldString="Uri.parse(&quot;package:${context.packageName}&quot;)"
+            replacement="&quot;package:${context.packageName}&quot;.toUri()"
+            reformat="value"
+            imports="androidx.core.net.toUri"
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nexusblock/ui/viewmodel/SettingsViewModel.kt"
+                startOffset="2071"
+                endOffset="2114"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nexusblock/ui/viewmodel/SettingsViewModel.kt"
+            line="60"
+            column="20"
+            startOffset="2071"
+            endLine="60"
+            endColumn="63"
+            endOffset="2114"/>
+    </incident>
+
+</incidents>

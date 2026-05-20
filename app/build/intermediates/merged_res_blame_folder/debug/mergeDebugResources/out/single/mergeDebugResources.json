@@ -1,0 +1,86 @@
+[
+    {
+        "merged": "com.nexusblock.app-debug-54:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.nexusblock.app-main-56:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.nexusblock.app-debug-54:/drawable_ic_banner.xml.flat",
+        "source": "com.nexusblock.app-main-56:/drawable/ic_banner.xml"
+    },
+    {
+        "merged": "com.nexusblock.app-debug-54:/drawable_ic_nav_firewall.xml.flat",
+        "source": "com.nexusblock.app-main-56:/drawable/ic_nav_firewall.xml"
+    },
+    {
+        "merged": "com.nexusblock.app-debug-54:/drawable_ic_nav_logs.xml.flat",
+        "source": "com.nexusblock.app-main-56:/drawable/ic_nav_logs.xml"
+    },
+    {
+        "merged": "com.nexusblock.app-debug-54:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.nexusblock.app-main-56:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.nexusblock.app-debug-54:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.nexusblock.app-main-56:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-debug-54:\\drawable_ic_notification.xml.flat",
+        "source": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-main-56:\\drawable\\ic_notification.xml"
+    },
+    {
+        "merged": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-debug-54:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-main-56:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
+    },
+    {
+        "merged": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-debug-54:\\drawable_ic_shield.xml.flat",
+        "source": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-main-56:\\drawable\\ic_shield.xml"
+    },
+    {
+        "merged": "com.nexusblock.app-debug-54:/drawable_ic_nav_dashboard.xml.flat",
+        "source": "com.nexusblock.app-main-56:/drawable/ic_nav_dashboard.xml"
+    },
+    {
+        "merged": "com.nexusblock.app-debug-54:/drawable_ic_nav_settings.xml.flat",
+        "source": "com.nexusblock.app-main-56:/drawable/ic_nav_settings.xml"
+    },
+    {
+        "merged": "com.nexusblock.app-debug-54:/drawable_ic_logo_nexus.xml.flat",
+        "source": "com.nexusblock.app-main-56:/drawable/ic_logo_nexus.xml"
+    },
+    {
+        "merged": "com.nexusblock.app-debug-54:/drawable_ic_nav_blocklists.xml.flat",
+        "source": "com.nexusblock.app-main-56:/drawable/ic_nav_blocklists.xml"
+    },
+    {
+        "merged": "com.nexusblock.app-debug-54:/drawable_ic_nav_rules.xml.flat",
+        "source": "com.nexusblock.app-main-56:/drawable/ic_nav_rules.xml"
+    },
+    {
+        "merged": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-debug-54:\\drawable_ic_vpn_key.xml.flat",
+        "source": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-main-56:\\drawable\\ic_vpn_key.xml"
+    },
+    {
+        "merged": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-debug-54:\\drawable_ic_launcher_foreground.xml.flat",
+        "source": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-main-56:\\drawable\\ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-debug-54:\\drawable_ic_banner.xml.flat",
+        "source": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-main-56:\\drawable\\ic_banner.xml"
+    },
+    {
+        "merged": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-debug-54:\\mipmap-anydpi_ic_launcher.xml.flat",
+        "source": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-main-56:\\mipmap-anydpi\\ic_launcher.xml"
+    },
+    {
+        "merged": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-debug-54:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-main-56:\\mipmap-anydpi-v26\\ic_launcher.xml"
+    },
+    {
+        "merged": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-debug-54:\\raw_blocklist_hosts.txt.flat",
+        "source": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-main-56:\\raw\\blocklist_hosts.txt"
+    },
+    {
+        "merged": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-debug-54:\\mipmap-anydpi_ic_launcher_round.xml.flat",
+        "source": "C:\\Users\\Prabha\\.gradle\\daemon\\8.13\\com.nexusblock.app-main-56:\\mipmap-anydpi\\ic_launcher_round.xml"
+    }
+]

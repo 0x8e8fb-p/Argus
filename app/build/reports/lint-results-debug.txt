@@ -1,0 +1,426 @@
+C:\Users\Prabha\Desktop\AB\app\src\main\java\com\nexusblock\ui\viewmodel\DashboardViewModel.kt:70: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+                kb > 1_000_000 -> String.format("%.1f GB", kb / 1_000_000.0)
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\java\com\nexusblock\ui\viewmodel\DashboardViewModel.kt:71: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+                kb > 1000 -> String.format("%.1f MB", kb / 1000.0)
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\java\com\nexusblock\ui\viewmodel\DashboardViewModel.kt:110: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            bytes >= 1_000_000_000 -> String.format("%.2f GB", bytes / 1_000_000_000.0)
+                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\java\com\nexusblock\ui\viewmodel\DashboardViewModel.kt:111: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            bytes >= 1_000_000 -> String.format("%.1f MB", bytes / 1_000_000.0)
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\java\com\nexusblock\ui\viewmodel\DashboardViewModel.kt:112: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            bytes >= 1000 -> String.format("%.1f KB", bytes / 1000.0)
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "DefaultLocale":
+   Calling String#toLowerCase() or #toUpperCase() without specifying an
+   explicit locale is a common source of bugs. The reason for that is that
+   those methods will use the current locale on the user's device, and even
+   though the code appears to work correctly when you are developing the app,
+   it will fail in some locales. For example, in the Turkish locale, the
+   uppercase replacement for i is not I.
+
+   If you want the methods to just perform ASCII replacement, for example to
+   convert an enum name, call String#toUpperCase(Locale.ROOT) instead. If you
+   really want to use the current locale, call
+   String#toUpperCase(Locale.getDefault()) instead.
+
+   https://developer.android.com/reference/java/util/Locale.html#default_locale
+
+C:\Users\Prabha\Desktop\AB\app\src\main\java\com\nexusblock\service\VpnWatchdogService.kt:40: Warning: This argument is a new instance so stopService will not remove anything [ImplicitSamInstance]
+            context.stopService(Intent(context, VpnWatchdogService::class.java))
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "ImplicitSamInstance":
+   Kotlin's support for SAM (single abstract method) interfaces lets you pass
+   a lambda to the interface. This will create a new instance on the fly even
+   though there is no explicit constructor call. If you pass one of these
+   lambdas or method references into a method which (for example) stores or
+   compares the object identity, unexpected results may happen.
+
+   In particular, passing a lambda variable in as a listener, and then later
+   attempting to remove the listener will not work because a different
+   instance is passed in.
+
+   https://kotlinlang.org/docs/fun-interfaces.html#sam-conversions
+
+C:\Users\Prabha\Desktop\AB\app\src\main\java\com\nexusblock\ui\MainActivity.kt:88: Error: Call requires API level 26 (current min is 24): android.content.ContextWrapper#startForegroundService [NewApi]
+        startForegroundService(serviceIntent)
+        ~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "NewApi":
+   This check scans through all the Android API calls in the application and
+   warns about any calls that are not available on all versions targeted by
+   this application (according to its minimum SDK attribute in the manifest).
+
+   If you really want to use this API and don't need to support older devices
+   just set the minSdkVersion in your build.gradle or AndroidManifest.xml
+   files.
+
+   If your code is deliberately accessing newer APIs, and you have ensured
+   (e.g. with conditional execution) that this code will only ever be called
+   on a supported platform, then you can annotate your class or method with
+   the @TargetApi annotation specifying the local minimum SDK to apply, such
+   as @TargetApi(11), such that this check considers 11 rather than your
+   manifest file's minimum SDK as the required API level.
+
+   If you are deliberately setting android: attributes in style definitions,
+   make sure you place this in a values-vNN folder in order to avoid running
+   into runtime conflicts on certain devices where manufacturers have added
+   custom attributes whose ids conflict with the new ones on later platforms.
+
+   Similarly, you can use tools:targetApi="11" in an XML file to indicate that
+   the element will only be inflated in an adequate context.
+
+C:\Users\Prabha\Desktop\AB\app\src\main\java\com\nexusblock\ui\viewmodel\SettingsViewModel.kt:59: Warning: Use of REQUEST_IGNORE_BATTERY_OPTIMIZATIONS violates the Play Store Content Policy regarding acceptable use cases, as described in https://developer.android.com/training/monitoring-device-state/doze-standby.html [BatteryLife]
+        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "BatteryLife":
+   This issue flags code that either
+   * negatively affects battery life, or
+   * uses APIs that have recently changed behavior to prevent background tasks
+   from consuming memory and battery excessively.
+
+   Generally, you should be using WorkManager instead.
+
+   For more details on how to update your code, please see
+   https://developer.android.com/topic/performance/background-optimization
+
+
+C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:9: Warning: Requiring Wifi permissions limits app availability on TVs that support only Ethernet [LeanbackUsesWifi]
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "LeanbackUsesWifi":
+   WiFi is not required for Android TV and many devices connect to the
+   internet via alternative methods e.g. Ethernet.
+
+   If your app is not focused specifically on WiFi functionality and only
+   wishes to connect to the internet, please modify your Manifest to contain:
+   <uses-feature android:name="android.hardware.wifi" android:required="false"
+   />
+
+   Un-metered or non-roaming connections can be detected in software using
+   NetworkCapabilities#NET_CAPABILITY_NOT_METERED and
+   NetworkCapabilities#NET_CAPABILITY_NOT_ROAMING.
+
+C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:17: Error: Permission is only granted to system apps [ProtectedPermissions]
+    <uses-permission android:name="android.permission.BIND_VPN_SERVICE" />
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "ProtectedPermissions":
+   Permissions with the protection level signature, privileged or
+   signatureOrSystem are only granted to system apps (unless they also include
+   appop). If an app is a regular non-system app, it will never be able to use
+   these permissions.
+
+C:\Users\Prabha\Desktop\AB\app\src\main\res\drawable\ic_banner.xml:3: Warning: Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more [VectorRaster]
+    android:width="320dp"
+                   ~~~~~
+
+   Explanation for issues of type "VectorRaster":
+   Vector icons require API 21 or API 24 depending on used features, but when
+   minSdkVersion is less than 21 or 24 and Android Gradle plugin 1.4 or higher
+   is used, a vector drawable placed in the drawable folder is automatically
+   moved to drawable-anydpi-v21 or drawable-anydpi-v24 and bitmap images are
+   generated for different screen resolutions for backwards compatibility.
+
+   However, there are some limitations to this raster image generation, and
+   this lint check flags elements and attributes that are not fully supported.
+   You should manually check whether the generated output is acceptable for
+   those older devices.
+
+C:\Users\Prabha\Desktop\AB\app\build.gradle.kts:63: Warning: A newer version of com.google.guava:guava than 33.0.0-jre is available: 33.3.1-jre [GradleDependency]
+    implementation("com.google.guava:guava:33.0.0-jre")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\build.gradle.kts:81: Warning: A newer version of com.google.dagger:hilt-android than 2.52 is available: 2.54 [GradleDependency]
+    implementation("com.google.dagger:hilt-android:2.52")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\build.gradle.kts:114: Warning: A newer version of org.bouncycastle:bcprov-jdk18on than 1.77 is available: 1.79 [GradleDependency]
+    implementation("org.bouncycastle:bcprov-jdk18on:1.77")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\build.gradle.kts:115: Warning: A newer version of org.bouncycastle:bcpkix-jdk18on than 1.77 is available: 1.79 [GradleDependency]
+    implementation("org.bouncycastle:bcpkix-jdk18on:1.77")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\build.gradle.kts:118: Warning: A newer version of org.jetbrains.kotlinx:kotlinx-serialization-json than 1.6.2 is available: 1.8.1 [GradleDependency]
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\build.gradle.kts:121: Warning: A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-android than 1.7.3 is available: 1.9.0 [GradleDependency]
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\build.gradle.kts:125: Warning: A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-test than 1.7.3 is available: 1.9.0 [GradleDependency]
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "GradleDependency":
+   This detector looks for usages of libraries where the version you are using
+   is not the current stable release. Using older versions is fine, and there
+   are cases where you deliberately want to stick with an older version.
+   However, you may simply not be aware that a more recent version is
+   available, and that is what this lint check helps find.
+
+C:\Users\Prabha\.gradle\caches\modules-2\files-2.1\org.bouncycastle\bcpkix-jdk18on\1.77\ed953791ba0229747dd0fd9911e3d76a462acfd3\bcpkix-jdk18on-1.77.jar: Warning: checkServerTrusted is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers [TrustAllX509TrustManager]
+C:\Users\Prabha\.gradle\caches\modules-2\files-2.1\org.littleshoot\littleproxy\1.1.2\a52a858007f6efbced829a944a827a63fe39d9b2\littleproxy-1.1.2.jar: Warning: checkClientTrusted is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers [TrustAllX509TrustManager]
+C:\Users\Prabha\.gradle\caches\modules-2\files-2.1\org.littleshoot\littleproxy\1.1.2\a52a858007f6efbced829a944a827a63fe39d9b2\littleproxy-1.1.2.jar: Warning: checkServerTrusted is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers [TrustAllX509TrustManager]
+
+   Explanation for issues of type "TrustAllX509TrustManager":
+   This check looks for X509TrustManager implementations whose
+   checkServerTrusted or checkClientTrusted methods do nothing (thus trusting
+   any certificate chain) which could result in insecure network traffic
+   caused by trusting arbitrary TLS/SSL certificates presented by peers.
+
+   https://goo.gle/TrustAllX509TrustManager
+
+C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:16: Error: A <queries> declaration should generally be used instead of QUERY_ALL_PACKAGES; see https://g.co/dev/packagevisibility for details [QueryAllPackagesPermission]
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "QueryAllPackagesPermission":
+   If you need to query or interact with other installed apps, you should be
+   using a <queries> declaration in your manifest. Using the
+   QUERY_ALL_PACKAGES permission in order to see all installed apps is rarely
+   necessary, and most apps on Google Play are not allowed to have this
+   permission.
+
+   https://g.co/dev/packagevisibility
+
+C:\Users\Prabha\Desktop\AB\app\src\main\java\com\nexusblock\service\NexusVpnService.kt:197: Warning: Unnecessary; SDK_INT is always >= 24 [ObsoleteSdkInt]
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "ObsoleteSdkInt":
+   This check flags version checks that are not necessary, because the
+   minSdkVersion (or surrounding known API level) is already at least as high
+   as the version checked for.
+
+   Similarly, it also looks for resources in -vNN folders, such as values-v14
+   where the version qualifier is less than or equal to the minSdkVersion,
+   where the contents should be merged into the best folder.
+
+C:\Users\Prabha\Desktop\AB\app\src\main\java\com\nexusblock\ui\viewmodel\BlocklistViewModel.kt:20: Warning: This field leaks a context object [StaticFieldLeak]
+    private val context = application.applicationContext
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\java\com\nexusblock\ui\viewmodel\DashboardViewModel.kt:49: Warning: This field leaks a context object [StaticFieldLeak]
+    private val context = application.applicationContext
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\java\com\nexusblock\ui\viewmodel\SettingsViewModel.kt:25: Warning: This field leaks a context object [StaticFieldLeak]
+    private val context = application.applicationContext
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "StaticFieldLeak":
+   A static field will leak contexts.
+
+   Non-static inner classes have an implicit reference to their outer class.
+   If that outer class is for example a Fragment or Activity, then this
+   reference means that the long-running handler/loader/task will hold a
+   reference to the activity which prevents it from getting garbage
+   collected.
+
+   Similarly, direct field references to activities and fragments from these
+   longer running instances can cause leaks.
+
+   ViewModel classes should never point to Views or non-application Contexts.
+
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\colors.xml:7: Warning: The resource R.color.surface appears to be unused [UnusedResources]
+    <color name="surface">#FF1E1E1E</color>
+           ~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\colors.xml:8: Warning: The resource R.color.error appears to be unused [UnusedResources]
+    <color name="error">#FFFF5252</color>
+           ~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\colors.xml:9: Warning: The resource R.color.on_background appears to be unused [UnusedResources]
+    <color name="on_background">#FFFFFFFF</color>
+           ~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\colors.xml:10: Warning: The resource R.color.on_surface appears to be unused [UnusedResources]
+    <color name="on_surface">#FFFFFFFF</color>
+           ~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:3: Warning: The resource R.string.app_desc appears to be unused [UnusedResources]
+    <string name="app_desc">Device-wide ad blocker for Android TV</string>
+            ~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:9: Warning: The resource R.string.toggle_on appears to be unused [UnusedResources]
+    <string name="toggle_on">Blocking Enabled</string>
+            ~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:10: Warning: The resource R.string.toggle_off appears to be unused [UnusedResources]
+    <string name="toggle_off">Blocking Disabled</string>
+            ~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:11: Warning: The resource R.string.stats_ads_blocked appears to be unused [UnusedResources]
+    <string name="stats_ads_blocked">Ads Blocked</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:12: Warning: The resource R.string.stats_data_saved appears to be unused [UnusedResources]
+    <string name="stats_data_saved">Data Saved</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:13: Warning: The resource R.string.stats_domains_active appears to be unused [UnusedResources]
+    <string name="stats_domains_active">Active Domains</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:14: Warning: The resource R.string.nav_dashboard appears to be unused [UnusedResources]
+    <string name="nav_dashboard">Dashboard</string>
+            ~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:15: Warning: The resource R.string.nav_blocklists appears to be unused [UnusedResources]
+    <string name="nav_blocklists">Blocklists</string>
+            ~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:16: Warning: The resource R.string.nav_whitelist appears to be unused [UnusedResources]
+    <string name="nav_whitelist">Whitelist</string>
+            ~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:17: Warning: The resource R.string.nav_logs appears to be unused [UnusedResources]
+    <string name="nav_logs">Logs</string>
+            ~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:18: Warning: The resource R.string.nav_settings appears to be unused [UnusedResources]
+    <string name="nav_settings">Settings</string>
+            ~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:19: Warning: The resource R.string.blocklist_source_firebog appears to be unused [UnusedResources]
+    <string name="blocklist_source_firebog">Firebog YouTube Ads</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:20: Warning: The resource R.string.blocklist_source_oisd appears to be unused [UnusedResources]
+    <string name="blocklist_source_oisd">OISD Big</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:21: Warning: The resource R.string.blocklist_source_adguard appears to be unused [UnusedResources]
+    <string name="blocklist_source_adguard">AdGuard YouTube</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:22: Warning: The resource R.string.blocklist_source_stevenblack appears to be unused [UnusedResources]
+    <string name="blocklist_source_stevenblack">StevenBlack Hosts</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:23: Warning: The resource R.string.whitelist_description appears to be unused [UnusedResources]
+    <string name="whitelist_description">Select apps to bypass ad blocking</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:24: Warning: The resource R.string.settings_auto_start appears to be unused [UnusedResources]
+    <string name="settings_auto_start">Auto-start on boot</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:25: Warning: The resource R.string.settings_battery_optimization appears to be unused [UnusedResources]
+    <string name="settings_battery_optimization">Ignore battery optimization</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:26: Warning: The resource R.string.settings_install_ca appears to be unused [UnusedResources]
+    <string name="settings_install_ca">Install CA Certificate</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:27: Warning: The resource R.string.settings_update_blocklists appears to be unused [UnusedResources]
+    <string name="settings_update_blocklists">Update blocklists now</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:28: Warning: The resource R.string.settings_check_updates appears to be unused [UnusedResources]
+    <string name="settings_check_updates">Check for app updates</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:29: Warning: The resource R.string.logs_empty appears to be unused [UnusedResources]
+    <string name="logs_empty">No blocked ads yet</string>
+            ~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:30: Warning: The resource R.string.logs_clear appears to be unused [UnusedResources]
+    <string name="logs_clear">Clear logs</string>
+            ~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:31: Warning: The resource R.string.nav_custom_rules appears to be unused [UnusedResources]
+    <string name="nav_custom_rules">Rules</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:32: Warning: The resource R.string.nav_diagnostics appears to be unused [UnusedResources]
+    <string name="nav_diagnostics">Diagnostics</string>
+            ~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:33: Warning: The resource R.string.diagnostics_title appears to be unused [UnusedResources]
+    <string name="diagnostics_title">Diagnostics</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:34: Warning: The resource R.string.custom_rules_title appears to be unused [UnusedResources]
+    <string name="custom_rules_title">Custom Rules</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:35: Warning: The resource R.string.add_rule appears to be unused [UnusedResources]
+    <string name="add_rule">Add Rule</string>
+            ~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:36: Warning: The resource R.string.delete_rule appears to be unused [UnusedResources]
+    <string name="delete_rule">Delete</string>
+            ~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:37: Warning: The resource R.string.rule_type_block appears to be unused [UnusedResources]
+    <string name="rule_type_block">Block</string>
+            ~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\res\values\strings.xml:38: Warning: The resource R.string.rule_type_allow appears to be unused [UnusedResources]
+    <string name="rule_type_allow">Allow</string>
+            ~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UnusedResources":
+   Unused resources make applications larger and slow down builds.
+
+
+   The unused resource check can ignore tests. If you want to include
+   resources that are only referenced from tests, consider packaging them in a
+   test source set instead.
+
+   You can include test sources in the unused resource check by setting the
+   system property lint.unused-resources.include-tests =true, and to exclude
+   them (usually for performance reasons), use
+   lint.unused-resources.exclude-tests =true.
+   ,
+
+C:\Users\Prabha\Desktop\AB\app\src\main\res\mipmap-anydpi-v26\ic_launcher.xml:2: Warning: The application adaptive icon is missing a monochrome tag [MonochromeLauncherIcon]
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+^
+C:\Users\Prabha\Desktop\AB\app\src\main\res\mipmap-anydpi-v26\ic_launcher_round.xml:2: Warning: The application adaptive roundIcon is missing a monochrome tag [MonochromeLauncherIcon]
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+^
+
+   Explanation for issues of type "MonochromeLauncherIcon":
+   If android:roundIcon and android:icon are both in your manifest, you must
+   either remove the reference to android:roundIcon if it is not needed; or,
+   supply the monochrome icon in the drawable defined by the android:roundIcon
+   and android:icon attribute.
+
+   For example, if android:roundIcon and android:icon are both in the
+   manifest, a launcher might choose to use android:roundIcon over
+   android:icon to display the adaptive app icon. Therefore, your themed
+   application iconwill not show if your monochrome attribute is not also
+   specified in android:roundIcon.
+
+C:\Users\Prabha\Desktop\AB\app\src\main\java\com\nexusblock\ui\viewmodel\SettingsViewModel.kt:60: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+            data = Uri.parse("package:${context.packageName}")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Prabha\Desktop\AB\app\src\main\java\com\nexusblock\ui\viewmodel\SettingsViewModel.kt:60: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+            data = Uri.parse("package:${context.packageName}")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UseKtx":
+   The Android KTX libraries decorates the Android platform SDK as well as
+   various libraries with more convenient extension functions available from
+   Kotlin, allowing you to use default parameters, named parameters, and
+   more.
+
+   Available options:
+
+   **remove-defaults** (default is true):
+   Whether to skip arguments that match the defaults provided by the extension.
+
+   Extensions often provide default values for some of the parameters. For example:
+   ```kotlin
+   fun Path.readLines(charset: Charset = Charsets.UTF_8): List<String> { return Files.readAllLines(this, charset) }
+   ```
+   This lint check will by default automatically omit parameters that match the default, so if your code was calling ```kotlin
+   Files.readAllLines(file, Charset.UTF_8)
+   ```
+   lint would replace this with
+   ```kotlin
+   file.readLines()
+   ```
+   rather than
+   ```kotlin
+   file.readLines(Charset.UTF_8
+   ```
+   You can turn this behavior off using this option.
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="remove-defaults" value="true" />
+       </issue>
+   </lint>
+   ```
+
+   **require-present** (default is true):
+   Whether to only offer extensions already available.
+
+   This option lets you only have lint suggest extension replacements if those extensions are already available on the class path (in other words, you're already depending on the library containing the extension method.)
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="require-present" value="true" />
+       </issue>
+   </lint>
+   ```
+
+3 errors, 62 warnings

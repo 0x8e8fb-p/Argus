@@ -1,0 +1,327 @@
+package com.nexusblock.engine
+
+import android.util.Log
+import com.nexusblock.data.model.BlockedDomain
+import java.util.regex.PatternSyntaxException
+
+/**
+ * Full AdGuard/Adblock-style rule engine supporting:
+ * - ||example.org^ (hostname with subdomains)
+ * - |example.org (prefix match)
+ * - example.org| (suffix match)
+ * - /regex/ (regular expression)
+ * - @@||example.org^ (exception rules)
+ * - 127.0.0.1 example.org (hosts syntax)
+ * - example.org (plain domain)
+ */
+class RuleEngine {
+
+    companion object {
+        private const val TAG = "NexusBlock/Rules"
+    }
+
+    // Exact domain matches for O(1) lookup
+    private val exactBlocks = HashSet<String>()
+    private val exactAllows = HashSet<String>()
+
+    // Bloom Filter for fast blocklist skipping
+    private val bloomFilter = BloomFilter()
+
+    // Trie for subdomain wildcard matching (||...^)
+    private val blockTrie = DomainTrie()
+    private val allowTrie = DomainTrie()
+
+    // Prefix/suffix patterns
+    private val prefixBlocks = mutableListOf<String>()
+    private val prefixAllows = mutableListOf<String>()
+    private val suffixBlocks = mutableListOf<String>()
+    private val suffixAllows = mutableListOf<String>()
+
+    // Regex patterns
+    private val blockRegexes = mutableListOf<Regex>()
+    private val allowRegexes = mutableListOf<Regex>()
+
+    // IP blocks and CIDR ranges
+    private val exactIpBlocks = HashSet<String>()
+    private val cidrBlocks = mutableListOf<CidrMatcher>()
+
+    @Synchronized
+    fun loadRules(domains: List<BlockedDomain>) {
+        clearAll()
+
+        for (domain in domains) {
+            if (!domain.enabled) continue
+            val host = domain.host.trim()
+            if (host.isEmpty() || host.startsWith("#")) continue
+
+            try {
+                when {
+                    // CIDR support: 1.2.3.4/24
+                    host.contains("/") && host.all { it.isDigit() || it == '.' || it == '/' } -> {
+                        addCidrBlock(host)
+                    }
+                    // Plain IP
+                    host.all { it.isDigit() || it == '.' } && host.split(".").size == 4 -> {
+                        exactIpBlocks.add(host)
+                    }
+                    domain.isRegex && domain.regexPattern != null -> {
+                        addRegex(domain.regexPattern, isAllow = false)
+                    }
+                    host.startsWith("@@||") -> {
+                        addHostRule(host.substring(4).trimEnd('^'), isAllow = true, isSubdomain = true)
+                    }
+                    host.startsWith("@@|") -> {
+                        addPrefixRule(host.substring(3), isAllow = true)
+                    }
+                    host.startsWith("@@") -> {
+                        addHostRule(host.substring(2), isAllow = true)
+                    }
+                    host.startsWith("||") -> {
+                        addHostRule(host.substring(2).trimEnd('^'), isAllow = false, isSubdomain = true)
+                    }
+                    host.startsWith("|") -> {
+                        addPrefixRule(host.substring(1), isAllow = false)
+                    }
+                    host.endsWith("|") -> {
+                        addSuffixRule(host.dropLast(1), isAllow = false)
+                    }
+                    host.startsWith("/") && host.endsWith("/") -> {
+                        addRegex(host.substring(1, host.length - 1), isAllow = false)
+                    }
+                    else -> {
+                        // Handle hosts format: 127.0.0.1 domain.com
+                        val parts = host.split(Regex("\\s+"))
+                        val finalHost = if (parts.size >= 2 && (parts[0] == "127.0.0.1" || parts[0] == "0.0.0.0")) {
+                            parts[1]
+                        } else {
+                            host
+                        }
+                        
+                        val normalized = finalHost.lowercase().trimEnd('.')
+                        if (normalized.isNotEmpty()) {
+                            exactBlocks.add(normalized)
+                            blockTrie.insert(normalized)
+                            bloomFilter.add(normalized)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to parse rule: ${domain.host}", e)
+            }
+        }
+
+        Log.i(TAG, "Loaded ${exactBlocks.size} domains, ${exactIpBlocks.size} IPs, ${cidrBlocks.size} CIDRs. Patterns: ${blockRegexes.size} regex, ${prefixBlocks.size} prefix")
+    }
+
+    @Synchronized
+    fun isBlocked(host: String): Boolean {
+        val normalized = host.lowercase().trimEnd('.')
+        if (normalized.isEmpty()) return false
+
+        // 1. Check exception rules first (highest priority)
+        // Note: Exceptions bypass the Bloom Filter check
+        if (exactAllows.contains(normalized)) return false
+        if (allowTrie.contains(normalized)) return false
+        for (prefix in prefixAllows) {
+            if (normalized.startsWith(prefix)) return false
+        }
+        for (suffix in suffixAllows) {
+            if (normalized.endsWith(suffix)) return false
+        }
+        for (regex in allowRegexes) {
+            if (regex.containsMatchIn(normalized)) return false
+        }
+
+        // 2. Dynamic video ad CDN patterns are not necessarily present in
+        // the Bloom filter, so they must be evaluated before the fast-fail.
+        if (isAdVideoServer(normalized)) return true
+
+        // 3. Subdomain rules must be checked before the Bloom fast-fail.
+        // The Bloom filter stores the configured base rule (example.com), while
+        // DNS queries often arrive as subdomains (ads.example.com).
+        if (blockTrie.contains(normalized)) return true
+
+        // 4. Fast-fail check with Bloom Filter
+        // If bloom filter says no, it's definitely not in exactBlocks or blockTrie
+        if (!bloomFilter.mightContain(normalized)) {
+            // Still need to check prefix, suffix, and regex blocks as they are not in Bloom Filter
+            for (prefix in prefixBlocks) {
+                if (normalized.startsWith(prefix)) return true
+            }
+            for (suffix in suffixBlocks) {
+                if (normalized.endsWith(suffix)) return true
+            }
+            for (regex in blockRegexes) {
+                if (regex.containsMatchIn(normalized)) return true
+            }
+            return false
+        }
+
+        // 5. Check block rules
+        if (exactBlocks.contains(normalized)) return true
+        for (prefix in prefixBlocks) {
+            if (normalized.startsWith(prefix)) return true
+        }
+        for (suffix in suffixBlocks) {
+            if (normalized.endsWith(suffix)) return true
+        }
+        for (regex in blockRegexes) {
+            if (regex.containsMatchIn(normalized)) return true
+        }
+
+        return false
+    }
+
+    @Synchronized
+    fun isIpBlocked(ip: String): Boolean {
+        if (exactIpBlocks.contains(ip)) return true
+        
+        try {
+            val ipInt = ipToLong(ip)
+            for (cidr in cidrBlocks) {
+                if (cidr.matches(ipInt)) return true
+            }
+        } catch (e: Exception) {
+            return false
+        }
+        return false
+    }
+
+    /**
+     * Check if a googlevideo.com hostname matches known ad-serving patterns.
+     * YouTube uses specific subdomain patterns for ad video servers.
+     * This is imperfect but catches a significant percentage of ad video CDN hostnames.
+     */
+    fun isAdVideoServer(hostname: String): Boolean {
+        val lower = hostname.lowercase()
+        if (!lower.endsWith("googlevideo.com")) return false
+        // Known ad-serving patterns in googlevideo.com subdomains:
+        // - Contains "-ad-" in the subdomain
+        // - Redirector endpoint (used for ad redirects)
+        return lower.contains("-ad-") ||
+               lower.startsWith("redirector.") ||
+               lower.contains("---ad") ||
+               lower.contains("_ad_")
+    }
+
+    @Synchronized
+    fun clearAll() {
+        exactBlocks.clear()
+        exactAllows.clear()
+        blockTrie.clear()
+        allowTrie.clear()
+        prefixBlocks.clear()
+        prefixAllows.clear()
+        suffixBlocks.clear()
+        suffixAllows.clear()
+        blockRegexes.clear()
+        allowRegexes.clear()
+        exactIpBlocks.clear()
+        cidrBlocks.clear()
+        bloomFilter.clear()
+    }
+
+    private fun addHostRule(host: String, isAllow: Boolean, isSubdomain: Boolean = false) {
+        val normalized = host.lowercase().trimEnd('.')
+        if (normalized.isEmpty()) return
+
+        if (isAllow) {
+            exactAllows.add(normalized)
+            if (isSubdomain) allowTrie.insert(normalized)
+        } else {
+            exactBlocks.add(normalized)
+            bloomFilter.add(normalized)
+            if (isSubdomain) blockTrie.insert(normalized)
+        }
+    }
+
+    private fun addPrefixRule(prefix: String, isAllow: Boolean) {
+        val normalized = prefix.lowercase().trimEnd('.')
+        if (normalized.isEmpty()) return
+        if (isAllow) prefixAllows.add(normalized) else prefixBlocks.add(normalized)
+    }
+
+    private fun addSuffixRule(suffix: String, isAllow: Boolean) {
+        val normalized = suffix.lowercase().trimEnd('.')
+        if (normalized.isEmpty()) return
+        if (isAllow) suffixAllows.add(normalized) else suffixBlocks.add(normalized)
+    }
+
+    private fun addRegex(pattern: String, isAllow: Boolean) {
+        try {
+            val regex = Regex(pattern, RegexOption.IGNORE_CASE)
+            if (isAllow) allowRegexes.add(regex) else blockRegexes.add(regex)
+        } catch (e: PatternSyntaxException) {
+            Log.w(TAG, "Invalid regex pattern: $pattern")
+        }
+    }
+
+    private fun addCidrBlock(cidr: String) {
+        try {
+            val parts = cidr.split("/")
+            if (parts.size != 2) return
+            val network = ipToLong(parts[0])
+            val mask = parts[1].toInt()
+            cidrBlocks.add(CidrMatcher(network, mask))
+        } catch (e: Exception) {
+            Log.w(TAG, "Invalid CIDR: $cidr")
+        }
+    }
+
+    private fun ipToLong(ip: String): Long {
+        val parts = ip.split(".")
+        if (parts.size != 4) return 0
+        var result = 0L
+        for (i in 0..3) {
+            result = result shl 8 or (parts[i].toLong() and 0xFF)
+        }
+        return result
+    }
+
+    private class CidrMatcher(network: Long, maskBits: Int) {
+        private val mask: Long = if (maskBits == 0) 0 else (-1L shl (32 - maskBits)) and 0xFFFFFFFFL
+        private val base: Long = network and mask
+
+        fun matches(ip: Long): Boolean {
+            return (ip and mask) == base
+        }
+    }
+
+    // Subdomain-matching Trie
+    private class DomainTrie {
+        private val root = TrieNode()
+        private var nodeCount = 0
+
+        fun size(): Int = nodeCount
+
+        fun insert(domain: String) {
+            val parts = domain.split(".").reversed()
+            var node = root
+            for (part in parts) {
+                node = node.children.getOrPut(part) { TrieNode() }
+            }
+            node.isEnd = true
+            nodeCount++
+        }
+
+        fun contains(domain: String): Boolean {
+            val parts = domain.split(".").reversed()
+            var node = root
+            for (part in parts) {
+                if (node.isEnd) return true
+                node = node.children[part] ?: return false
+            }
+            return node.isEnd
+        }
+
+        fun clear() {
+            root.children.clear()
+            nodeCount = 0
+        }
+
+        private class TrieNode {
+            val children = mutableMapOf<String, TrieNode>()
+            var isEnd = false
+        }
+    }
+}
