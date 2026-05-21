@@ -4,6 +4,7 @@ import androidx.hilt.work.HiltWrapper_WorkerFactoryModule;
 import com.nexusblock.data.worker.BlocklistUpdateWorker_HiltModule;
 import com.nexusblock.di.AppModule;
 import com.nexusblock.di.DatabaseModule;
+import com.nexusblock.service.ArgusAccessibilityService_GeneratedInjector;
 import com.nexusblock.service.BootReceiver_GeneratedInjector;
 import com.nexusblock.service.NexusVpnService_GeneratedInjector;
 import com.nexusblock.service.VpnWatchdogService_GeneratedInjector;
@@ -160,7 +161,8 @@ public final class NexusBlockApplication_HiltComponents {
 
   @Subcomponent
   @ServiceScoped
-  public abstract static class ServiceC implements NexusVpnService_GeneratedInjector,
+  public abstract static class ServiceC implements ArgusAccessibilityService_GeneratedInjector,
+      NexusVpnService_GeneratedInjector,
       VpnWatchdogService_GeneratedInjector,
       ServiceComponent,
       GeneratedComponent {

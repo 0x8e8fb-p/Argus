@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.CallSuper;
-import dagger.hilt.android.internal.OnReceiveBytecodeInjectionMarker;
 import dagger.hilt.android.internal.managers.BroadcastReceiverComponentManager;
 import dagger.hilt.internal.UnsafeCasts;
 import java.lang.Object;
@@ -14,7 +13,6 @@ import javax.annotation.processing.Generated;
 /**
  * A generated base class to be extended by the @dagger.hilt.android.AndroidEntryPoint annotated class. If using the Gradle plugin, this is swapped as the base class via bytecode transformation.
  */
-@OnReceiveBytecodeInjectionMarker
 @Generated("dagger.hilt.android.processor.internal.androidentrypoint.BroadcastReceiverGenerator")
 public abstract class Hilt_BootReceiver extends BroadcastReceiver {
   private volatile boolean injected = false;

@@ -20,9 +20,14 @@ drawable ic_nav_settings
 drawable ic_notification
 drawable ic_shield
 drawable ic_vpn_key
+font dubai_bold
+font dubai_light
+font dubai_medium
+font dubai_regular
 mipmap ic_launcher
 mipmap ic_launcher_round
 raw blocklist_hosts
+string accessibility_service_desc
 string add_rule
 string app_desc
 string app_name
@@ -63,3 +68,4 @@ string watchdog_notification_text
 string watchdog_notification_title
 string whitelist_description
 style Theme.NexusBlock
+xml accessibility_service_config

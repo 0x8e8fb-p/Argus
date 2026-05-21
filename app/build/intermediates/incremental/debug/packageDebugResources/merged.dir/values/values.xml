@@ -8,9 +8,10 @@
     <color name="primary">#FF66E3D8</color>
     <color name="primary_dark">#FF123E44</color>
     <color name="surface">#FF10161D</color>
+    <string name="accessibility_service_desc">Detects and skips in-stream video ads using audio and visual cues. No personal data is collected.</string>
     <string name="add_rule">Add Rule</string>
-    <string name="app_desc">Device-wide ad blocker for Android TV</string>
-    <string name="app_name">NexusBlock</string>
+    <string name="app_desc">System-wide ad blocker for Android TV</string>
+    <string name="app_name">Argus Ad Blocker</string>
     <string name="blocklist_source_adguard">AdGuard YouTube</string>
     <string name="blocklist_source_firebog">Firebog YouTube Ads</string>
     <string name="blocklist_source_oisd">OISD Big</string>
@@ -43,9 +44,9 @@
     <string name="toggle_on">Blocking Enabled</string>
     <string name="vpn_notification_channel">VPN Service</string>
     <string name="vpn_notification_text">Blocking ads across all apps</string>
-    <string name="vpn_notification_title">NexusBlock is active</string>
+    <string name="vpn_notification_title">Argus is active</string>
     <string name="watchdog_notification_text">Ensuring ad blocking stays active</string>
-    <string name="watchdog_notification_title">NexusBlock Watchdog</string>
+    <string name="watchdog_notification_title">Argus Watchdog</string>
     <string name="whitelist_description">Select apps to bypass ad blocking</string>
     <style name="Theme.NexusBlock" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/background</item>

@@ -1,1 +1,1 @@
-{"className":"com.nexusblock.service.Hilt_BootReceiver","classAnnotations":["dagger.hilt.android.internal.OnReceiveBytecodeInjectionMarker"],"interfaces":[],"superClasses":["android.content.BroadcastReceiver","java.lang.Object"]}
+{"className":"com.nexusblock.service.Hilt_BootReceiver","classAnnotations":[],"interfaces":[],"superClasses":["android.content.BroadcastReceiver","java.lang.Object"]}

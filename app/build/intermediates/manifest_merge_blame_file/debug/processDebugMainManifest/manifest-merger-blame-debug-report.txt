@@ -55,327 +55,400 @@
 28        android:maxSdkVersion="28" />
 28-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:19:78-104
 29
-30    <!-- TV feature declarations -->
-31    <uses-feature
-31-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:22:5-24:35
-32        android:name="android.software.leanback"
-32-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:23:9-49
-33        android:required="true" />
-33-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:24:9-32
-34    <uses-feature
-34-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:25:5-27:36
-35        android:name="android.hardware.touchscreen"
-35-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:26:9-52
-36        android:required="false" />
-36-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:27:9-33
-37
-38    <uses-permission android:name="android.permission.WAKE_LOCK" />
-38-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:23:5-68
-38-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:23:22-65
-39
-40    <permission
-40-->[androidx.core:core:1.18.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\edef19903c7272193b2fffc41f338057\transformed\core-1.18.0\AndroidManifest.xml:22:5-24:47
-41        android:name="com.nexusblock.debug.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-41-->[androidx.core:core:1.18.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\edef19903c7272193b2fffc41f338057\transformed\core-1.18.0\AndroidManifest.xml:23:9-81
-42        android:protectionLevel="signature" />
-42-->[androidx.core:core:1.18.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\edef19903c7272193b2fffc41f338057\transformed\core-1.18.0\AndroidManifest.xml:24:9-44
-43
-44    <uses-permission android:name="com.nexusblock.debug.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-44-->[androidx.core:core:1.18.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\edef19903c7272193b2fffc41f338057\transformed\core-1.18.0\AndroidManifest.xml:26:5-97
-44-->[androidx.core:core:1.18.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\edef19903c7272193b2fffc41f338057\transformed\core-1.18.0\AndroidManifest.xml:26:22-94
-45
-46    <application
-46-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:29:5-102:19
-47        android:name="com.nexusblock.NexusBlockApplication"
-47-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:30:9-46
-48        android:allowBackup="true"
-48-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:31:9-35
-49        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-49-->[androidx.core:core:1.18.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\edef19903c7272193b2fffc41f338057\transformed\core-1.18.0\AndroidManifest.xml:28:18-86
-50        android:banner="@drawable/ic_banner"
-50-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:32:9-45
-51        android:debuggable="true"
-52        android:extractNativeLibs="false"
-53        android:icon="@mipmap/ic_launcher"
-53-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:33:9-43
-54        android:label="@string/app_name"
-54-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:34:9-41
-55        android:roundIcon="@mipmap/ic_launcher_round"
-55-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:35:9-54
-56        android:supportsRtl="true"
-56-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:36:9-35
-57        android:theme="@style/Theme.NexusBlock"
-57-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:37:9-48
-58        android:usesCleartextTraffic="true" >
-58-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:38:9-44
-59
-60        <!-- Main Activity -->
-61        <activity
-61-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:41:9-52:20
-62            android:name="com.nexusblock.ui.MainActivity"
-62-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:42:13-44
-63            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize"
-63-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:43:13-93
-64            android:exported="true"
-64-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:44:13-36
-65            android:launchMode="singleTask"
-65-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:45:13-44
-66            android:theme="@style/Theme.NexusBlock" >
-66-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:46:13-52
-67            <intent-filter>
-67-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:47:13-51:29
-68                <action android:name="android.intent.action.MAIN" />
-68-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:48:17-69
-68-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:48:25-66
-69
-70                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-70-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:49:17-86
-70-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:49:27-83
-71                <category android:name="android.intent.category.LAUNCHER" />
-71-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:50:17-77
-71-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:50:27-74
-72            </intent-filter>
-73        </activity>
-74
-75        <!-- VPN Service -->
-76        <service
-76-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:55:9-66:19
-77            android:name="com.nexusblock.service.NexusVpnService"
-77-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:56:13-52
-78            android:exported="false"
-78-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:57:13-37
-79            android:foregroundServiceType="specialUse"
-79-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:58:13-55
-80            android:permission="android.permission.BIND_VPN_SERVICE" >
-80-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:59:13-69
-81            <intent-filter>
-81-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:60:13-62:29
-82                <action android:name="android.net.VpnService" />
-82-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:61:17-65
-82-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:61:25-62
-83            </intent-filter>
-84
-85            <property
-85-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:63:13-65:39
-86                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-86-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:64:17-76
-87                android:value="vpn" />
-87-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:65:17-36
-88        </service>
-89
-90        <!-- Watchdog Service -->
-91        <service
-91-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:69:9-76:19
-92            android:name="com.nexusblock.service.VpnWatchdogService"
-92-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:70:13-55
-93            android:exported="false"
-93-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:71:13-37
-94            android:foregroundServiceType="specialUse" >
-94-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:72:13-55
-95            <property
-95-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:63:13-65:39
-96                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-96-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:64:17-76
-97                android:value="watchdog" />
-97-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:65:17-36
-98        </service>
-99
-100        <!-- Boot Receiver -->
-101        <receiver
-101-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:79:9-88:20
-102            android:name="com.nexusblock.service.BootReceiver"
-102-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:80:13-49
-103            android:exported="true"
-103-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:81:13-36
-104            android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
-104-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:82:13-75
-105            <intent-filter>
-105-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:83:13-87:29
-106                <action android:name="android.intent.action.BOOT_COMPLETED" />
-106-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:84:17-79
-106-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:84:25-76
-107                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-107-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:85:17-82
-107-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:85:25-79
-108                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
-108-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:86:17-82
-108-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:86:25-79
-109            </intent-filter>
-110        </receiver>
-111
-112        <!-- Hilt-managed WorkManager initialization (removes default initializer) -->
-113        <provider
-114            android:name="androidx.startup.InitializationProvider"
-114-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:92:13-67
-115            android:authorities="com.nexusblock.debug.androidx-startup"
-115-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:93:13-68
-116            android:exported="false" >
-116-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:94:13-37
-117            <meta-data
-117-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\80a36eb51226cb0ef8d72add6c34646e\transformed\emoji2-1.4.0\AndroidManifest.xml:29:13-31:52
-118                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-118-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\80a36eb51226cb0ef8d72add6c34646e\transformed\emoji2-1.4.0\AndroidManifest.xml:30:17-75
-119                android:value="androidx.startup" />
-119-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\80a36eb51226cb0ef8d72add6c34646e\transformed\emoji2-1.4.0\AndroidManifest.xml:31:17-49
-120            <meta-data
-120-->[androidx.lifecycle:lifecycle-process:2.10.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\a3e9a02b8e5e309348b0ab60e28be8a9\transformed\lifecycle-process-2.10.0\AndroidManifest.xml:29:13-31:52
-121                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-121-->[androidx.lifecycle:lifecycle-process:2.10.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\a3e9a02b8e5e309348b0ab60e28be8a9\transformed\lifecycle-process-2.10.0\AndroidManifest.xml:30:17-78
-122                android:value="androidx.startup" />
-122-->[androidx.lifecycle:lifecycle-process:2.10.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\a3e9a02b8e5e309348b0ab60e28be8a9\transformed\lifecycle-process-2.10.0\AndroidManifest.xml:31:17-49
-123            <meta-data
-123-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:29:13-31:52
-124                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-124-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:30:17-85
-125                android:value="androidx.startup" />
-125-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:31:17-49
-126        </provider>
+30    <!-- Layer 3: AccessibilityService for SSAI ad detection & skip -->
+31    <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
+31-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:22:5-85
+31-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:22:22-82
+32
+33    <!-- Layer 3: MediaProjection for visual ad frame classification -->
+34    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+34-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:25:5-94
+34-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:25:22-91
+35
+36    <!-- Layer 3: AudioRecord for loudness spike detection -->
+37    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+37-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:28:5-71
+37-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:28:22-68
+38
+39    <!-- TV feature declarations -->
+40    <uses-feature
+40-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:31:5-33:35
+41        android:name="android.software.leanback"
+41-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:32:9-49
+42        android:required="true" />
+42-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:33:9-32
+43    <uses-feature
+43-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:34:5-36:36
+44        android:name="android.hardware.touchscreen"
+44-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:35:9-52
+45        android:required="false" />
+45-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:36:9-33
+46
+47    <uses-permission android:name="android.permission.WAKE_LOCK" />
+47-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:23:5-68
+47-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:23:22-65
+48
+49    <permission
+49-->[androidx.core:core:1.18.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\32eed959d002fa4ef56d330e9bad7c62\transformed\core-1.18.0\AndroidManifest.xml:22:5-24:47
+50        android:name="com.nexusblock.debug.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+50-->[androidx.core:core:1.18.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\32eed959d002fa4ef56d330e9bad7c62\transformed\core-1.18.0\AndroidManifest.xml:23:9-81
+51        android:protectionLevel="signature" />
+51-->[androidx.core:core:1.18.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\32eed959d002fa4ef56d330e9bad7c62\transformed\core-1.18.0\AndroidManifest.xml:24:9-44
+52
+53    <uses-permission android:name="com.nexusblock.debug.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+53-->[androidx.core:core:1.18.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\32eed959d002fa4ef56d330e9bad7c62\transformed\core-1.18.0\AndroidManifest.xml:26:5-97
+53-->[androidx.core:core:1.18.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\32eed959d002fa4ef56d330e9bad7c62\transformed\core-1.18.0\AndroidManifest.xml:26:22-94
+54
+55    <application
+55-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:38:5-141:19
+56        android:name="com.nexusblock.NexusBlockApplication"
+56-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:39:9-46
+57        android:allowBackup="true"
+57-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:40:9-35
+58        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+58-->[androidx.core:core:1.18.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\32eed959d002fa4ef56d330e9bad7c62\transformed\core-1.18.0\AndroidManifest.xml:28:18-86
+59        android:banner="@drawable/ic_banner"
+59-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:41:9-45
+60        android:debuggable="true"
+61        android:extractNativeLibs="false"
+62        android:icon="@mipmap/ic_launcher"
+62-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:42:9-43
+63        android:label="Argus Ad Blocker"
+63-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:43:9-41
+64        android:roundIcon="@mipmap/ic_launcher_round"
+64-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:44:9-54
+65        android:supportsRtl="true"
+65-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:45:9-35
+66        android:theme="@style/Theme.NexusBlock"
+66-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:46:9-48
+67        android:usesCleartextTraffic="true" >
+67-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:47:9-44
+68
+69        <!-- Main Activity -->
+70        <activity
+70-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:50:9-61:20
+71            android:name="com.nexusblock.ui.MainActivity"
+71-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:51:13-44
+72            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize"
+72-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:52:13-93
+73            android:exported="true"
+73-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:53:13-36
+74            android:launchMode="singleTask"
+74-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:54:13-44
+75            android:theme="@style/Theme.NexusBlock" >
+75-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:55:13-52
+76            <intent-filter>
+76-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:56:13-60:29
+77                <action android:name="android.intent.action.MAIN" />
+77-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:57:17-69
+77-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:57:25-66
+78
+79                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+79-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:58:17-86
+79-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:58:27-83
+80                <category android:name="android.intent.category.LAUNCHER" />
+80-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:59:17-77
+80-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:59:27-74
+81            </intent-filter>
+82        </activity>
+83
+84        <!-- VPN Service -->
+85        <service
+85-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:64:9-75:19
+86            android:name="com.nexusblock.service.NexusVpnService"
+86-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:65:13-52
+87            android:exported="false"
+87-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:66:13-37
+88            android:foregroundServiceType="specialUse"
+88-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:67:13-55
+89            android:permission="android.permission.BIND_VPN_SERVICE" >
+89-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:68:13-69
+90            <intent-filter>
+90-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:69:13-71:29
+91                <action android:name="android.net.VpnService" />
+91-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:70:17-65
+91-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:70:25-62
+92            </intent-filter>
+93
+94            <property
+94-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:72:13-74:47
+95                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+95-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:73:17-76
+96                android:value="vpn_adblock" />
+96-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:74:17-44
+97        </service>
+98
+99        <!-- Watchdog Service -->
+100        <service
+100-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:78:9-85:19
+101            android:name="com.nexusblock.service.VpnWatchdogService"
+101-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:79:13-55
+102            android:exported="false"
+102-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:80:13-37
+103            android:foregroundServiceType="specialUse" >
+103-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:81:13-55
+104            <property
+104-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:72:13-74:47
+105                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+105-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:73:17-76
+106                android:value="watchdog" />
+106-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:74:17-44
+107        </service>
+108
+109        <!-- Layer 3: Accessibility Service for SSAI ad skip -->
+110        <service
+110-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:88:9-102:19
+111            android:name="com.nexusblock.service.ArgusAccessibilityService"
+111-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:89:13-62
+112            android:exported="false"
+112-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:90:13-37
+113            android:foregroundServiceType="specialUse"
+113-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:92:13-55
+114            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
+114-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:91:13-79
+115            <intent-filter>
+115-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:93:13-95:29
+116                <action android:name="android.accessibilityservice.AccessibilityService" />
+116-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:94:17-92
+116-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:94:25-89
+117            </intent-filter>
+118
+119            <meta-data
+119-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:96:13-98:72
+120                android:name="android.accessibilityservice"
+120-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:97:17-60
+121                android:resource="@xml/accessibility_service_config" />
+121-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:98:17-69
+122
+123            <property
+123-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:72:13-74:47
+124                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+124-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:73:17-76
+125                android:value="accessibility_adblock" />
+125-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:74:17-44
+126        </service>
 127
-128        <activity
-128-->[androidx.compose.ui:ui-tooling-android:1.11.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\262faf3a9624e789720011611b2eee26\transformed\ui-tooling\AndroidManifest.xml:23:9-25:39
-129            android:name="androidx.compose.ui.tooling.PreviewActivity"
-129-->[androidx.compose.ui:ui-tooling-android:1.11.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\262faf3a9624e789720011611b2eee26\transformed\ui-tooling\AndroidManifest.xml:24:13-71
-130            android:exported="true" />
-130-->[androidx.compose.ui:ui-tooling-android:1.11.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\262faf3a9624e789720011611b2eee26\transformed\ui-tooling\AndroidManifest.xml:25:13-36
-131
-132        <service
-132-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:39:9-45:35
-133            android:name="androidx.work.impl.background.systemjob.SystemJobService"
-133-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:40:13-84
-134            android:directBootAware="false"
-134-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:41:13-44
-135            android:enabled="@bool/enable_system_job_service_default"
-135-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:42:13-70
-136            android:exported="true"
-136-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:43:13-36
-137            android:permission="android.permission.BIND_JOB_SERVICE" />
-137-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:44:13-69
-138        <service
-138-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:46:9-52:35
-139            android:name="androidx.work.impl.foreground.SystemForegroundService"
-139-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:47:13-81
-140            android:directBootAware="false"
-140-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:48:13-44
-141            android:enabled="@bool/enable_system_foreground_service_default"
-141-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:49:13-77
-142            android:exported="false" />
-142-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:50:13-37
-143
-144        <receiver
-144-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:54:9-59:35
-145            android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
-145-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:55:13-88
-146            android:directBootAware="false"
-146-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:56:13-44
-147            android:enabled="true"
-147-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:57:13-35
-148            android:exported="false" />
-148-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:58:13-37
-149        <receiver
-149-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:60:9-69:20
-150            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
-150-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:61:13-88
-151            android:directBootAware="false"
-151-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:62:13-44
-152            android:enabled="false"
-152-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:63:13-36
-153            android:exported="false" >
-153-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:64:13-37
-154            <intent-filter>
-154-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:66:13-68:29
-155                <action android:name="android.intent.action.BOOT_COMPLETED" />
-155-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:84:17-79
-155-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:84:25-76
-156            </intent-filter>
-157        </receiver>
-158        <receiver
-158-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:70:9-80:20
-159            android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
-159-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:71:13-78
-160            android:directBootAware="false"
-160-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:72:13-44
-161            android:enabled="true"
-161-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:73:13-35
-162            android:exported="true"
-162-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:74:13-36
-163            android:permission="android.permission.DUMP" >
-163-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:75:13-57
-164            <intent-filter>
-164-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:77:13-79:29
-165                <action android:name="androidx.work.diagnostics.REQUEST_DIAGNOSTICS" />
-165-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:78:17-88
-165-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\8.13\transforms\73ca85d3578f412b1a1653e9f37107ed\transformed\work-runtime-2.11.2\AndroidManifest.xml:78:25-85
-166            </intent-filter>
-167        </receiver>
-168
-169        <uses-library
-169-->[androidx.window:window:1.5.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\ba1cc51e6ebd088d959f8f074cda9ac9\transformed\window-1.5.0\AndroidManifest.xml:23:9-25:40
-170            android:name="androidx.window.extensions"
-170-->[androidx.window:window:1.5.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\ba1cc51e6ebd088d959f8f074cda9ac9\transformed\window-1.5.0\AndroidManifest.xml:24:13-54
-171            android:required="false" />
-171-->[androidx.window:window:1.5.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\ba1cc51e6ebd088d959f8f074cda9ac9\transformed\window-1.5.0\AndroidManifest.xml:25:13-37
-172        <uses-library
-172-->[androidx.window:window:1.5.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\ba1cc51e6ebd088d959f8f074cda9ac9\transformed\window-1.5.0\AndroidManifest.xml:26:9-28:40
-173            android:name="androidx.window.sidecar"
-173-->[androidx.window:window:1.5.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\ba1cc51e6ebd088d959f8f074cda9ac9\transformed\window-1.5.0\AndroidManifest.xml:27:13-51
-174            android:required="false" />
-174-->[androidx.window:window:1.5.0] C:\Users\Prabha\.gradle\caches\8.13\transforms\ba1cc51e6ebd088d959f8f074cda9ac9\transformed\window-1.5.0\AndroidManifest.xml:28:13-37
-175
-176        <activity
-176-->[androidx.compose.ui:ui-test-manifest:1.11.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\c6be6924e1af5e6494ba4798bf8faae8\transformed\ui-test-manifest-1.11.1\AndroidManifest.xml:23:9-26:79
-177            android:name="androidx.activity.ComponentActivity"
-177-->[androidx.compose.ui:ui-test-manifest:1.11.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\c6be6924e1af5e6494ba4798bf8faae8\transformed\ui-test-manifest-1.11.1\AndroidManifest.xml:24:13-63
+128        <!-- Boot Receiver -->
+129        <receiver
+129-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:105:9-114:20
+130            android:name="com.nexusblock.service.BootReceiver"
+130-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:106:13-49
+131            android:exported="true"
+131-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:107:13-36
+132            android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
+132-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:108:13-75
+133            <intent-filter>
+133-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:109:13-113:29
+134                <action android:name="android.intent.action.BOOT_COMPLETED" />
+134-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:110:17-79
+134-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:110:25-76
+135                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+135-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:111:17-82
+135-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:111:25-79
+136                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+136-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:112:17-82
+136-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:112:25-79
+137            </intent-filter>
+138        </receiver>
+139
+140        <!-- Uninstall Cleanup Receiver (best-effort) -->
+141        <receiver
+141-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:117:9-127:20
+142            android:name="com.nexusblock.service.UninstallCleanupReceiver"
+142-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:118:13-61
+143            android:exported="false" >
+143-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:119:13-37
+144            <intent-filter>
+144-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:120:13-123:29
+145                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+145-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:121:17-80
+145-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:121:25-77
+146
+147                <data android:scheme="package" />
+147-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:122:17-50
+147-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:122:23-47
+148            </intent-filter>
+149            <intent-filter>
+149-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:124:13-126:29
+150                <action android:name="android.intent.action.MY_PACKAGE_SUSPENDED" />
+150-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:125:17-85
+150-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:125:25-82
+151            </intent-filter>
+152        </receiver>
+153
+154        <!-- Hilt-managed WorkManager initialization (removes default initializer) -->
+155        <provider
+156            android:name="androidx.startup.InitializationProvider"
+156-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:131:13-67
+157            android:authorities="com.nexusblock.debug.androidx-startup"
+157-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:132:13-68
+158            android:exported="false" >
+158-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:133:13-37
+159            <meta-data
+159-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\b06e6143045e266046af96c48a86a527\transformed\emoji2-1.4.0\AndroidManifest.xml:29:13-31:52
+160                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+160-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\b06e6143045e266046af96c48a86a527\transformed\emoji2-1.4.0\AndroidManifest.xml:30:17-75
+161                android:value="androidx.startup" />
+161-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\b06e6143045e266046af96c48a86a527\transformed\emoji2-1.4.0\AndroidManifest.xml:31:17-49
+162            <meta-data
+162-->[androidx.lifecycle:lifecycle-process:2.10.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\1afe11fd0a5854f0c4183bcf456543a1\transformed\lifecycle-process-2.10.0\AndroidManifest.xml:29:13-31:52
+163                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+163-->[androidx.lifecycle:lifecycle-process:2.10.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\1afe11fd0a5854f0c4183bcf456543a1\transformed\lifecycle-process-2.10.0\AndroidManifest.xml:30:17-78
+164                android:value="androidx.startup" />
+164-->[androidx.lifecycle:lifecycle-process:2.10.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\1afe11fd0a5854f0c4183bcf456543a1\transformed\lifecycle-process-2.10.0\AndroidManifest.xml:31:17-49
+165            <meta-data
+165-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:29:13-31:52
+166                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+166-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:30:17-85
+167                android:value="androidx.startup" />
+167-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:31:17-49
+168        </provider>
+169
+170        <activity
+170-->[androidx.compose.ui:ui-tooling-android:1.11.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\0bc1439ac1efc855ff6b855abf1b47fb\transformed\ui-tooling\AndroidManifest.xml:23:9-25:39
+171            android:name="androidx.compose.ui.tooling.PreviewActivity"
+171-->[androidx.compose.ui:ui-tooling-android:1.11.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\0bc1439ac1efc855ff6b855abf1b47fb\transformed\ui-tooling\AndroidManifest.xml:24:13-71
+172            android:exported="true" />
+172-->[androidx.compose.ui:ui-tooling-android:1.11.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\0bc1439ac1efc855ff6b855abf1b47fb\transformed\ui-tooling\AndroidManifest.xml:25:13-36
+173
+174        <service
+174-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:39:9-45:35
+175            android:name="androidx.work.impl.background.systemjob.SystemJobService"
+175-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:40:13-84
+176            android:directBootAware="false"
+176-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:41:13-44
+177            android:enabled="@bool/enable_system_job_service_default"
+177-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:42:13-70
 178            android:exported="true"
-178-->[androidx.compose.ui:ui-test-manifest:1.11.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\c6be6924e1af5e6494ba4798bf8faae8\transformed\ui-test-manifest-1.11.1\AndroidManifest.xml:25:13-36
-179            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
-179-->[androidx.compose.ui:ui-test-manifest:1.11.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\c6be6924e1af5e6494ba4798bf8faae8\transformed\ui-test-manifest-1.11.1\AndroidManifest.xml:26:13-76
-180
-181        <service
-181-->[androidx.room:room-runtime-android:2.8.4] C:\Users\Prabha\.gradle\caches\8.13\transforms\2f1b5d3ffea531f3a8cf4582716c0130\transformed\room-runtime\AndroidManifest.xml:24:9-28:63
-182            android:name="androidx.room.MultiInstanceInvalidationService"
-182-->[androidx.room:room-runtime-android:2.8.4] C:\Users\Prabha\.gradle\caches\8.13\transforms\2f1b5d3ffea531f3a8cf4582716c0130\transformed\room-runtime\AndroidManifest.xml:25:13-74
-183            android:directBootAware="true"
-183-->[androidx.room:room-runtime-android:2.8.4] C:\Users\Prabha\.gradle\caches\8.13\transforms\2f1b5d3ffea531f3a8cf4582716c0130\transformed\room-runtime\AndroidManifest.xml:26:13-43
+178-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:43:13-36
+179            android:permission="android.permission.BIND_JOB_SERVICE" />
+179-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:44:13-69
+180        <service
+180-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:46:9-52:35
+181            android:name="androidx.work.impl.foreground.SystemForegroundService"
+181-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:47:13-81
+182            android:directBootAware="false"
+182-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:48:13-44
+183            android:enabled="@bool/enable_system_foreground_service_default"
+183-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:49:13-77
 184            android:exported="false" />
-184-->[androidx.room:room-runtime-android:2.8.4] C:\Users\Prabha\.gradle\caches\8.13\transforms\2f1b5d3ffea531f3a8cf4582716c0130\transformed\room-runtime\AndroidManifest.xml:27:13-37
+184-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:50:13-37
 185
 186        <receiver
-186-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:34:9-52:20
-187            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-187-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:35:13-76
+186-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:54:9-59:35
+187            android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
+187-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:55:13-88
 188            android:directBootAware="false"
-188-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:36:13-44
+188-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:56:13-44
 189            android:enabled="true"
-189-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:37:13-35
-190            android:exported="true"
-190-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:38:13-36
-191            android:permission="android.permission.DUMP" >
-191-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:39:13-57
-192            <intent-filter>
-192-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:40:13-42:29
-193                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-193-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:41:17-91
-193-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:41:25-88
-194            </intent-filter>
-195            <intent-filter>
-195-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:43:13-45:29
-196                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-196-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:44:17-85
-196-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:44:25-82
-197            </intent-filter>
-198            <intent-filter>
-198-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:46:13-48:29
-199                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-199-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:47:17-88
-199-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:47:25-85
-200            </intent-filter>
-201            <intent-filter>
-201-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:49:13-51:29
-202                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-202-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:50:17-95
-202-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\8.13\transforms\5fcf077a0815075622d9fa09506971eb\transformed\profileinstaller-1.4.1\AndroidManifest.xml:50:25-92
-203            </intent-filter>
-204        </receiver>
-205    </application>
-206
-207</manifest>
+189-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:57:13-35
+190            android:exported="false" />
+190-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:58:13-37
+191        <receiver
+191-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:60:9-69:20
+192            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
+192-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:61:13-88
+193            android:directBootAware="false"
+193-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:62:13-44
+194            android:enabled="false"
+194-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:63:13-36
+195            android:exported="false" >
+195-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:64:13-37
+196            <intent-filter>
+196-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:66:13-68:29
+197                <action android:name="android.intent.action.BOOT_COMPLETED" />
+197-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:110:17-79
+197-->C:\Users\Prabha\Desktop\AB\app\src\main\AndroidManifest.xml:110:25-76
+198            </intent-filter>
+199        </receiver>
+200        <receiver
+200-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:70:9-80:20
+201            android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
+201-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:71:13-78
+202            android:directBootAware="false"
+202-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:72:13-44
+203            android:enabled="true"
+203-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:73:13-35
+204            android:exported="true"
+204-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:74:13-36
+205            android:permission="android.permission.DUMP" >
+205-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:75:13-57
+206            <intent-filter>
+206-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:77:13-79:29
+207                <action android:name="androidx.work.diagnostics.REQUEST_DIAGNOSTICS" />
+207-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:78:17-88
+207-->[androidx.work:work-runtime:2.11.2] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ddd5af9c7fd9d18a2a285b724851c000\transformed\work-runtime-2.11.2\AndroidManifest.xml:78:25-85
+208            </intent-filter>
+209        </receiver>
+210
+211        <uses-library
+211-->[androidx.window:window:1.5.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\492548ea976fee14a4f7fe2748a13429\transformed\window-1.5.0\AndroidManifest.xml:23:9-25:40
+212            android:name="androidx.window.extensions"
+212-->[androidx.window:window:1.5.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\492548ea976fee14a4f7fe2748a13429\transformed\window-1.5.0\AndroidManifest.xml:24:13-54
+213            android:required="false" />
+213-->[androidx.window:window:1.5.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\492548ea976fee14a4f7fe2748a13429\transformed\window-1.5.0\AndroidManifest.xml:25:13-37
+214        <uses-library
+214-->[androidx.window:window:1.5.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\492548ea976fee14a4f7fe2748a13429\transformed\window-1.5.0\AndroidManifest.xml:26:9-28:40
+215            android:name="androidx.window.sidecar"
+215-->[androidx.window:window:1.5.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\492548ea976fee14a4f7fe2748a13429\transformed\window-1.5.0\AndroidManifest.xml:27:13-51
+216            android:required="false" />
+216-->[androidx.window:window:1.5.0] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\492548ea976fee14a4f7fe2748a13429\transformed\window-1.5.0\AndroidManifest.xml:28:13-37
+217
+218        <activity
+218-->[androidx.compose.ui:ui-test-manifest:1.11.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ef0a0af326214d64edea33085bdab0b2\transformed\ui-test-manifest-1.11.1\AndroidManifest.xml:23:9-26:79
+219            android:name="androidx.activity.ComponentActivity"
+219-->[androidx.compose.ui:ui-test-manifest:1.11.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ef0a0af326214d64edea33085bdab0b2\transformed\ui-test-manifest-1.11.1\AndroidManifest.xml:24:13-63
+220            android:exported="true"
+220-->[androidx.compose.ui:ui-test-manifest:1.11.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ef0a0af326214d64edea33085bdab0b2\transformed\ui-test-manifest-1.11.1\AndroidManifest.xml:25:13-36
+221            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+221-->[androidx.compose.ui:ui-test-manifest:1.11.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\ef0a0af326214d64edea33085bdab0b2\transformed\ui-test-manifest-1.11.1\AndroidManifest.xml:26:13-76
+222
+223        <service
+223-->[androidx.room:room-runtime-android:2.8.4] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\035f8769e4912a22a9937d44e00f3b2b\transformed\room-runtime\AndroidManifest.xml:24:9-28:63
+224            android:name="androidx.room.MultiInstanceInvalidationService"
+224-->[androidx.room:room-runtime-android:2.8.4] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\035f8769e4912a22a9937d44e00f3b2b\transformed\room-runtime\AndroidManifest.xml:25:13-74
+225            android:directBootAware="true"
+225-->[androidx.room:room-runtime-android:2.8.4] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\035f8769e4912a22a9937d44e00f3b2b\transformed\room-runtime\AndroidManifest.xml:26:13-43
+226            android:exported="false" />
+226-->[androidx.room:room-runtime-android:2.8.4] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\035f8769e4912a22a9937d44e00f3b2b\transformed\room-runtime\AndroidManifest.xml:27:13-37
+227
+228        <receiver
+228-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:34:9-52:20
+229            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+229-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:35:13-76
+230            android:directBootAware="false"
+230-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:36:13-44
+231            android:enabled="true"
+231-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:37:13-35
+232            android:exported="true"
+232-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:38:13-36
+233            android:permission="android.permission.DUMP" >
+233-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:39:13-57
+234            <intent-filter>
+234-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:40:13-42:29
+235                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+235-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:41:17-91
+235-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:41:25-88
+236            </intent-filter>
+237            <intent-filter>
+237-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:43:13-45:29
+238                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+238-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:44:17-85
+238-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:44:25-82
+239            </intent-filter>
+240            <intent-filter>
+240-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:46:13-48:29
+241                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+241-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:47:17-88
+241-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:47:25-85
+242            </intent-filter>
+243            <intent-filter>
+243-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:49:13-51:29
+244                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+244-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:50:17-95
+244-->[androidx.profileinstaller:profileinstaller:1.4.1] C:\Users\Prabha\.gradle\caches\9.5.1\transforms\92440bbe203d1a8a720dafb10114415f\transformed\profileinstaller-1.4.1\AndroidManifest.xml:50:25-92
+245            </intent-filter>
+246        </receiver>
+247    </application>
+248
+249</manifest>

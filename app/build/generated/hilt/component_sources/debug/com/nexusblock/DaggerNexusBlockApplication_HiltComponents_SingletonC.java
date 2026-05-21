@@ -38,8 +38,14 @@ import com.nexusblock.di.DatabaseModule_ProvideDatabaseFactory;
 import com.nexusblock.engine.CertificateManager;
 import com.nexusblock.engine.ConnectionTracker;
 import com.nexusblock.engine.DnsFilterEngine;
-import com.nexusblock.engine.MitmProxyManager;
 import com.nexusblock.engine.PacketRouter;
+import com.nexusblock.engine.proxy.ArgusProxyServer;
+import com.nexusblock.engine.transformers.QuickJsTransformer;
+import com.nexusblock.engine.transformers.TransformerEngine;
+import com.nexusblock.router.StrategyMatrix;
+import com.nexusblock.router.StrategyRouter;
+import com.nexusblock.service.ArgusAccessibilityService;
+import com.nexusblock.service.ArgusAccessibilityService_MembersInjector;
 import com.nexusblock.service.BootReceiver;
 import com.nexusblock.service.BootReceiver_MembersInjector;
 import com.nexusblock.service.NexusVpnService;
@@ -60,6 +66,7 @@ import com.nexusblock.ui.viewmodel.LogsViewModel;
 import com.nexusblock.ui.viewmodel.LogsViewModel_HiltModules;
 import com.nexusblock.ui.viewmodel.SettingsViewModel;
 import com.nexusblock.ui.viewmodel.SettingsViewModel_HiltModules;
+import com.nexusblock.vision.LiteRTClassifier;
 import dagger.hilt.android.ActivityRetainedLifecycle;
 import dagger.hilt.android.ViewModelLifecycle;
 import dagger.hilt.android.internal.builders.ActivityComponentBuilder;
@@ -449,7 +456,7 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_nexusblock_ui_viewmodel_DashboardViewModel = "com.nexusblock.ui.viewmodel.DashboardViewModel";
+      static String com_nexusblock_ui_viewmodel_SettingsViewModel = "com.nexusblock.ui.viewmodel.SettingsViewModel";
 
       static String com_nexusblock_ui_viewmodel_FirewallViewModel = "com.nexusblock.ui.viewmodel.FirewallViewModel";
 
@@ -459,10 +466,10 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
 
       static String com_nexusblock_ui_viewmodel_CustomRulesViewModel = "com.nexusblock.ui.viewmodel.CustomRulesViewModel";
 
-      static String com_nexusblock_ui_viewmodel_SettingsViewModel = "com.nexusblock.ui.viewmodel.SettingsViewModel";
+      static String com_nexusblock_ui_viewmodel_DashboardViewModel = "com.nexusblock.ui.viewmodel.DashboardViewModel";
 
       @KeepFieldType
-      DashboardViewModel com_nexusblock_ui_viewmodel_DashboardViewModel2;
+      SettingsViewModel com_nexusblock_ui_viewmodel_SettingsViewModel2;
 
       @KeepFieldType
       FirewallViewModel com_nexusblock_ui_viewmodel_FirewallViewModel2;
@@ -477,7 +484,7 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
       CustomRulesViewModel com_nexusblock_ui_viewmodel_CustomRulesViewModel2;
 
       @KeepFieldType
-      SettingsViewModel com_nexusblock_ui_viewmodel_SettingsViewModel2;
+      DashboardViewModel com_nexusblock_ui_viewmodel_DashboardViewModel2;
     }
   }
 
@@ -535,33 +542,33 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
     private static final class LazyClassKeyProvider {
       static String com_nexusblock_ui_viewmodel_BlocklistViewModel = "com.nexusblock.ui.viewmodel.BlocklistViewModel";
 
+      static String com_nexusblock_ui_viewmodel_DashboardViewModel = "com.nexusblock.ui.viewmodel.DashboardViewModel";
+
       static String com_nexusblock_ui_viewmodel_FirewallViewModel = "com.nexusblock.ui.viewmodel.FirewallViewModel";
-
-      static String com_nexusblock_ui_viewmodel_LogsViewModel = "com.nexusblock.ui.viewmodel.LogsViewModel";
-
-      static String com_nexusblock_ui_viewmodel_CustomRulesViewModel = "com.nexusblock.ui.viewmodel.CustomRulesViewModel";
 
       static String com_nexusblock_ui_viewmodel_SettingsViewModel = "com.nexusblock.ui.viewmodel.SettingsViewModel";
 
-      static String com_nexusblock_ui_viewmodel_DashboardViewModel = "com.nexusblock.ui.viewmodel.DashboardViewModel";
+      static String com_nexusblock_ui_viewmodel_CustomRulesViewModel = "com.nexusblock.ui.viewmodel.CustomRulesViewModel";
+
+      static String com_nexusblock_ui_viewmodel_LogsViewModel = "com.nexusblock.ui.viewmodel.LogsViewModel";
 
       @KeepFieldType
       BlocklistViewModel com_nexusblock_ui_viewmodel_BlocklistViewModel2;
 
       @KeepFieldType
+      DashboardViewModel com_nexusblock_ui_viewmodel_DashboardViewModel2;
+
+      @KeepFieldType
       FirewallViewModel com_nexusblock_ui_viewmodel_FirewallViewModel2;
-
-      @KeepFieldType
-      LogsViewModel com_nexusblock_ui_viewmodel_LogsViewModel2;
-
-      @KeepFieldType
-      CustomRulesViewModel com_nexusblock_ui_viewmodel_CustomRulesViewModel2;
 
       @KeepFieldType
       SettingsViewModel com_nexusblock_ui_viewmodel_SettingsViewModel2;
 
       @KeepFieldType
-      DashboardViewModel com_nexusblock_ui_viewmodel_DashboardViewModel2;
+      CustomRulesViewModel com_nexusblock_ui_viewmodel_CustomRulesViewModel2;
+
+      @KeepFieldType
+      LogsViewModel com_nexusblock_ui_viewmodel_LogsViewModel2;
     }
 
     private static final class SwitchingProvider<T> implements Provider<T> {
@@ -678,6 +685,12 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
     }
 
     @Override
+    public void injectArgusAccessibilityService(
+        ArgusAccessibilityService argusAccessibilityService) {
+      injectArgusAccessibilityService2(argusAccessibilityService);
+    }
+
+    @Override
     public void injectNexusVpnService(NexusVpnService nexusVpnService) {
       injectNexusVpnService2(nexusVpnService);
     }
@@ -688,18 +701,26 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
     }
 
     @CanIgnoreReturnValue
-    private NexusVpnService injectNexusVpnService2(NexusVpnService instance) {
-      NexusVpnService_MembersInjector.injectPacketRouter(instance, singletonCImpl.packetRouterProvider.get());
-      NexusVpnService_MembersInjector.injectDnsEngine(instance, singletonCImpl.dnsFilterEngineProvider.get());
-      NexusVpnService_MembersInjector.injectMitmProxy(instance, singletonCImpl.mitmProxyManagerProvider.get());
-      NexusVpnService_MembersInjector.injectSettingsRepo(instance, singletonCImpl.settingsRepositoryProvider.get());
+    private ArgusAccessibilityService injectArgusAccessibilityService2(
+        ArgusAccessibilityService instance) {
+      ArgusAccessibilityService_MembersInjector.injectStrategyRouter(instance, singletonCImpl.strategyRouterProvider.get());
+      ArgusAccessibilityService_MembersInjector.injectLiteRTClassifier(instance, singletonCImpl.liteRTClassifierProvider.get());
       return instance;
     }
 
     @CanIgnoreReturnValue
-    private VpnWatchdogService injectVpnWatchdogService2(VpnWatchdogService instance2) {
-      VpnWatchdogService_MembersInjector.injectSettingsRepo(instance2, singletonCImpl.settingsRepositoryProvider.get());
+    private NexusVpnService injectNexusVpnService2(NexusVpnService instance2) {
+      NexusVpnService_MembersInjector.injectPacketRouter(instance2, singletonCImpl.packetRouterProvider.get());
+      NexusVpnService_MembersInjector.injectDnsEngine(instance2, singletonCImpl.dnsFilterEngineProvider.get());
+      NexusVpnService_MembersInjector.injectProxyServer(instance2, singletonCImpl.argusProxyServerProvider.get());
+      NexusVpnService_MembersInjector.injectSettingsRepo(instance2, singletonCImpl.settingsRepositoryProvider.get());
       return instance2;
+    }
+
+    @CanIgnoreReturnValue
+    private VpnWatchdogService injectVpnWatchdogService2(VpnWatchdogService instance3) {
+      VpnWatchdogService_MembersInjector.injectSettingsRepo(instance3, singletonCImpl.settingsRepositoryProvider.get());
+      return instance3;
     }
   }
 
@@ -734,7 +755,17 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
 
     private Provider<CertificateManager> certificateManagerProvider;
 
-    private Provider<MitmProxyManager> mitmProxyManagerProvider;
+    private Provider<StrategyMatrix> strategyMatrixProvider;
+
+    private Provider<StrategyRouter> strategyRouterProvider;
+
+    private Provider<LiteRTClassifier> liteRTClassifierProvider;
+
+    private Provider<QuickJsTransformer> quickJsTransformerProvider;
+
+    private Provider<TransformerEngine> transformerEngineProvider;
+
+    private Provider<ArgusProxyServer> argusProxyServerProvider;
 
     private SingletonCImpl(ApplicationContextModule applicationContextModuleParam) {
       this.applicationContextModule = applicationContextModuleParam;
@@ -778,7 +809,12 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
       this.customRuleRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<CustomRuleRepository>(singletonCImpl, 10));
       this.packetRouterProvider = DoubleCheck.provider(new SwitchingProvider<PacketRouter>(singletonCImpl, 11));
       this.certificateManagerProvider = DoubleCheck.provider(new SwitchingProvider<CertificateManager>(singletonCImpl, 12));
-      this.mitmProxyManagerProvider = DoubleCheck.provider(new SwitchingProvider<MitmProxyManager>(singletonCImpl, 13));
+      this.strategyMatrixProvider = DoubleCheck.provider(new SwitchingProvider<StrategyMatrix>(singletonCImpl, 14));
+      this.strategyRouterProvider = DoubleCheck.provider(new SwitchingProvider<StrategyRouter>(singletonCImpl, 13));
+      this.liteRTClassifierProvider = DoubleCheck.provider(new SwitchingProvider<LiteRTClassifier>(singletonCImpl, 15));
+      this.quickJsTransformerProvider = DoubleCheck.provider(new SwitchingProvider<QuickJsTransformer>(singletonCImpl, 18));
+      this.transformerEngineProvider = DoubleCheck.provider(new SwitchingProvider<TransformerEngine>(singletonCImpl, 17));
+      this.argusProxyServerProvider = DoubleCheck.provider(new SwitchingProvider<ArgusProxyServer>(singletonCImpl, 16));
     }
 
     @Override
@@ -809,6 +845,7 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
     @CanIgnoreReturnValue
     private NexusBlockApplication injectNexusBlockApplication2(NexusBlockApplication instance) {
       NexusBlockApplication_MembersInjector.injectWorkerFactory(instance, hiltWorkerFactory());
+      NexusBlockApplication_MembersInjector.injectOnCreate(instance);
       return instance;
     }
 
@@ -876,8 +913,23 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
           case 12: // com.nexusblock.engine.CertificateManager 
           return (T) new CertificateManager(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.settingsRepositoryProvider.get());
 
-          case 13: // com.nexusblock.engine.MitmProxyManager 
-          return (T) new MitmProxyManager(singletonCImpl.certificateManagerProvider.get(), singletonCImpl.statsRepositoryProvider.get(), singletonCImpl.settingsRepositoryProvider.get());
+          case 13: // com.nexusblock.router.StrategyRouter 
+          return (T) new StrategyRouter(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.strategyMatrixProvider.get());
+
+          case 14: // com.nexusblock.router.StrategyMatrix 
+          return (T) new StrategyMatrix();
+
+          case 15: // com.nexusblock.vision.LiteRTClassifier 
+          return (T) new LiteRTClassifier(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 16: // com.nexusblock.engine.proxy.ArgusProxyServer 
+          return (T) new ArgusProxyServer(singletonCImpl.certificateManagerProvider.get(), singletonCImpl.transformerEngineProvider.get(), singletonCImpl.strategyRouterProvider.get());
+
+          case 17: // com.nexusblock.engine.transformers.TransformerEngine 
+          return (T) new TransformerEngine(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.quickJsTransformerProvider.get());
+
+          case 18: // com.nexusblock.engine.transformers.QuickJsTransformer 
+          return (T) new QuickJsTransformer(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.settingsRepositoryProvider.get());
 
           default: throw new AssertionError(id);
         }
