@@ -1,63 +1,130 @@
-name: Android CI/CD
+name: Android CI
 
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
-
-permissions:
-  contents: write
+    inputs:
+      release_name:
+        description: "Release version (e.g., v1.2.3)"
+        required: true
+        default: "v1.0.0"
+      version_code:
+        description: "Version code for the build"
+        required: true
+        default: "1"
+      version_name:
+        description: "Version name for the build"
+        required: true
+        default: "1.0.0"
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: gradle
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
+      - name: Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
 
-    - name: Build Debug APKs & AABs
-      run: |
-        # If gradlew doesn't exist, use the system gradle to generate the wrapper
-        if [ ! -f "./gradlew" ]; then
-          gradle wrapper --gradle-version 8.11.1
-        fi
-        chmod +x ./gradlew
-        ./gradlew assembleDebug bundleDebug --info
+      - name: Build APK and AAB
+        run: ./gradlew assembleRelease bundleRelease
+        env:
+          VERSION_CODE: ${{ github.event.inputs.version_code }}
+          VERSION_NAME: ${{ github.event.inputs.version_name }}
 
-    - name: Prepare Release Artifacts
-      run: |
-        mkdir -p release_apks release_aabs
-        # Copy all generated APKs to a single directory
-        find app/build/outputs/apk/debug -name "*.apk" -exec cp {} release_apks/ \;
-        # Copy all generated AABs to a single directory
-        find app/build/outputs/bundle/debug -name "*.aab" -exec cp {} release_aabs/ \;
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-release
+          path: app/build/outputs/apk/release/*.apk
 
-    - name: Generate Short SHA
-      id: vars
-      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Upload AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aab-release
+          path: app/build/outputs/bundle/release/*.aab
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: "v1.0-${{ steps.vars.outputs.sha_short }}"
-        name: "NexusBlock Release (${{ steps.vars.outputs.sha_short }})"
-        draft: false
-        prerelease: false
-        files: |
-          release_apks/*.apk
-          release_aabs/*.aab
-        body: |
-          Automated build generated from commit ${{ github.sha }}.
-          Contains APKs and AABs for all architectures (Universal, ARM, ARM64, x86, x86_64).
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  sign-apk:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: apk-release
+          path: apk/
+
+      - name: Sign APK
+        uses: ilharp/sign-android-release@v1
+        with:
+          releaseDir: apk/
+          signingKey: ${{ secrets.SIGNING_KEY }}
+          keyAlias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload Signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-apk
+          path: apk/*-signed.apk
+
+  sign-aab:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download AAB Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: aab-release
+          path: aab/
+
+      - name: Sign AAB
+        uses: ilharp/sign-android-release@v1
+        with:
+          releaseDir: aab/
+          signingKey: ${{ secrets.SIGNING_KEY }}
+          keyAlias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload Signed AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-aab
+          path: aab/*-signed.aab
+
+  create-release:
+    needs: [sign-apk, sign-aab]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download Signed APK
+        uses: actions/download-artifact@v4
+        with:
+          name: signed-apk
+          path: release/
+
+      - name: Download Signed AAB
+        uses: actions/download-artifact@v4
+        with:
+          name: signed-aab
+          path: release/
+
+      - name: Create GitHub Release
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: ${{ github.event.inputs.release_name }}
+          prerelease: false
+          title: "NexusBlock Android TV Release ${{ github.event.inputs.release_name }}"
+          files: |
+            release/*.apk
+            release/*.aab
