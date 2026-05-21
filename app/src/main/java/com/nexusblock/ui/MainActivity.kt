@@ -1,8 +1,10 @@
 package com.nexusblock.ui
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.VpnService
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -89,11 +91,16 @@ class MainActivity : ComponentActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+    @SuppressLint("NewApi")
     private fun startVpnService() {
         val serviceIntent = Intent(this, NexusVpnService::class.java).apply {
             action = NexusVpnService.ACTION_START
         }
-        startForegroundService(serviceIntent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
         VpnWatchdogService.start(this)
     }
 }
