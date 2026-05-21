@@ -97,3 +97,45 @@ jobs:
           PLAY_STORE_JSON_KEY: play-store-key.json
         run: |
           bundle exec fastlane android deploy_internal
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download APK Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release-apk
+          path: release/
+
+      - name: Download AAB Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release-aab
+          path: release/
+
+      - name: Generate Short SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v1.0-${{ steps.vars.outputs.sha_short }}"
+          name: "NexusBlock Release (${{ steps.vars.outputs.sha_short }})"
+          draft: false
+          prerelease: false
+          files: |
+            release/*.apk
+            release/*.aab
+          body: |
+            Automated build generated from commit ${{ github.sha }}.
+            Contains APKs and AABs for all architectures (Universal, ARM, ARM64, x86, x86_64).
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
