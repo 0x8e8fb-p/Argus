@@ -1,0 +1,21 @@
+default_platform(:android)
+
+platform :android do
+  desc "Deploy a new version to the Google Play internal track"
+  lane :deploy_internal do
+    upload_to_play_store(
+      aab: ENV["AAB_PATH"] || "app/build/outputs/bundle/release/app-release.aab",
+      track: "internal",
+      release_status: "completed"
+    )
+  end
+
+  desc "Deploy a new version to the Google Play production track"
+  lane :deploy_production do
+    upload_to_play_store(
+      aab: ENV["AAB_PATH"] || "app/build/outputs/bundle/release/app-release.aab",
+      track: "production",
+      release_status: "completed"
+    )
+  end
+end

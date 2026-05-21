@@ -50,3 +50,33 @@ jobs:
         with:
           name: app-release-aab
           path: app/build/outputs/bundle/release/*.aab
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download AAB Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release-aab
+          path: app/build/outputs/bundle/release/
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Write Play Store Service Account Key
+        run: |
+          echo "${{ secrets.PLAY_STORE_JSON_KEY }}" > play-store-key.json
+
+      - name: Deploy to Play Store (internal)
+        env:
+          PLAY_STORE_JSON_KEY: play-store-key.json
+        run: |
+          bundle exec fastlane android deploy_internal
