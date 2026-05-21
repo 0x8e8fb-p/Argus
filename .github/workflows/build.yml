@@ -112,13 +112,49 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app-release-apk
-          path: release/
+          path: apk/
 
       - name: Download AAB Artifact
         uses: actions/download-artifact@v4
         with:
           name: app-release-aab
-          path: release/
+          path: aab/
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Sign APK
+        uses: ilharp/sign-android-release@v1
+        with:
+          releaseDir: apk/
+          signingKey: ${{ secrets.SIGNING_KEY }}
+          keyAlias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload Signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-apk
+          path: apk/*-signed.apk
+
+      - name: Sign AAB
+        uses: ilharp/sign-android-release@v1
+        with:
+          releaseDir: aab/
+          signingKey: ${{ secrets.SIGNING_KEY }}
+          keyAlias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload Signed AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-aab
+          path: aab/*-signed.aab
 
       - name: Generate Short SHA
         id: vars
@@ -132,10 +168,10 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            release/*.apk
-            release/*.aab
+            apk/*-signed.apk
+            aab/*-signed.aab
           body: |
             Automated build generated from commit ${{ github.sha }}.
-            Contains APKs and AABs for all architectures (Universal, ARM, ARM64, x86, x86_64).
+            Contains signed APKs and AABs for all architectures (Universal, ARM, ARM64, x86, x86_64).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
