@@ -50,6 +50,11 @@
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
 -keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
 
+# Rhino / Mozilla JavaScript — missing JDK classes in Android
+-dontwarn java.beans.**
+-dontwarn javax.lang.model.SourceVersion
+-dontwarn org.slf4j.impl.StaticLoggerBinder
+
 # Android TV / Compose
 -keep class androidx.tv.** { *; }
 -keep class androidx.compose.** { *; }
