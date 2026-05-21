@@ -25,20 +25,22 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
 
-    - name: Build Debug APKs
+    - name: Build Debug APKs & AABs
       run: |
         # If gradlew doesn't exist, use the system gradle to generate the wrapper
         if [ ! -f "./gradlew" ]; then
           gradle wrapper --gradle-version 8.11.1
         fi
         chmod +x ./gradlew
-        ./gradlew assembleDebug
+        ./gradlew assembleDebug bundleDebug --info
 
     - name: Prepare Release Artifacts
       run: |
-        mkdir -p release_apks
+        mkdir -p release_apks release_aabs
         # Copy all generated APKs to a single directory
         find app/build/outputs/apk/debug -name "*.apk" -exec cp {} release_apks/ \;
+        # Copy all generated AABs to a single directory
+        find app/build/outputs/bundle/debug -name "*.aab" -exec cp {} release_aabs/ \;
 
     - name: Generate Short SHA
       id: vars
@@ -51,9 +53,11 @@ jobs:
         name: "NexusBlock Release (${{ steps.vars.outputs.sha_short }})"
         draft: false
         prerelease: false
-        files: release_apks/*.apk
+        files: |
+          release_apks/*.apk
+          release_aabs/*.aab
         body: |
           Automated build generated from commit ${{ github.sha }}.
-          Contains APKs for all architectures (Universal, ARM, ARM64, x86, x86_64).
+          Contains APKs and AABs for all architectures (Universal, ARM, ARM64, x86, x86_64).
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
