@@ -139,6 +139,7 @@ class DnsUpstreamManager(
             for (server in servers) {
                 try {
                     java.net.DatagramSocket().use { socket ->
+                        VpnProtector.protect(socket)
                         socket.soTimeout = timeoutMs
 
                         val packet = java.net.DatagramPacket(

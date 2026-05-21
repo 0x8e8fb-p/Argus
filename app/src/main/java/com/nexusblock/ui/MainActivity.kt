@@ -30,7 +30,7 @@ import com.nexusblock.ui.theme.NexusBlockTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-@AndroidEntryPoint
+@AndroidEntryPoint(ComponentActivity::class)
 class MainActivity : ComponentActivity() {
 
     companion object {

@@ -1,0 +1,30 @@
+{
+  "host_patterns": [
+    "*.hotstar.com",
+    "api.hotstar.com",
+    "*.startv.com"
+  ],
+  "path_patterns": [
+    "/v1/play",
+    "/v1/page",
+    "/v1/detail",
+    "/v1/tray"
+  ],
+  "remove_fields": [
+    "ads",
+    "adBreaks",
+    "trackingData",
+    "beaconEvents",
+    "adPods"
+  ],
+  "remove_objects_with_keys": [
+    "adRenderer",
+    "adInfo",
+    "trackingPixel"
+  ],
+  "set_null_fields": [
+    "midroll",
+    "postroll",
+    "preroll"
+  ]
+}

@@ -9,7 +9,7 @@ import com.nexusblock.data.repository.SettingsRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-@AndroidEntryPoint
+@AndroidEntryPoint(BroadcastReceiver::class)
 class BootReceiver : BroadcastReceiver() {
 
     companion object {

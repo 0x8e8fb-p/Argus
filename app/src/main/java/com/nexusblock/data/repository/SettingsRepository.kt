@@ -21,11 +21,13 @@ import javax.inject.Singleton
 data class BlockingTechniques(
     val dnsFiltering: Boolean = true,
     val sniInspection: Boolean = true,
-    val mitmProxy: Boolean = false,
+    val mitmProxy: Boolean = true,
     val headerFilter: Boolean = true,
     val ipBlocking: Boolean = true,
     val stealthMode: Boolean = false,
-    val appFirewall: Boolean = false
+    val appFirewall: Boolean = false,
+    val fullTunnel: Boolean = false,
+    val albaniaMode: Boolean = false
 )
 
 @Singleton
@@ -48,6 +50,8 @@ class SettingsRepository @Inject constructor(
     private val KEY_TECH_IP = booleanPreferencesKey("tech_ip")
     private val KEY_TECH_STEALTH = booleanPreferencesKey("tech_stealth")
     private val KEY_TECH_FIREWALL = booleanPreferencesKey("tech_firewall_v2")
+    private val KEY_TECH_FULL_TUNNEL = booleanPreferencesKey("tech_full_tunnel")
+    private val KEY_TECH_ALBANIA_MODE = booleanPreferencesKey("tech_albania_mode")
     private val KEY_YOUTUBE_RECOMMENDATIONS = booleanPreferencesKey("youtube_recommendations")
     private val KEY_FIREWALL_MODES = stringPreferencesKey("firewall_modes_json")
 
@@ -77,11 +81,13 @@ class SettingsRepository @Inject constructor(
             BlockingTechniques(
                 dnsFiltering = prefs[KEY_TECH_DNS] ?: true,
                 sniInspection = prefs[KEY_TECH_SNI] ?: true,
-                mitmProxy = prefs[KEY_TECH_MITM] ?: false,
+                mitmProxy = prefs[KEY_TECH_MITM] ?: true,
                 headerFilter = prefs[KEY_TECH_HEADER] ?: true,
                 ipBlocking = prefs[KEY_TECH_IP] ?: true,
                 stealthMode = prefs[KEY_TECH_STEALTH] ?: false,
-                appFirewall = prefs[KEY_TECH_FIREWALL] ?: true
+                appFirewall = prefs[KEY_TECH_FIREWALL] ?: true,
+                fullTunnel = prefs[KEY_TECH_FULL_TUNNEL] ?: false,
+                albaniaMode = prefs[KEY_TECH_ALBANIA_MODE] ?: false
             )
         }
         .stateIn(scope, SharingStarted.Eagerly, BlockingTechniques())
@@ -124,6 +130,16 @@ class SettingsRepository @Inject constructor(
             scope.launch { dataStore.edit { it[KEY_CA_INSTALLED] = value } }
         }
 
+    /**
+     * Tracks whether Argus CA is installed in the system/user trust store.
+     * Distinct from [caInstalled] which tracked legacy certificate manager state.
+     */
+    var isSystemCaInstalled: Boolean
+        get() = caInstalledFlow.value
+        set(value) {
+            scope.launch { dataStore.edit { it[KEY_CA_INSTALLED] = value } }
+        }
+
     var dnsMode: String
         get() = dnsModeFlow.value
         set(value) {
@@ -142,6 +158,8 @@ class SettingsRepository @Inject constructor(
                     it[KEY_TECH_IP] = value.ipBlocking
                     it[KEY_TECH_STEALTH] = value.stealthMode
                     it[KEY_TECH_FIREWALL] = value.appFirewall
+                    it[KEY_TECH_FULL_TUNNEL] = value.fullTunnel
+                    it[KEY_TECH_ALBANIA_MODE] = value.albaniaMode
                 }
             }
         }

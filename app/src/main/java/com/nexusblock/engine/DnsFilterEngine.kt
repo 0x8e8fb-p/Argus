@@ -62,11 +62,28 @@ class DnsFilterEngine @Inject constructor(
         // - s.youtube.com: tracking / ad-signal endpoint
         // - gstatic.com, ggpht.com, googleapis.com: too broad
         // - google.com, play.google.com, clients4.google.com: not needed for playback
+        // Upstream resolver domains that must NEVER be blocked, even by
+        // emergency rules, otherwise DoH/DoT bootstrap fails and all
+        // resolution stops working.
+        private val UPSTREAM_DOMAINS = setOf(
+            "cloudflare-dns.com",
+            "dns.google",
+            "dns.quad9.net",
+            "dns11.quad9.net",
+            "dns12.quad9.net"
+        )
+
+        fun isUpstreamDomain(host: String): Boolean {
+            val h = host.trimEnd('.').lowercase()
+            return UPSTREAM_DOMAINS.any { h == it || h.endsWith(".$it") }
+        }
+
         val YOUTUBE_WHITELIST_RULES = listOf(
             BlockedDomain(host = "@@youtube.com", source = "nexusblock_whitelist"),
             BlockedDomain(host = "@@www.youtube.com", source = "nexusblock_whitelist"),
             BlockedDomain(host = "@@m.youtube.com", source = "nexusblock_whitelist"),
             BlockedDomain(host = "@@youtubei.googleapis.com", source = "nexusblock_whitelist"),
+            BlockedDomain(host = "@@innertube.googleapis.com", source = "nexusblock_whitelist"),
             BlockedDomain(host = "@@||i.ytimg.com^", source = "nexusblock_whitelist"),
             BlockedDomain(host = "@@||ytimg.com^", source = "nexusblock_whitelist"),
             BlockedDomain(host = "@@accounts.google.com", source = "nexusblock_whitelist"),
@@ -74,6 +91,50 @@ class DnsFilterEngine @Inject constructor(
             BlockedDomain(host = "@@www.youtube-nocookie.com", source = "nexusblock_whitelist"),
             BlockedDomain(host = "@@youtu.be", source = "nexusblock_whitelist")
         )
+
+        // ============================================================
+        // ALBANIA-MODE: Aggressive YouTube ad / tracking domains.
+        // These are blocked ONLY when Albania Mode is enabled.
+        // They target ad-serving infrastructure that is NOT needed
+        // for video playback but IS needed for ad delivery and
+        // ad-view measurement.
+        // ============================================================
+        private val ALBANIA_BLOCKLIST = setOf(
+            // Pure ad serving — never serves real content
+            "pagead2.googlesyndication.com",
+            "tpc.googlesyndication.com",
+            "video-ad-stats.googlesyndication.com",
+            "www.googletagservices.com",
+            "adservice.google.com",
+            "pagead.l.doubleclick.net",
+            "googleadservices.com",
+            "ad-g.doubleclick.net",
+            "ads.g.doubleclick.net",
+            "cm.g.doubleclick.net",
+            "iv.doubleclick.net",
+            "fls.doubleclick.net",
+            "googleads4.g.doubleclick.net",
+            "googleads5.g.doubleclick.net",
+            "googleads6.g.doubleclick.net",
+            "dfp.doubleclick.net",
+            "pubads.g.doubleclick.net",
+            "securepubads.g.doubleclick.net",
+            "googletagmanager.com",
+            "www.googletagmanager.com",
+            // Google analytics — safe to block
+            "ssl.google-analytics.com",
+            "www.google-analytics.com",
+            "analytics.google.com"
+            // NOTE: Removed YouTube-specific domains like s.youtube.com,
+            // redirector.googlevideo.com, manifest.googlevideo.com because
+            // they caused playback breakage. googlevideo.com ad subdomains
+            // are handled by RuleEngine.isAdVideoServer() when Albania Mode is ON.
+        )
+
+        fun isAlbaniaBlocked(host: String): Boolean {
+            val h = host.trimEnd('.').lowercase()
+            return ALBANIA_BLOCKLIST.any { h == it || h.endsWith(".$it") }
+        }
     }
 
     private val _isRunning = MutableStateFlow(false)
@@ -136,7 +197,12 @@ class DnsFilterEngine @Inject constructor(
     fun start(localAddress: InetAddress = InetAddress.getByName("127.0.0.1"), localPort: Int = DNS_PORT) {
         if (_isRunning.value || startJob?.isActive == true) return
         startJob = scope.launch {
+            // Default to PLAIN DNS for reliability.
+            // DoH causes recursive resolution loops when VPN is active.
             requestedDnsMode = parseDnsMode(settingsRepo.dnsMode)
+            if (requestedDnsMode == DnsUpstreamManager.DnsMode.PLAIN) {
+                Log.i(TAG, "Using plain DNS upstream")
+            }
             upstreamManager = DnsUpstreamManager(okHttpClient, requestedDnsMode)
             lastYoutubeSetting = settingsRepo.youtubeRecommendationsEnabled
             loadBootstrapRules()
@@ -187,7 +253,7 @@ class DnsFilterEngine @Inject constructor(
         queriesProcessed++
 
         // Block HTTPS/SVCB records for ad domains to prevent QUIC/H3 discovery
-        if ((type == 65 || type == 64) && ruleEngine.isBlocked(host)) {
+        if ((type == 65 || type == 64) && !isUpstreamDomain(host) && ruleEngine.isBlocked(host)) {
             queriesBlocked++
             queueLog(host, "dns-svcb")
             val response = Message(query.header.id)
@@ -217,11 +283,25 @@ class DnsFilterEngine @Inject constructor(
         // 2. Check Rule Engine before any upstream lookup.
         //    Returns sinkhole (0.0.0.0 / ::) instead of NXDOMAIN to prevent
         //    aggressive retry via DoH/DoT/IPv6.
-        if (ruleEngine.isBlocked(host)) {
+        //    EXCEPTION: upstream resolver hostnames must always be allowed
+        //    so that DoH/DoT bootstrap does not self-sabotage.
+        if (!isUpstreamDomain(host) && ruleEngine.isBlocked(host)) {
             queriesBlocked++
+            Log.i(TAG, "DNS sinkhole: $host (type=$type)")
             val response = buildSinkholeResponse(query, type)
             queueLog(host, "dns")
             return response.toWire()
+        }
+
+        // ALBANIA-MODE: aggressively block known YouTube ad CDN subdomains
+        // and dedicated ad/tracking domains at DNS resolution.
+        if (settingsRepo.techniques.albaniaMode && !isUpstreamDomain(host)) {
+            if (ruleEngine.isAdVideoServer(host) || isAlbaniaBlocked(host)) {
+                queriesBlocked++
+                Log.i(TAG, "DNS Albania block: $host")
+                queueLog(host, "dns-albania")
+                return buildSinkholeResponse(query, type).toWire()
+            }
         }
 
         val upstreamResponse = upstreamResolve(queryPayload) ?: return null
@@ -245,11 +325,11 @@ class DnsFilterEngine @Inject constructor(
             if (responseBytes != null) {
                 responseBytes
             } else {
-                systemResolve(queryPayload) ?: fallbackResolve(queryPayload)
+                fallbackResolve(queryPayload)
             }
         } catch (e: Exception) {
             Log.w(TAG, "Upstream resolution error", e)
-            systemResolve(queryPayload) ?: fallbackResolve(queryPayload)
+            fallbackResolve(queryPayload)
         }
     }
 
@@ -338,6 +418,7 @@ class DnsFilterEngine @Inject constructor(
             for (server in servers.distinctBy { it.hostAddress }) {
                 try {
                     java.net.DatagramSocket().use { upstream ->
+                        VpnProtector.protect(upstream)
                         upstream.soTimeout = 5000
                         upstream.send(DatagramPacket(queryPayload, queryPayload.size, server, 53))
                         val buf = ByteArray(BUFFER_SIZE)
@@ -506,11 +587,44 @@ class DnsFilterEngine @Inject constructor(
             "ads.g.doubleclick.net",
             "iv.doubleclick.net",
             "ad-g.doubleclick.net",
-            // YouTube-specific tracking (NOT whitelisted — blocking these reduces ad targeting)
+            // YouTube-specific ad / tracking endpoints
             "s.youtube.com",
             "r.youtube.com",
             "csp.withgoogle.com",
             "breakage.withgoogle.com",
+            "youtube-ui.l.google.com",
+            "video-stats.l.google.com",
+            "ytimg.l.google.com",
+            // YouTube SSAI / embedded ad domains (DANGER: googlevideo.com
+            // serves both ads AND content. Only block specific ad-prefixed
+            // subdomains via RuleEngine.isAdVideoServer() with Albania Mode.)
+            // REMOVED from built-ins: redirector and manifest break playback.
+            // "r1---sn-4g5edn7y" etc. removed — handled by isAdVideoServer().
+            // YouTube ad serving via known patterns (exact matches for common ad CDN endpoints)
+            // DANGER: innertube.googleapis.com is the PRIMARY YouTube API endpoint.
+            // Do NOT block it here — it breaks all YouTube playback.
+            // Whitelisted in YOUTUBE_WHITELIST_RULES.
+            // "youtube-nocookie.com" is whitelisted in YOUTUBE_WHITELIST_RULES,
+            // so the allow-rule takes precedence when recommendations are enabled.
+            "youtube-nocookie.com",
+            // ============================================================
+            // ALBANIA-MODE: Region-dependent ad domains that Albanian
+            // YouTube infrastructure does NOT serve. Blocking these
+            // globally removes the ad metadata even if the IP geolocation
+            // is not actually Albanian.
+            // ============================================================
+            "pagead2.googlesyndication.com",
+            "tpc.googlesyndication.com",
+            "video-ad-stats.googlesyndication.com",
+            "www.googletagservices.com",
+            "adservice.google.com",
+            "pagead.l.doubleclick.net",
+            "googleadservices.com",
+            // ============================================================
+            // YOUTUBE AD PLAYBACK SIGNALS
+            // ============================================================
+            "video.google.com",
+            "innovation.withgoogle.com",
             // ============================================================
             // INDIAN OTT AD DOMAINS
             // ============================================================
@@ -709,7 +823,11 @@ class DnsFilterEngine @Inject constructor(
         allowed = queriesAllowed
     )
 
-    fun isDomainBlocked(host: String): Boolean = ruleEngine.isBlocked(host)
+    fun isDomainBlocked(host: String): Boolean {
+        return ruleEngine.isBlocked(host) ||
+               (settingsRepo.techniques.albaniaMode &&
+                (ruleEngine.isAdVideoServer(host) || isAlbaniaBlocked(host)))
+    }
 
     fun isIpBlocked(ip: String): Boolean = ruleEngine.isIpBlocked(ip)
 
@@ -729,6 +847,25 @@ class DnsFilterEngine @Inject constructor(
             val query = Message(queryPayload)
             val type = query.question?.type ?: Type.A
             buildSinkholeResponse(query, type).toWire()
+        } catch (_: Exception) { null }
+    }
+
+    /**
+     * Build synthetic AAAA sinkhole response (returns ::) instead of dropping IPv6.
+     * This prevents apps from failing when IPv6 is unavailable.
+     */
+    fun buildIPv6SinkholeBytes(queryPayload: ByteArray): ByteArray? {
+        return try {
+            val query = Message(queryPayload)
+            val response = Message(query.header.id)
+            response.header.setFlag(Flags.QR.toInt())
+            response.header.setFlag(Flags.RA.toInt())
+            response.header.rcode = Rcode.NOERROR
+            response.addRecord(query.question, Section.QUESTION)
+            val name = query.question.name
+            val sinkhole = InetAddress.getByName("::")
+            response.addRecord(AAAARecord(name, DClass.IN, 300L, sinkhole), Section.ANSWER)
+            response.toWire()
         } catch (_: Exception) { null }
     }
 

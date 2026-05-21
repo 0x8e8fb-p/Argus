@@ -9,6 +9,9 @@ import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.nexusblock.data.worker.BlocklistUpdateWorker
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import java.security.Security
 import javax.inject.Inject
 
@@ -18,12 +21,18 @@ class NexusBlockApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
+    @Inject
+
     override fun onCreate() {
         super.onCreate()
         Security.addProvider(org.bouncycastle.jce.provider.BouncyCastleProvider())
         createNotificationChannels()
         initializeWorkManager()
-        schedulePeriodicBlocklistUpdate()
+
+        // Offload blocklist scheduling to background to reduce main-thread jank at cold start
+        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            schedulePeriodicBlocklistUpdate()
+        }
     }
 
     private fun initializeWorkManager() {

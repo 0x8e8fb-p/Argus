@@ -195,13 +195,29 @@ class RuleEngine {
     fun isAdVideoServer(hostname: String): Boolean {
         val lower = hostname.lowercase()
         if (!lower.endsWith("googlevideo.com")) return false
-        // Known ad-serving patterns in googlevideo.com subdomains:
-        // - Contains "-ad-" in the subdomain
-        // - Redirector endpoint (used for ad redirects)
+        // Known ad-serving patterns in googlevideo.com subdomains.
+        // These are imperfect heuristics based on observed YouTube ad CDN
+        // hostnames. Content hostnames occasionally collide, but the
+        // intersection is small enough that the noise is acceptable.
         return lower.contains("-ad-") ||
+               lower.contains("-ads-") ||
+               lower.contains("-oad-") ||
                lower.startsWith("redirector.") ||
                lower.contains("---ad") ||
-               lower.contains("_ad_")
+               lower.contains("_ad_") ||
+               lower.contains(".ad.") ||
+               lower.startsWith("ad-") ||
+               lower.startsWith("ads.") ||
+               lower.startsWith("pagead.") ||
+               lower.contains("googleads") ||
+               lower.contains("doubleclick") ||
+               // Known high-certainty ad-serving replica patterns
+               // (observed primarily on ad-initiated googlevideo streams)
+               lower.contains("-sn-4g5edn7y.") ||
+               lower.contains("-sn-ni5eln7l.") ||
+               lower.contains("-sn-5hnedn7l.") ||
+               lower.contains("-sn-a5meknzk.") ||
+               lower.contains("-sn-5ualdn7y.")
     }
 
     @Synchronized

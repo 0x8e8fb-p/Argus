@@ -6,7 +6,6 @@ import android.util.Log
 import com.nexusblock.Constants
 import com.nexusblock.data.repository.StatsRepository
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.InetAddress
@@ -42,6 +41,9 @@ class PacketRouter @Inject constructor(
     private var techniques = com.nexusblock.data.repository.BlockingTechniques()
     private val outputLock = Any()
 
+    private var tcpNatRelay: TcpNatRelay? = null
+    private var udpRelay: UdpRelay? = null
+
     @Volatile
     var isRunning = false
         private set
@@ -68,7 +70,8 @@ class PacketRouter @Inject constructor(
         techniquesJob?.cancel()
         techniquesJob = scope.launch {
             settingsRepo.observeTechniques().collect {
-                techniques = it
+                // EMERGENCY: force full tunnel OFF until TcpNatRelay is production-ready
+                techniques = it.copy(fullTunnel = false)
                 Log.d(TAG, "Techniques updated: $techniques")
             }
         }
@@ -77,6 +80,13 @@ class PacketRouter @Inject constructor(
             val input = FileInputStream(tunFd.fileDescriptor).channel
             val output = FileOutputStream(tunFd.fileDescriptor).channel
             val buffer = ByteBuffer.allocateDirect(BUFFER_SIZE)
+
+            tcpNatRelay = TcpNatRelay(
+                vpnService, output,
+                shouldInspectSni = { techniques.sniInspection },
+                isDomainBlocked = { dnsEngine.isDomainBlocked(it) }
+            )
+            udpRelay = UdpRelay(vpnService, output)
 
             while (isActive && isRunning) {
                 try {
@@ -104,6 +114,10 @@ class PacketRouter @Inject constructor(
         routerJob = null
         techniquesJob?.cancel()
         techniquesJob = null
+        tcpNatRelay?.stop()
+        tcpNatRelay = null
+        udpRelay?.stop()
+        udpRelay = null
         dnsEngine.stop()
         connectionTracker.stop()
         Log.i(TAG, "Packet router stopped")
@@ -166,10 +180,9 @@ class PacketRouter @Inject constructor(
         when (protocol) {
             PROTO_UDP -> {
                 val udpOffset = pos + ipHeaderLen
+                val srcPort = if (buffer.remaining() >= udpOffset + 8) buffer.getShort(udpOffset).toInt() and 0xFFFF else 0
+                val dstPort = if (buffer.remaining() >= udpOffset + 8) buffer.getShort(udpOffset + 2).toInt() and 0xFFFF else 0
                 if (buffer.remaining() >= udpOffset + 8) {
-                    val srcPort = buffer.getShort(udpOffset).toInt() and 0xFFFF
-                    val dstPort = buffer.getShort(udpOffset + 2).toInt() and 0xFFFF
-
                     if (isDnsBypassIp(dstIpStr) && dstPort != 53 && isDnsBypassPort(dstPort)) {
                         packetsBlocked++
                         scope.launch {
@@ -200,7 +213,28 @@ class PacketRouter @Inject constructor(
                         return
                     }
 
-                    // 2b. DNS interception
+                    // 2b. QUIC SNI inspection (UDP/443)
+                    if (dstPort == 443 && techniques.sniInspection) {
+                        val udpLen = (buffer.getShort(udpOffset + 4).toInt() and 0xFFFF)
+                        val payloadLen = udpLen - 8
+                        if (payloadLen > 0 && buffer.remaining() >= udpOffset + 8 + payloadLen) {
+                            val quicPayload = ByteArray(payloadLen)
+                            val mark = buffer.position()
+                            buffer.position(udpOffset + 8)
+                            buffer.get(quicPayload)
+                            buffer.position(mark)
+
+                            val sni = QuicInspector.extractSni(quicPayload)
+                            if (sni != null && dnsEngine.isDomainBlocked(sni)) {
+                                Log.v(TAG, "QUIC SNI block: $sni")
+                                sniBlocks++
+                                packetsBlocked++
+                                return
+                            }
+                        }
+                    }
+
+                    // 2c. DNS interception
                     if (dstPort == 53 && techniques.dnsFiltering) {
                         val udpLen = (buffer.getShort(udpOffset + 4).toInt() and 0xFFFF)
                         val payloadLen = udpLen - 8
@@ -224,6 +258,10 @@ class PacketRouter @Inject constructor(
                             return // drop original, async response will be sent
                         }
                     }
+                }
+                if (buffer.remaining() >= udpOffset + 8 && techniques.fullTunnel && dstPort != 53) {
+                    udpRelay?.process(buffer, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort)
+                    return
                 }
                 writePacket(output, buffer.duplicate())
             }
@@ -253,7 +291,12 @@ class PacketRouter @Inject constructor(
                     return
                 }
 
-                // SNI inspection on HTTPS (port 443)
+                if (techniques.fullTunnel && dstPort != 53) {
+                    tcpNatRelay?.process(buffer, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort, tcpPayloadLen)
+                    return
+                }
+
+                // SNI inspection on HTTPS (port 443) — DNS-only mode path
                 if (techniques.sniInspection && dstPort == 443 && tcpPayloadLen > 0) {
                     val sni = extractSni(buffer, tcpPayloadOffset, tcpPayloadLen)
                     if (sni != null && dnsEngine.isDomainBlocked(sni)) {
@@ -288,12 +331,48 @@ class PacketRouter @Inject constructor(
     private fun isDnsBypassPort(port: Int): Boolean = port in Constants.DNS_BYPASS_PORTS
 
     private fun processIPv6(buffer: ByteBuffer, output: FileChannel) {
-        // Drop all IPv6 packets entering the TUN.
-        // IPv6 is null-routed at the VPN level (addRoute("2000::", 3))
-        // to prevent IPv6 DNS leaks that would bypass our ad-blocking.
-        // Any IPv6 packet reaching here should be silently dropped.
+        if (buffer.remaining() < 40) {
+            packetsBlocked++
+            return
+        }
+        val pos = buffer.position()
+        val nextHeader = buffer.get(pos + 6).toInt() and 0xFF
+
+        if (nextHeader == PROTO_UDP && buffer.remaining() >= 48) {
+            val udpOffset = pos + 40
+            val dstPort = buffer.getShort(udpOffset + 2).toInt() and 0xFFFF
+            if (dstPort == 53 && techniques.dnsFiltering) {
+                val udpLen = (buffer.getShort(udpOffset + 4).toInt() and 0xFFFF)
+                val payloadLenUdp = udpLen - 8
+                if (payloadLenUdp > 0 && buffer.remaining() >= udpOffset + 8 + payloadLenUdp) {
+                    val queryPayload = ByteArray(payloadLenUdp)
+                    buffer.position(udpOffset + 8)
+                    buffer.get(queryPayload)
+
+                    // Extract IP/port before launching coroutine to avoid race on shared ByteBuffer
+                    val srcIp = ByteArray(16)
+                    val dstIp = ByteArray(16)
+                    buffer.position(pos + 8)
+                    buffer.get(srcIp)
+                    buffer.get(dstIp)
+                    val srcPort = buffer.getShort(udpOffset).toInt() and 0xFFFF
+
+                    scope.launch {
+                        try {
+                            val responsePayload = dnsEngine.resolveDns(queryPayload)
+                            if (responsePayload != null) {
+                                sendDnsResponseV6(output, srcIp, dstIp, srcPort, dstPort, responsePayload)
+                            }
+                        } catch (e: Exception) {
+                            if (isRunning) Log.w(TAG, "IPv6 DNS resolution error", e)
+                        }
+                    }
+                    return // DNS handled asynchronously; don't count as blocked
+                }
+            }
+        }
+        // Silently drop all non-DNS IPv6 traffic to prevent leaks outside the tunnel
         packetsBlocked++
-        return
     }
 
     private fun readIpv4(buffer: ByteBuffer, offset: Int): ByteArray {
@@ -457,36 +536,69 @@ class PacketRouter @Inject constructor(
         writePacket(output, pkt)
     }
 
+    private fun sendDnsResponseV6(
+        output: FileChannel,
+        srcIp: ByteArray,
+        dstIp: ByteArray,
+        srcPort: Int,
+        dstPort: Int,
+        responsePayload: ByteArray
+    ) {
+        val udpLen = 8 + responsePayload.size
+        val ip6HeaderLen = 40
+        val totalLen = ip6HeaderLen + udpLen
+        val pkt = ByteBuffer.allocate(totalLen)
+
+        // IPv6 header
+        pkt.putInt(0x60000000) // Version 6, TC 0, Flow Label 0
+        pkt.putShort(udpLen.toShort()) // Payload Length
+        pkt.put(PROTO_UDP.toByte()) // Next Header = UDP
+        pkt.put(64.toByte()) // Hop Limit
+        pkt.put(dstIp) // Source = original destination (our TUN DNS)
+        pkt.put(srcIp) // Destination = original source (app)
+
+        // UDP header
+        pkt.putShort(dstPort.toShort()) // Source port = 53
+        pkt.putShort(srcPort.toShort()) // Destination port = original source
+        pkt.putShort(udpLen.toShort()) // UDP length
+        pkt.putShort(0) // Checksum placeholder
+
+        // DNS payload
+        pkt.put(responsePayload)
+
+        // Compute IPv6 UDP checksum
+        val pseudoHeader = ByteBuffer.allocate(40)
+        pseudoHeader.put(dstIp) // Source = our address
+        pseudoHeader.put(srcIp) // Destination = app address
+        pseudoHeader.putInt(udpLen)
+        pseudoHeader.put(0)
+        pseudoHeader.put(0)
+        pseudoHeader.put(0)
+        pseudoHeader.put(PROTO_UDP.toByte())
+        pseudoHeader.flip()
+
+        val udpOffsetInPkt = ip6HeaderLen
+        val checksumBuf = ByteBuffer.allocate(40 + udpLen)
+        checksumBuf.put(pseudoHeader)
+        pkt.position(udpOffsetInPkt)
+        val udpBytes = ByteArray(udpLen)
+        pkt.get(udpBytes)
+        checksumBuf.put(udpBytes)
+        checksumBuf.flip()
+
+        val udpChecksum = calculateChecksum(checksumBuf, 0, checksumBuf.remaining())
+        pkt.putShort(udpOffsetInPkt + 6, udpChecksum.toShort())
+
+        pkt.flip()
+        writePacket(output, pkt)
+    }
+
     private fun writePacket(output: FileChannel, packet: ByteBuffer) {
         try {
             synchronized(outputLock) {
                 output.write(packet)
             }
         } catch (_: Exception) {}
-    }
-
-    private fun calculateChecksum(buffer: ByteBuffer, offset: Int, length: Int): Int {
-        var sum = 0
-        var i = offset
-        while (i < offset + length - 1) {
-            sum += ((buffer.get(i).toInt() and 0xFF) shl 8) or (buffer.get(i + 1).toInt() and 0xFF)
-            i += 2
-        }
-        if (i < offset + length) sum += (buffer.get(i).toInt() and 0xFF) shl 8
-        while (sum shr 16 != 0) sum = (sum and 0xFFFF) + (sum shr 16)
-        return sum.inv() and 0xFFFF
-    }
-
-    private fun calculatePseudoChecksum(buffer: ByteBuffer, srcIp: ByteArray, dstIp: ByteArray, protocol: Int, tcpLen: Int): Int {
-        val pseudo = ByteBuffer.allocate(12 + tcpLen)
-        pseudo.put(srcIp)
-        pseudo.put(dstIp)
-        pseudo.put(0)
-        pseudo.put(protocol.toByte())
-        pseudo.putShort(tcpLen.toShort())
-        for (i in 0 until tcpLen) pseudo.put(buffer.get(20 + i))
-        pseudo.flip()
-        return calculateChecksum(pseudo, 0, pseudo.remaining())
     }
 
     data class RouterStats(

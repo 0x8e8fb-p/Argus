@@ -17,7 +17,7 @@ import com.nexusblock.R
 import com.nexusblock.data.repository.SettingsRepository
 import com.nexusblock.engine.DnsFilterEngine
 import com.nexusblock.engine.DnsUpstreamManager
-import com.nexusblock.engine.MitmProxyManager
+import com.nexusblock.engine.proxy.ArgusProxyServer
 import com.nexusblock.engine.PacketRouter
 import com.nexusblock.ui.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,7 +25,7 @@ import kotlinx.coroutines.*
 import java.net.InetAddress
 import javax.inject.Inject
 
-@AndroidEntryPoint
+@AndroidEntryPoint(VpnService::class)
 class NexusVpnService : VpnService() {
 
     companion object {
@@ -37,6 +37,10 @@ class NexusVpnService : VpnService() {
         @Volatile
         var isRunning = false
             private set
+
+        /** Exposed so other components can call [protect] on their sockets. */
+        @Volatile
+        var currentInstance: NexusVpnService? = null
     }
 
     @Inject
@@ -46,7 +50,7 @@ class NexusVpnService : VpnService() {
     lateinit var dnsEngine: DnsFilterEngine
 
     @Inject
-    lateinit var mitmProxy: MitmProxyManager
+    lateinit var proxyServer: ArgusProxyServer
 
     @Inject
     lateinit var settingsRepo: SettingsRepository
@@ -60,6 +64,7 @@ class NexusVpnService : VpnService() {
 
     override fun onCreate() {
         super.onCreate()
+        currentInstance = this
         Log.i(TAG, "Service created")
     }
 
@@ -99,6 +104,7 @@ class NexusVpnService : VpnService() {
         Log.i(TAG, "Service destroyed")
         stopVpnInternal(updateDesiredState = explicitStop)
         serviceScope.cancel()
+        currentInstance = null
         super.onDestroy()
     }
 
@@ -115,20 +121,31 @@ class NexusVpnService : VpnService() {
                 .setSession(getString(R.string.app_name))
                 .setMtu(Constants.VPN_MTU)
                 .addAddress(Constants.VPN_ADDRESS, 24)
-                .addRoute(Constants.VPN_DNS, 32)
                 .addDnsServer(Constants.VPN_DNS)
-            // NOTE: No default route added. Only DNS traffic (to 10.0.0.1 on the
-            // local VPN subnet) enters the TUN. All other traffic bypasses the VPN,
-            // preventing routing loops since we only intercept DNS at the TUN level.
 
-            // IPv6 support: capture IPv6 DNS to prevent IPv6 DNS leaks
+            // Routing mode: DNS-only (default) or full tunnel (deep inspection)
+            // EMERGENCY: force DNS-only mode until TcpNatRelay is production-ready
+            val fullTunnel = false
+            if (fullTunnel) {
+                // Full tunnel: capture ALL IPv4 and IPv6 traffic for SNI inspection
+                builder.addRoute("0.0.0.0", 0)
+                builder.addRoute("::", 0)
+                Log.i(TAG, "Full-tunnel mode enabled")
+            } else {
+                // DNS-only: only DNS packets enter TUN. Everything else bypasses.
+                builder.addRoute(Constants.VPN_DNS, 32)
+            }
+
+            // IPv6: minimal local address for IPv6 DNS capture.
+            // Do NOT block all IPv6 (2000::/3) — that breaks dual-stack apps
+            // which wait for IPv6 connection timeouts before IPv4 fallback.
+            // Instead, we capture IPv6 DNS by routing known public IPv6 DNS
+            // servers through the TUN (they'll be handled like IPv4 DNS).
             try {
                 builder.addAddress("fd00:1:fd00:1:fd00:1:fd00:1", 128)
-                // Block all IPv6 traffic to prevent DNS leaks via IPv6.
-                // This forces all DNS resolution through our IPv4 DNS filter.
-                // Without this, apps can query IPv6 DNS servers directly,
-                // completely bypassing our ad-blocking DNS engine.
-                builder.addRoute("2000::", 3) // Block global unicast IPv6
+                Constants.DNS_BYPASS_IPV6_ROUTES.forEach { ip ->
+                    try { builder.addRoute(ip, 128) } catch (_: Exception) {}
+                }
             } catch (e: Exception) {
                 Log.w(TAG, "IPv6 not supported on this device")
             }
@@ -165,7 +182,7 @@ class NexusVpnService : VpnService() {
             dnsEngine.setUpstreamMode(dnsMode)
 
             if (settingsRepo.techniques.mitmProxy) {
-                mitmProxy.start()
+                proxyServer.start()
             }
 
             // Start packet router (includes DNS engine)
@@ -213,7 +230,7 @@ class NexusVpnService : VpnService() {
 
         try {
             packetRouter.stop()
-            mitmProxy.stop()
+            proxyServer.stop()
             dnsEngine.clearCache()
         } catch (e: Exception) {
             Log.w(TAG, "Error stopping engines", e)

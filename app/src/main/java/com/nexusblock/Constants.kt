@@ -55,6 +55,15 @@ object Constants {
         "45.90.30.0"
     )
 
+    val DNS_BYPASS_IPV6_ROUTES = listOf(
+        "2606:4700:4700::1111",  // Cloudflare
+        "2606:4700:4700::1001",
+        "2001:4860:4860::8888",  // Google
+        "2001:4860:4860::8844",
+        "2620:fe::fe",           // Quad9
+        "2620:fe::9"
+    )
+
     val DNS_BYPASS_PORTS = setOf(53, 443, 853, 784, 8853)
 
     const val WORK_TAG_BLOCKLIST = "blocklist_update"

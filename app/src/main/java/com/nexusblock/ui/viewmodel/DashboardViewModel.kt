@@ -154,6 +154,7 @@ class DashboardViewModel @Inject constructor(
             "ip" -> current.copy(ipBlocking = enabled)
             "stealth" -> current.copy(stealthMode = enabled)
             "firewall" -> current.copy(appFirewall = enabled)
+            "albania" -> current.copy(albaniaMode = enabled)
             else -> current
         }
         settingsRepo.techniques = updated

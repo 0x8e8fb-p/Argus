@@ -20,7 +20,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
-@AndroidEntryPoint
+@AndroidEntryPoint(Service::class)
 class VpnWatchdogService : Service() {
 
     companion object {
@@ -101,23 +101,40 @@ class VpnWatchdogService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (checkSelfPermission(Manifest.permission.SCHEDULE_EXACT_ALARM) != PackageManager.PERMISSION_GRANTED) {
-                Log.w(TAG, "SCHEDULE_EXACT_ALARM permission not granted, skipping exact alarm")
-                return
+        val canExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            try {
+                checkSelfPermission(Manifest.permission.SCHEDULE_EXACT_ALARM) == PackageManager.PERMISSION_GRANTED &&
+                        alarmManager.canScheduleExactAlarms()
+            } catch (e: Exception) {
+                Log.w(TAG, "Exact alarm check failed", e)
+                false
             }
-            if (!alarmManager.canScheduleExactAlarms()) {
-                Log.w(TAG, "Cannot schedule exact alarms, skipping")
-                return
-            }
-        }
+        } else true
 
         try {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + CHECK_INTERVAL_MS,
-                pendingIntent
-            )
+            if (canExact) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + CHECK_INTERVAL_MS,
+                    pendingIntent
+                )
+            } else {
+                // Fallback: inexact alarm doesn't need SCHEDULE_EXACT_ALARM permission
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                        SystemClock.elapsedRealtime() + CHECK_INTERVAL_MS,
+                        pendingIntent
+                    )
+                } else {
+                    alarmManager.set(
+                        AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                        SystemClock.elapsedRealtime() + CHECK_INTERVAL_MS,
+                        pendingIntent
+                    )
+                }
+                Log.d(TAG, "Using inexact alarm fallback (exact permission unavailable)")
+            }
         } catch (e: SecurityException) {
             Log.w(TAG, "SecurityException scheduling alarm", e)
         }

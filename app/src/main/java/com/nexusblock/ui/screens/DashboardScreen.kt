@@ -270,7 +270,8 @@ private val TECHNIQUES = listOf(
     Technique("Header Filter", "Removes common tracking headers in proxy mode", "header"),
     Technique("IP Blocking", "Drops known ad server IP ranges when visible", "ip"),
     Technique("Stealth Mode", "Blocks ICMP probes from the TV profile", "stealth"),
-    Technique("App Firewall", "Applies per-app VPN bypass and block modes", "firewall")
+    Technique("App Firewall", "Applies per-app VPN bypass and block modes", "firewall"),
+    Technique("Albania Mode", "YouTube region spoof — fewer ads via Albanian routing", "albania")
 )
 
 private fun com.nexusblock.data.repository.BlockingTechniques.isEnabled(key: String): Boolean {
@@ -282,6 +283,7 @@ private fun com.nexusblock.data.repository.BlockingTechniques.isEnabled(key: Str
         "ip" -> ipBlocking
         "stealth" -> stealthMode
         "firewall" -> appFirewall
+        "albania" -> albaniaMode
         else -> false
     }
 }

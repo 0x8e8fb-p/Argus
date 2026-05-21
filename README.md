@@ -27,7 +27,7 @@
 | Multi-source blocklists | ✅ Complete | Firebog, OISD, AdGuard, StevenBlack |
 | Auto blocklist updates | ✅ Complete | WorkManager daily worker |
 | TLS SNI inspection | ✅ Complete | Parses ClientHello without decryption |
-| MITM HTTPS proxy | ✅ Complete | LittleProxy + BouncyCastle CA |
+| MITM HTTPS proxy | ✅ Complete | Kotlin ArgusProxyServer + BouncyCastle CA |
 | YouTube ad blocking | ✅ Complete | DNS + SNI + regex path rules |
 | App whitelist | ✅ Complete | Per-app VPN bypass |
 | Auto-start on boot | ✅ Complete | `BOOT_COMPLETED` receiver |
@@ -71,8 +71,8 @@
 │  │   ├── DnsUpstreamManager (Plain/DoH/DoT)                        │
 │  │   ├── Matches queries against ad domains                         │
 │  │   └── Returns NXDOMAIN for blocked domains                       │
-│  ├── MitmProxyManager (HTTPS inspection)                            │
-│  │   ├── Local HTTP/HTTPS proxy (LittleProxy)                       │
+│  ├── ArgusProxyServer (HTTPS inspection)                            │
+│  │   ├── Local HTTP/HTTPS proxy (Kotlin coroutine-based)            │
 │  │   ├── Filters requests by URL/Host against blocklists            │
 │  │   ├── Generates on-device CA certificate                         │
 │  │   └── Handles YouTube ad API calls (√)                           │
@@ -164,15 +164,16 @@ Maps network connections to their owning app packages.
 - **UID cache**: Pre-populates package name mapping for faster lookups
 - **Periodic refresh**: Refreshes procfs table every 5 seconds on older devices
 
-### 7. MitmProxyManager (`engine/MitmProxyManager.kt`)
-Embedded HTTP/HTTPS proxy using LittleProxy.
+### 7. ArgusProxyServer (`engine/proxy/ArgusProxyServer.kt`)
+Embedded HTTP/HTTPS proxy built with Kotlin coroutines (replaced LittleProxy/Netty for ~4MB APK savings).
 
 - **Path-based blocking**: `/youtubei/v1/ads`, `/pagead`, `/api/stats/ads`
 - **Host-based blocking**: Regex for `googleadservices.com`, `doubleclick.net`
 - **User-Agent spoofing**: Modifies headers for YouTube requests
+- **SOCKS5 mode**: Routes all TCP through local SOCKS5 for tun2socks integration
 - **CA certificate**: On-device generated RSA 2048 CA using BouncyCastle
 
-### 8. CertificateManager (`engine/CertificateManager.kt`)
+### 8. CaCertificateManager (`cert/CaCertificateManager.kt`)
 Generates and manages the X.509 CA certificate.
 
 - **On-device generation**: No pre-bundled keys — each device gets unique CA
@@ -403,7 +404,7 @@ This project is provided as an educational reference for VPN-based ad blocking a
 ## Acknowledgments
 
 - **dnsjava** — DNS protocol parsing
-- **LittleProxy** — Embeddable HTTP/HTTPS proxy
+- **ArgusProxyServer** — Lightweight Kotlin coroutine HTTP/HTTPS proxy
 - **BouncyCastle** — Cryptographic certificate generation
 - **AdGuard** — Inspiration for DNS filtering and rule syntax
 - **RethinkDNS** — Inspiration for connection tracking and UI philosophy

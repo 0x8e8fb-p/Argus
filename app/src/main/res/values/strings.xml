@@ -1,10 +1,11 @@
 <resources>
-    <string name="app_name">NexusBlock</string>
-    <string name="app_desc">Device-wide ad blocker for Android TV</string>
-    <string name="vpn_notification_title">NexusBlock is active</string>
+    <string name="app_name">Argus Ad Blocker</string>
+    <string name="app_desc">System-wide ad blocker for Android TV</string>
+    <string name="accessibility_service_desc">Detects and skips in-stream video ads using audio and visual cues. No personal data is collected.</string>
+    <string name="vpn_notification_title">Argus is active</string>
     <string name="vpn_notification_text">Blocking ads across all apps</string>
     <string name="vpn_notification_channel">VPN Service</string>
-    <string name="watchdog_notification_title">NexusBlock Watchdog</string>
+    <string name="watchdog_notification_title">Argus Watchdog</string>
     <string name="watchdog_notification_text">Ensuring ad blocking stays active</string>
     <string name="toggle_on">Blocking Enabled</string>
     <string name="toggle_off">Blocking Disabled</string>
