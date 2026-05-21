@@ -99,7 +99,7 @@ jobs:
           bundle exec fastlane android deploy_internal
 
   release:
-    needs: build
+    needs: [build, deploy]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     permissions:
