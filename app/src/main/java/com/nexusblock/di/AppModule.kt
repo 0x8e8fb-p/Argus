@@ -51,14 +51,17 @@ object AppModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
+        // Note: BASIC logging would fire on every DoH query (hot path under VPN);
+        // disabled entirely to avoid CPU cost and log spam.
         return OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
             .socketFactory(com.nexusblock.engine.VpnProtectedSocketFactory())
-            .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BASIC
-            })
+            // Bootstrap DNS: prevents infinite recursion when the VPN is active
+            // (system DNS = 10.0.0.1 = our TUN, which would route DoH hostname
+            // lookups back into our own resolver).
+            .dns(com.nexusblock.engine.dns.BootstrapDns())
             .build()
     }
 }

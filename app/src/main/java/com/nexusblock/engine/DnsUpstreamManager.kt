@@ -4,6 +4,8 @@ import android.util.Log
 import com.nexusblock.engine.dns.DnsProviderProfile
 import com.nexusblock.engine.dns.DnsProfileManager
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -12,6 +14,7 @@ import org.xbill.DNS.Message
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLSocketFactory
 
 /**
@@ -39,16 +42,30 @@ class DnsUpstreamManager(
 ) {
     companion object {
         private const val TAG = "NexusBlock/DnsUpstream"
-        private const val PLAIN_DNS_TIMEOUT_MS = 5000
-        private const val DOH_TIMEOUT_MS = 10000
+        private const val PLAIN_DNS_TIMEOUT_MS = 2500
+        private const val DOH_TIMEOUT_MS = 3000L
+        private const val DOT_TIMEOUT_MS = 3000
+        // Cap concurrent upstream resolutions so a burst of packets from the
+        // TUN can't fork unbounded coroutines and exhaust the IO thread pool.
+        private const val MAX_INFLIGHT = 32
 
         /** Absolute fallback — these are queried only when the active profile fails. */
         val FALLBACK_SERVERS = listOf("8.8.8.8", "1.1.1.1", "9.9.9.9")
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val inflight = Semaphore(MAX_INFLIGHT)
 
-    fun resolve(queryBytes: ByteArray): ByteArray? = runBlocking {
+    // Pre-built OkHttp client with a short call timeout for DoH. Built once
+    // (not per query) — previous code allocated a new client wrapper on every
+    // DNS packet, generating churn under TV-app traffic.
+    private val dohClient: OkHttpClient by lazy {
+        okHttpClient.newBuilder()
+            .callTimeout(DOH_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+            .build()
+    }
+
+    suspend fun resolve(queryBytes: ByteArray): ByteArray? = inflight.withPermit {
         val profile = profileManager.activeProfile()
         val protocols = profile.resolutionOrder()
 
@@ -58,9 +75,7 @@ class DnsUpstreamManager(
                 Protocol.DOT -> resolveDot(profile, queryBytes)
                 Protocol.PLAIN -> resolvePlain(profile, queryBytes)
             }
-            if (result != null) {
-                return@runBlocking result
-            }
+            if (result != null) return@withPermit result
         }
 
         // All profile protocols failed — try generic fallbacks so the user
@@ -86,16 +101,9 @@ class DnsUpstreamManager(
             .build()
 
         try {
-            okHttpClient.newBuilder()
-                .callTimeout(DOH_TIMEOUT_MS.toLong(), java.util.concurrent.TimeUnit.MILLISECONDS)
-                .build()
-                .newCall(request)
-                .execute()
-                .use { response ->
-                    if (response.isSuccessful) {
-                        response.body?.bytes()
-                    } else null
-                }
+            dohClient.newCall(request).execute().use { response ->
+                if (response.isSuccessful) response.body?.bytes() else null
+            }
         } catch (e: Exception) {
             Log.w(TAG, "DoH failed for ${profile.name}: ${e.message}")
             null
@@ -120,6 +128,7 @@ class DnsUpstreamManager(
             try {
                 val sslSocket = SSLSocketFactory.getDefault().createSocket(server, 853) as javax.net.ssl.SSLSocket
                 VpnProtector.protect(sslSocket)
+                sslSocket.soTimeout = DOT_TIMEOUT_MS
                 sslSocket.use { socket ->
                     socket.startHandshake()
 
