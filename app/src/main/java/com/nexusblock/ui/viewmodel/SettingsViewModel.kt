@@ -3,11 +3,14 @@ package com.nexusblock.ui.viewmodel
 import android.app.Application
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.nexusblock.data.repository.SettingsRepository
+import com.nexusblock.data.repository.VpnRoutingMode
+import com.nexusblock.service.NexusVpnService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
@@ -26,6 +29,9 @@ class SettingsViewModel @Inject constructor(
     val dnsProfile: StateFlow<String> = settingsRepo.observeDnsProfile()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "adguard_standard")
 
+    val vpnRoutingMode: StateFlow<VpnRoutingMode> = settingsRepo.observeVpnRoutingMode()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), VpnRoutingMode.FULL_ROUTE_AGGRESSIVE)
+
     private val _isBatteryOptimized = MutableStateFlow(false)
     val isBatteryOptimized: StateFlow<Boolean> = _isBatteryOptimized.asStateFlow()
 
@@ -39,6 +45,20 @@ class SettingsViewModel @Inject constructor(
 
     fun setDnsProfile(profileId: String) {
         settingsRepo.dnsProfile = profileId
+    }
+
+    fun setVpnRoutingMode(mode: VpnRoutingMode) {
+        settingsRepo.vpnRoutingMode = mode
+        if (NexusVpnService.isRunning) {
+            val intent = Intent(context, NexusVpnService::class.java).apply {
+                action = NexusVpnService.ACTION_RESTART
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
+        }
     }
 
     fun requestBatteryOptimization(): Boolean {

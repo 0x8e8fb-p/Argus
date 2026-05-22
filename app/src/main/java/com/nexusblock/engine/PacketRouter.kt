@@ -4,9 +4,11 @@ import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.nexusblock.Constants
+import com.nexusblock.data.repository.VpnRoutingMode
 import com.nexusblock.data.repository.StatsRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.sync.Semaphore
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.InetAddress
@@ -29,6 +31,7 @@ class PacketRouter @Inject constructor(
         private const val PROTO_ICMP = 1
         private const val PROTO_TCP = 6
         private const val PROTO_UDP = 17
+        private const val MAX_CONCURRENT_DNS_QUERIES = 64
 
         private const val TCP_RST = 0x04
     }
@@ -36,6 +39,7 @@ class PacketRouter @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var routerJob: Job? = null
     private var techniquesJob: Job? = null
+    private var routingModeJob: Job? = null
     private var blockedLogJob: Job? = null
     // Bounded channel for blocked-event logging. Dropping the oldest entry
     // under burst is fine — diagnostics should never throttle the data path.
@@ -44,6 +48,8 @@ class PacketRouter @Inject constructor(
         onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
     )
     private var techniques = com.nexusblock.data.repository.BlockingTechniques()
+    private var routingMode = VpnRoutingMode.FULL_ROUTE_AGGRESSIVE
+    private val dnsQueryLimiter = Semaphore(MAX_CONCURRENT_DNS_QUERIES)
     private val outputLock = Any()
 
     @Volatile
@@ -72,6 +78,7 @@ class PacketRouter @Inject constructor(
             packetsBlocked++
             blockedLogChannel.trySend(target to type)
         }
+        tcpRelay.blockUnknownCloudFrontDistributions = settingsRepo.vpnRoutingMode == VpnRoutingMode.FULL_ROUTE_AGGRESSIVE
         tcpRelay.start(vpnService, outputChannel)
         udpRelay.start(vpnService, outputChannel)
 
@@ -80,6 +87,15 @@ class PacketRouter @Inject constructor(
             settingsRepo.observeTechniques().collect {
                 techniques = it
                 Log.d(TAG, "Techniques updated: $techniques")
+            }
+        }
+
+        routingModeJob?.cancel()
+        routingModeJob = scope.launch {
+            settingsRepo.observeVpnRoutingMode().collect {
+                routingMode = it
+                tcpRelay.blockUnknownCloudFrontDistributions = it == VpnRoutingMode.FULL_ROUTE_AGGRESSIVE
+                Log.d(TAG, "Routing mode updated: $routingMode")
             }
         }
 
@@ -127,6 +143,8 @@ class PacketRouter @Inject constructor(
         routerJob = null
         techniquesJob?.cancel()
         techniquesJob = null
+        routingModeJob?.cancel()
+        routingModeJob = null
         blockedLogJob?.cancel()
         blockedLogJob = null
         tcpRelay.blockedCallback = null
@@ -206,6 +224,7 @@ class PacketRouter @Inject constructor(
                     // where TLS SNI inspection gives us visibility to block
                     // ad-serving CloudFront distributions.
                     if (dstPort == 443 && techniques.dnsFiltering &&
+                        routingMode == VpnRoutingMode.FULL_ROUTE_AGGRESSIVE &&
                         (dnsEngine.shouldForceDowngradeQuic(dstIpStr) || CloudFrontCidr.isCloudFrontIp(dstIpStr))) {
                         packetsBlocked++
                         blockedLogChannel.trySend("$dstIpStr:443" to "quic-downgrade")
@@ -223,6 +242,12 @@ class PacketRouter @Inject constructor(
                             buffer.get(queryPayload)
                             buffer.position(mark)
 
+                            if (!dnsQueryLimiter.tryAcquire()) {
+                                packetsBlocked++
+                                blockedLogChannel.trySend("$dstIpStr:53" to "dns-overload")
+                                return
+                            }
+
                             scope.launch {
                                 try {
                                     val responsePayload = dnsEngine.resolveDns(queryPayload)
@@ -231,6 +256,8 @@ class PacketRouter @Inject constructor(
                                     }
                                 } catch (e: Exception) {
                                     if (isRunning) Log.w(TAG, "DNS resolution error", e)
+                                } finally {
+                                    dnsQueryLimiter.release()
                                 }
                             }
                             return // drop original, async response will be sent
@@ -305,6 +332,12 @@ class PacketRouter @Inject constructor(
                     buffer.get(dstIp)
                     val srcPort = buffer.getShort(udpOffset).toInt() and 0xFFFF
 
+                    if (!dnsQueryLimiter.tryAcquire()) {
+                        packetsBlocked++
+                        blockedLogChannel.trySend("ipv6-dns" to "dns-overload")
+                        return
+                    }
+
                     scope.launch {
                         try {
                             val responsePayload = dnsEngine.resolveDns(queryPayload)
@@ -313,6 +346,8 @@ class PacketRouter @Inject constructor(
                             }
                         } catch (e: Exception) {
                             if (isRunning) Log.w(TAG, "IPv6 DNS resolution error", e)
+                        } finally {
+                            dnsQueryLimiter.release()
                         }
                     }
                     return // DNS handled asynchronously; don't count as blocked

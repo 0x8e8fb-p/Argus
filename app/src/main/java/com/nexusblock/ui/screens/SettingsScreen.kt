@@ -28,6 +28,7 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import com.nexusblock.data.repository.VpnRoutingMode
 import com.nexusblock.ui.components.ArgusScreenHeader
 import com.nexusblock.ui.components.FocusPanel
 import com.nexusblock.ui.components.SegmentedControl
@@ -41,6 +42,7 @@ fun SettingsScreen(
     val autoStart by viewModel.autoStart.collectAsState()
     val isBatteryOptimized by viewModel.isBatteryOptimized.collectAsState()
     val dnsProfile by viewModel.dnsProfile.collectAsState()
+    val vpnRoutingMode by viewModel.vpnRoutingMode.collectAsState()
     var showAdvanced by remember { mutableStateOf(false) }
 
     if (showAdvanced) {
@@ -97,6 +99,39 @@ fun SettingsScreen(
                         ),
                         selectedKey = dnsProfile,
                         onSelected = viewModel::setDnsProfile
+                    )
+                }
+            }
+        }
+
+        item {
+            FocusPanel(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = "VPN Routing",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Current: ${formatVpnRoutingMode(vpnRoutingMode)}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    SegmentedControl(
+                        options = listOf(
+                            VpnRoutingMode.DNS_ONLY.storageKey to "DNS",
+                            VpnRoutingMode.FULL_ROUTE_SAFE.storageKey to "Safe",
+                            VpnRoutingMode.FULL_ROUTE_AGGRESSIVE.storageKey to "Aggressive"
+                        ),
+                        selectedKey = vpnRoutingMode.storageKey,
+                        onSelected = { selected ->
+                            viewModel.setVpnRoutingMode(VpnRoutingMode.fromStorageKey(selected))
+                        }
                     )
                 }
             }
@@ -246,4 +281,10 @@ private fun formatDnsProfile(id: String): String = when (id) {
     "quad9" -> "Quad9"
     "google" -> "Google DNS"
     else -> id
+}
+
+private fun formatVpnRoutingMode(mode: VpnRoutingMode): String = when (mode) {
+    VpnRoutingMode.DNS_ONLY -> "DNS Only"
+    VpnRoutingMode.FULL_ROUTE_SAFE -> "Full Route Safe"
+    VpnRoutingMode.FULL_ROUTE_AGGRESSIVE -> "Full Route Aggressive"
 }

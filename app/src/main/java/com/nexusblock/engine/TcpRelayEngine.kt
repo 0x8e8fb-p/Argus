@@ -38,6 +38,8 @@ class TcpRelayEngine @Inject constructor(
         private const val WRITE_TIMEOUT_MS = 5_000L
         private const val MAX_ZERO_WRITES = 64
         private const val BUFFER_SIZE = 16384
+        private const val IDLE_DELAY_NO_SESSIONS_MS = 25L
+        private const val IDLE_DELAY_ACTIVE_SESSIONS_MS = 5L
 
         private const val TCP_FIN = 0x01
         private const val TCP_SYN = 0x02
@@ -60,6 +62,9 @@ class TcpRelayEngine @Inject constructor(
     private val outputLock = Any()
 
     var blockedCallback: ((String, String) -> Unit)? = null
+
+    @Volatile
+    var blockUnknownCloudFrontDistributions: Boolean = true
 
     fun start(service: VpnService, output: FileChannel) {
         vpnService = service
@@ -96,7 +101,9 @@ class TcpRelayEngine @Inject constructor(
                         }
                     }
                 }
-                if (!hadData) delay(1) // Yield if no data to prevent busy-spin
+                if (!hadData) {
+                    delay(if (sessions.isEmpty()) IDLE_DELAY_NO_SESSIONS_MS else IDLE_DELAY_ACTIVE_SESSIONS_MS)
+                }
             }
         }
 
@@ -298,7 +305,7 @@ class TcpRelayEngine @Inject constructor(
                     return true
                 }
                 // CloudFront default-deny
-                if (dnsEngine.isUnknownCloudFrontDistribution(sni)) {
+                if (blockUnknownCloudFrontDistributions && dnsEngine.isUnknownCloudFrontDistribution(sni)) {
                     Log.d(TAG, "CloudFront default-deny: $sni")
                     sendRstToApp(session)
                     session.state = SessionState.CLOSED
