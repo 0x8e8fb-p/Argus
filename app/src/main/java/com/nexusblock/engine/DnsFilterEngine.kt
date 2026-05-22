@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.*
 import okhttp3.OkHttpClient
 import org.xbill.DNS.*
 import java.net.InetAddress
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -54,6 +55,7 @@ class DnsFilterEngine @Inject constructor(
         private const val DNS_PORT = 53
         private const val BUFFER_SIZE = 4096
         private const val NEGATIVE_CACHE_TTL_MS = 60_000L
+        private const val CLOUDFRONT_IP_TTL_MS = 600_000L // 10 min
 
         /**
          * Upstream resolver domains that must NEVER be blocked, otherwise
@@ -105,6 +107,11 @@ class DnsFilterEngine @Inject constructor(
     private val blockedIpCache = object : LinkedHashMap<String, Long>(512, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Long>?): Boolean = size > 500
     }
+
+    // CloudFront IP cache: IPs resolved from *.cloudfront.net are cached here.
+    // PacketRouter uses this to force QUIC→TCP downgrade (block UDP/443) so
+    // that TLS SNI inspection can catch ad-serving CloudFront distributions.
+    private val cloudFrontIpCache = ConcurrentHashMap<String, Long>(256)
 
     private val pendingLogs = mutableListOf<com.nexusblock.data.model.BlockedEvent>()
     private var logJob: Job? = null
@@ -230,6 +237,7 @@ class DnsFilterEngine @Inject constructor(
             if (plainResponse != null) {
                 Log.d(TAG, "DNS critical-allow bypass: $host")
                 cacheAllowedResponse(cacheKey, plainResponse)
+                trackCloudFrontIps(plainResponse)
                 queriesAllowed++
                 return plainResponse
             }
@@ -263,6 +271,7 @@ class DnsFilterEngine @Inject constructor(
         }
 
         cacheAllowedResponse(cacheKey, upstreamResponse)
+        trackCloudFrontIps(upstreamResponse)
         queriesAllowed++
         return upstreamResponse
     }
@@ -325,6 +334,63 @@ class DnsFilterEngine @Inject constructor(
                 synchronized(dnsCache) { dnsCache[cacheKey] = response }
             }
         } catch (_: Exception) {}
+    }
+
+    /**
+     * Extract IPs from DNS responses that contain CNAME chains resolving to
+     * *.cloudfront.net. These IPs are cached so that PacketRouter can force
+     * QUIC→TCP downgrade, giving us SNI visibility on ad-serving CloudFront
+     * distributions.
+     */
+    private fun trackCloudFrontIps(responseBytes: ByteArray) {
+        try {
+            val response = Message(responseBytes)
+            var hasCloudFrontCname = false
+            for (record in response.getSectionArray(Section.ANSWER)) {
+                if (record is CNAMERecord) {
+                    val target = record.target.toString(true).lowercase().trimEnd('.')
+                    if (target.endsWith(".cloudfront.net")) {
+                        hasCloudFrontCname = true
+                    }
+                }
+            }
+            // If ANY record in the chain touches CloudFront, cache all A/AAAA IPs
+            // as "force-tcp" targets. This also applies when the queried host IS
+            // a *.cloudfront.net directly (the A records themselves).
+            val queriedHost = response.question?.name?.toString(true)?.lowercase()?.trimEnd('.') ?: ""
+            if (hasCloudFrontCname || queriedHost.endsWith(".cloudfront.net")) {
+                val now = System.currentTimeMillis()
+                for (record in response.getSectionArray(Section.ANSWER)) {
+                    when (record) {
+                        is ARecord -> {
+                            record.address.hostAddress?.let { ip ->
+                                cloudFrontIpCache[ip] = now
+                            }
+                        }
+                        is AAAARecord -> {
+                            record.address.hostAddress?.let { ip ->
+                                cloudFrontIpCache[ip] = now
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (_: Exception) {}
+    }
+
+    /**
+     * Returns true if the given IP was resolved from a *.cloudfront.net domain.
+     * PacketRouter uses this to block UDP/443 (QUIC) to these IPs, forcing
+     * the app to fall back to TCP/443 where we can inspect TLS ClientHello SNI
+     * and block ad-serving CloudFront distributions.
+     */
+    fun shouldForceDowngradeQuic(ip: String): Boolean {
+        val ts = cloudFrontIpCache[ip] ?: return false
+        if (System.currentTimeMillis() - ts > CLOUDFRONT_IP_TTL_MS) {
+            cloudFrontIpCache.remove(ip)
+            return false
+        }
+        return true
     }
 
     private fun findBlockedAnswer(responseBytes: ByteArray, originalHost: String): String? {

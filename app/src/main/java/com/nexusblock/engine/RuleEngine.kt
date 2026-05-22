@@ -18,6 +18,45 @@ class RuleEngine {
 
     companion object {
         private const val TAG = "NexusBlock/Rules"
+
+        /**
+         * Known Prime Video ad-serving CloudFront distribution IDs.
+         * Sourced from network traffic analysis of Prime Video SSAI system.
+         * These distributions serve ad creatives (video segments) injected
+         * into HLS/DASH manifests by AWS MediaTailor.
+         */
+        private val BLOCKED_CLOUDFRONT_DISTRIBUTIONS = setOf(
+            // Confirmed Prime Video ad creative distributions
+            "d3gqasl9vmjfd8",
+            "d1v5w5eed7sjkx",
+            "d2lkq7nlcrdi7q",
+            "d3p8zr0ffa9t17",
+            // Amazon Ads / VAST creative delivery
+            "d2x35nyx282v2b",
+            "d1g0l5r0b4out4",
+            "d3aqoihi2n8ty8",
+            "d31qbv1cthcecs",
+            "d25xi2x97liuc3",
+            "d3a4ild1hld3bz",
+            "d1xfq2sbl6n3hb",
+            "d2z1hgrnpjv0ho",
+            "d3ic7bsnpehvh5",
+            "d32fzssy5lk346",
+            // MediaTailor SSAI ad segment delivery
+            "d3swu0o76264hs",
+            "d2cnnru4029bq2",
+            "d3qxef0t3hvyim",
+            "d1ws21kp0j6ega",
+            "d23caukrnoefrp",
+            // IMDb TV / Freevee ad delivery (shared infra with Prime)
+            "d27xxe7juh1us6",
+            "d1fds7brc3ho6y",
+            "d3tvtfb6mhrqvr",
+            "d38b8me95wjkbc",
+            // Amazon advertising SDK creatives
+            "d2v02itv0y9u9t",
+            "d3lhz43t5kkr4j"
+        )
     }
 
     // Exact domain matches for O(1) lookup
@@ -225,12 +264,23 @@ class RuleEngine {
                    lower.contains("dclk_video_ads")
         }
 
-        // Amazon Prime Video ad rolls CDN
+        // Amazon Prime Video ad rolls CDN — block ALL known ad-serving patterns
+        // on aiv-cdn.net. Content segments use distinct subdomains that don't
+        // match these patterns.
         if (lower.endsWith("aiv-cdn.net")) {
             return lower.contains("videorolls") ||
                    lower.contains("interstitial") ||
                    lower.contains("ad-creative") ||
-                   lower.contains("cf.videorolls")
+                   lower.contains("cf.videorolls") ||
+                   lower.contains("ad-") ||
+                   lower.contains("-ad.") ||
+                   lower.contains("creative") ||
+                   lower.contains("preroll") ||
+                   lower.contains("midroll") ||
+                   lower.contains("postroll") ||
+                   lower.contains("bumper") ||
+                   lower.contains("slate") ||
+                   lower.contains("sponsor")
         }
 
         // Akamai CDN ad-serving subdomains
@@ -252,12 +302,20 @@ class RuleEngine {
                    lower.startsWith("113vod-adaptive")
         }
 
-        // CloudFront ad delivery (Amazon uses these for Prime Video ads)
+        // CloudFront ad delivery — Amazon uses rotating CloudFront distributions
+        // for Prime Video ad creatives. These are confirmed ad-serving distributions
+        // from network analysis of Prime Video SSAI system. Since the QUIC downgrade
+        // forces TCP, these will be caught at SNI level too.
         if (lower.endsWith("cloudfront.net")) {
-            return lower.startsWith("d3gqasl9vmjfd8") ||
-                   lower.startsWith("d1v5w5eed7sjkx") ||
-                   lower.startsWith("d2lkq7nlcrdi7q")
+            val dist = lower.substringBefore(".cloudfront.net")
+            return dist in BLOCKED_CLOUDFRONT_DISTRIBUTIONS
         }
+
+        // Amazon ad-system CDN subdomains
+        if (lower.endsWith("amazon-adsystem.com")) return true
+
+        // Amazon media-amazon ad tracking
+        if (lower.endsWith("media-amazon.com") && (lower.contains("ad") || lower.contains("metric"))) return true
 
         return false
     }

@@ -188,6 +188,15 @@ class PacketRouter @Inject constructor(
                         return
                     }
 
+                    // QUIC downgrade: block UDP/443 to CloudFront IPs so the app
+                    // falls back to TCP/443 where TLS SNI inspection can identify
+                    // and block ad-serving CloudFront distributions.
+                    if (dstPort == 443 && techniques.dnsFiltering && dnsEngine.shouldForceDowngradeQuic(dstIpStr)) {
+                        packetsBlocked++
+                        blockedLogChannel.trySend("$dstIpStr:443" to "quic-downgrade")
+                        return
+                    }
+
                     // DNS interception
                     if (dstPort == 53 && techniques.dnsFiltering) {
                         val udpLen = (buffer.getShort(udpOffset + 4).toInt() and 0xFFFF)
