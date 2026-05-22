@@ -66,8 +66,9 @@ android {
 }
 
 dependencies {
-    // Conflict resolution: LittleProxy needs full Guava; force recent version
-    implementation("com.google.guava:guava:33.0.0-jre")
+    // Conflict resolution: LittleProxy was previously used; keep Guava for okHttp
+    // implementation("com.google.guava:guava:33.0.0-jre")
+    // Note: Guava removed — no remaining code paths use it after proxy/transformer cleanup.
 
     // Core Android
     implementation("androidx.core:core-ktx:1.18.0")
@@ -111,21 +112,6 @@ dependencies {
     // DNS parsing
     implementation("dnsjava:dnsjava:3.5.3")
 
-    // Protobuf serialization for YouTube InnerTube API rewriting
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.6.2")
-
-    // TensorFlow Lite for on-device ad frame classification
-    // tensorflow-lite-support 0.4.4 requires tensorflow-lite ~2.13
-    implementation("org.tensorflow:tensorflow-lite:2.13.0")
-    implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
-
-    // Rhino JavaScript engine for runtime transformer plugins
-    // Pure-Java ES5/ES6 engine — no native code, works on Android TV
-    implementation("org.mozilla:rhino:1.7.14")
-
-    // BouncyCastle for certificate generation
-    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
-    implementation("org.bouncycastle:bcpkix-jdk18on:1.78.1")
 
     // Serialization (keep at 1.6.2 — 1.7+ requires Kotlin 2.0.20+)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")

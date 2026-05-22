@@ -37,16 +37,11 @@ public final class NexusBlockApplication_MembersInjector implements MembersInjec
   @Override
   public void injectMembers(NexusBlockApplication instance) {
     injectWorkerFactory(instance, workerFactoryProvider.get());
-    injectOnCreate(instance);
   }
 
   @InjectedFieldSignature("com.nexusblock.NexusBlockApplication.workerFactory")
   public static void injectWorkerFactory(NexusBlockApplication instance,
       HiltWorkerFactory workerFactory) {
     instance.workerFactory = workerFactory;
-  }
-
-  public static void injectOnCreate(NexusBlockApplication instance) {
-    instance.onCreate();
   }
 }

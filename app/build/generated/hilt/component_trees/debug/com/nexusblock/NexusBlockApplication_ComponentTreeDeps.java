@@ -22,7 +22,6 @@ import hilt_aggregated_deps._com_nexusblock_NexusBlockApplication_GeneratedInjec
 import hilt_aggregated_deps._com_nexusblock_data_worker_BlocklistUpdateWorker_HiltModule;
 import hilt_aggregated_deps._com_nexusblock_di_AppModule;
 import hilt_aggregated_deps._com_nexusblock_di_DatabaseModule;
-import hilt_aggregated_deps._com_nexusblock_service_ArgusAccessibilityService_GeneratedInjector;
 import hilt_aggregated_deps._com_nexusblock_service_BootReceiver_GeneratedInjector;
 import hilt_aggregated_deps._com_nexusblock_service_NexusVpnService_GeneratedInjector;
 import hilt_aggregated_deps._com_nexusblock_service_VpnWatchdogService_GeneratedInjector;
@@ -84,7 +83,6 @@ import hilt_aggregated_deps._dagger_hilt_android_internal_modules_HiltWrapper_Ac
         _com_nexusblock_data_worker_BlocklistUpdateWorker_HiltModule.class,
         _com_nexusblock_di_AppModule.class,
         _com_nexusblock_di_DatabaseModule.class,
-        _com_nexusblock_service_ArgusAccessibilityService_GeneratedInjector.class,
         _com_nexusblock_service_BootReceiver_GeneratedInjector.class,
         _com_nexusblock_service_NexusVpnService_GeneratedInjector.class,
         _com_nexusblock_service_VpnWatchdogService_GeneratedInjector.class,

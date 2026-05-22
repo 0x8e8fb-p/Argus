@@ -15,54 +15,29 @@
     "semantic_hash": "77d10da23c9101d79ceb12558fc4683d"
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/build.gradle.kts": {
-    "mtime": 1779382725.2610075,
-    "ast_hash": "5f5ac64755a40a2a2f2861aa7624c989",
-    "semantic_hash": "5f5ac64755a40a2a2f2861aa7624c989"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/test/java/com/nexusblock/engine/QuicInspectorTest.kt": {
-    "mtime": 1779382726.0388072,
-    "ast_hash": "be551fbf58eac7ce742eb01115a8ac00",
-    "semantic_hash": "be551fbf58eac7ce742eb01115a8ac00"
+    "mtime": 1779429442.2217858,
+    "ast_hash": "fc079cce667e85ae0895615a7e2c1c83",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/test/java/com/nexusblock/engine/RuleEngineTest.kt": {
     "mtime": 1779382726.0388832,
     "ast_hash": "6ec449af0e3474d32e8bbcf460609dc0",
     "semantic_hash": "6ec449af0e3474d32e8bbcf460609dc0"
   },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/test/java/com/nexusblock/engine/transformers/QuickJsTransformerTest.kt": {
-    "mtime": 1779382726.0390525,
-    "ast_hash": "051c97a35abba07d1c031c21e03b1265",
-    "semantic_hash": "051c97a35abba07d1c031c21e03b1265"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/test/java/com/nexusblock/engine/transformers/plugins/YoutubeTransformerTest.kt": {
-    "mtime": 1779382726.039313,
-    "ast_hash": "06407e6e753a830673dde124bf5c3b1c",
-    "semantic_hash": "06407e6e753a830673dde124bf5c3b1c"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/test/java/com/nexusblock/engine/transformers/plugins/SpotifyTransformerTest.kt": {
-    "mtime": 1779382726.0391996,
-    "ast_hash": "cb866a35a2150c46fcf4700337796118",
-    "semantic_hash": "cb866a35a2150c46fcf4700337796118"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/test/java/com/nexusblock/router/StrategyMatrixTest.kt": {
-    "mtime": 1779382726.0394418,
-    "ast_hash": "f3d763a6fb0fcc06b14836e86845f8ce",
-    "semantic_hash": "f3d763a6fb0fcc06b14836e86845f8ce"
-  },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/NexusBlockApplication.kt": {
-    "mtime": 1779382726.028395,
-    "ast_hash": "55f60b33c811543dbc76220068cf8cc8",
-    "semantic_hash": "55f60b33c811543dbc76220068cf8cc8"
+    "mtime": 1779444643.1759279,
+    "ast_hash": "ff1df85f3f071a85ae6ed455d4b2fa9a",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/Constants.kt": {
-    "mtime": 1779382726.0283184,
-    "ast_hash": "d2168d92f48c13065a347d3b32409d79",
-    "semantic_hash": "d2168d92f48c13065a347d3b32409d79"
+    "mtime": 1779444186.7222395,
+    "ast_hash": "d03072b9b6a21ffc99232fb85979319f",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/ui/MainActivity.kt": {
-    "mtime": 1779382726.0335548,
-    "ast_hash": "545c81fcc046e29e5f3a683debe7344d",
-    "semantic_hash": "545c81fcc046e29e5f3a683debe7344d"
+    "mtime": 1779435246.0640168,
+    "ast_hash": "aac2514485d831588dfb474cb82741f4",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/ui/viewmodel/LogsViewModel.kt": {
     "mtime": 1779382726.0350757,
@@ -70,9 +45,9 @@
     "semantic_hash": "b930d04fd8aeb068baa0a569f507afb0"
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/ui/viewmodel/BlocklistViewModel.kt": {
-    "mtime": 1779382726.0347784,
-    "ast_hash": "bff1963b47f083a973b05c4e02db7db1",
-    "semantic_hash": "bff1963b47f083a973b05c4e02db7db1"
+    "mtime": 1779431743.083569,
+    "ast_hash": "7a28d425a34a49cedef0111559f77dca",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/ui/viewmodel/CustomRulesViewModel.kt": {
     "mtime": 1779382726.0348458,
@@ -80,19 +55,19 @@
     "semantic_hash": "148b1f2e5daa9b9bfccab4338a47e52b"
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/ui/viewmodel/SettingsViewModel.kt": {
-    "mtime": 1779382726.0351408,
-    "ast_hash": "c59bddf9b9a3b2c765715f0f716fefc0",
-    "semantic_hash": "c59bddf9b9a3b2c765715f0f716fefc0"
+    "mtime": 1779429620.3318694,
+    "ast_hash": "588e683b7c154b7c6ccde8f800db0ef5",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/ui/viewmodel/FirewallViewModel.kt": {
-    "mtime": 1779382726.0350046,
-    "ast_hash": "9e89c63ae79fd03ab5dfcff76d9580df",
-    "semantic_hash": "9e89c63ae79fd03ab5dfcff76d9580df"
+    "mtime": 1779431757.8388562,
+    "ast_hash": "eb165e2d925cb81cb65634c536717881",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/ui/viewmodel/DashboardViewModel.kt": {
-    "mtime": 1779382726.0349298,
-    "ast_hash": "4d8d24ff58b95eddf298ebac2d8377cc",
-    "semantic_hash": "4d8d24ff58b95eddf298ebac2d8377cc"
+    "mtime": 1779429639.446142,
+    "ast_hash": "7b492932ada516920617196184bd1f3e",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/ui/screens/CustomRulesScreen.kt": {
     "mtime": 1779382726.0340545,
@@ -105,14 +80,14 @@
     "semantic_hash": "85e065cc5d79eefbf1cf60af84039c48"
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/ui/screens/SettingsScreen.kt": {
-    "mtime": 1779382726.0344896,
-    "ast_hash": "ce7dc6301363b80dbe4e4b8797666600",
-    "semantic_hash": "ce7dc6301363b80dbe4e4b8797666600"
+    "mtime": 1779430436.3387873,
+    "ast_hash": "cb504829a7b50c5fd3cf859b20270e7e",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/ui/screens/DashboardScreen.kt": {
-    "mtime": 1779382726.0342112,
-    "ast_hash": "97e6044ffd84068bfd82e041f32aab00",
-    "semantic_hash": "97e6044ffd84068bfd82e041f32aab00"
+    "mtime": 1779429639.457693,
+    "ast_hash": "6da0148f50ac087deda772fa9b42c1c9",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/ui/screens/BlocklistScreen.kt": {
     "mtime": 1779382726.0339003,
@@ -154,36 +129,6 @@
     "ast_hash": "74630d69839d84feca97c26f05e53e19",
     "semantic_hash": "74630d69839d84feca97c26f05e53e19"
   },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/vision/LiteRTClassifier.kt": {
-    "mtime": 1779382726.0354595,
-    "ast_hash": "488ee90e97695e5c6de1b4fabd98b121",
-    "semantic_hash": "488ee90e97695e5c6de1b4fabd98b121"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/vision/MediaProjectionCapture.kt": {
-    "mtime": 1779382726.035533,
-    "ast_hash": "d4046bdd50ff2f0094540a925ee69faf",
-    "semantic_hash": "d4046bdd50ff2f0094540a925ee69faf"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/vision/AudioAdDetector.kt": {
-    "mtime": 1779382726.0353808,
-    "ast_hash": "c4c62688ad36bc9697474a792edf9c11",
-    "semantic_hash": "c4c62688ad36bc9697474a792edf9c11"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/vision/AdSkipOrchestrator.kt": {
-    "mtime": 1779382726.0352988,
-    "ast_hash": "bf7323c11a52c09c9de4d908b065c76d",
-    "semantic_hash": "bf7323c11a52c09c9de4d908b065c76d"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/cert/CaCertificateManager.kt": {
-    "mtime": 1779382726.028513,
-    "ast_hash": "642a574fe62c5314b30b8c9c8652f06b",
-    "semantic_hash": "642a574fe62c5314b30b8c9c8652f06b"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/service/ArgusAccessibilityService.kt": {
-    "mtime": 1779382726.0330691,
-    "ast_hash": "73662dbb8bcd21b460cecd0c7cf312a2",
-    "semantic_hash": "73662dbb8bcd21b460cecd0c7cf312a2"
-  },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/service/VpnWatchdogService.kt": {
     "mtime": 1779382726.0334399,
     "ast_hash": "5956aeb7858c8dcb9dd4871d8cbbb16f",
@@ -200,14 +145,9 @@
     "semantic_hash": "75ad2a12daa3f29830ee52166c81cd45"
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/service/NexusVpnService.kt": {
-    "mtime": 1779382726.0332837,
-    "ast_hash": "d28484701e7080faf70bae0e7310254a",
-    "semantic_hash": "d28484701e7080faf70bae0e7310254a"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/jni/Tun2SocksBridge.kt": {
-    "mtime": 1779382726.0326457,
-    "ast_hash": "631184bbe8937f883d639fa62277a589",
-    "semantic_hash": "631184bbe8937f883d639fa62277a589"
+    "mtime": 1779444643.1584668,
+    "ast_hash": "6c09fb1081eb07e195a09016a9c9584a",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/data/repository/CustomRuleRepository.kt": {
     "mtime": 1779382726.0297003,
@@ -225,19 +165,19 @@
     "semantic_hash": "66fd6b7c02791547d70bf8b7303289bf"
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/data/repository/SettingsRepository.kt": {
-    "mtime": 1779382726.0298972,
-    "ast_hash": "8e6ab670b9c197691275c316cef4450b",
-    "semantic_hash": "8e6ab670b9c197691275c316cef4450b"
+    "mtime": 1779429563.3847618,
+    "ast_hash": "285251e7e103e6dcd84646fd47202282",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/data/repository/BlocklistSources.kt": {
-    "mtime": 1779382726.0294728,
-    "ast_hash": "954f22aaf695889e85bb14f6867a032f",
-    "semantic_hash": "954f22aaf695889e85bb14f6867a032f"
+    "mtime": 1779444643.1465316,
+    "ast_hash": "2b92c3b0edff22aae9d7720f23187689",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/data/repository/BuiltInBlockRules.kt": {
-    "mtime": 1779382726.0296183,
-    "ast_hash": "c1b8dc946bf8dc05e0ca10fa2a7ccee6",
-    "semantic_hash": "c1b8dc946bf8dc05e0ca10fa2a7ccee6"
+    "mtime": 1779444643.1453001,
+    "ast_hash": "f2015df56cf1cd808506aa76798b121d",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/data/repository/RawBlocklistLoader.kt": {
     "mtime": 1779382726.0297704,
@@ -290,14 +230,9 @@
     "semantic_hash": "51e7a60b86cd6d2d29a80d7123b0549f"
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/data/worker/BlocklistUpdateWorker.kt": {
-    "mtime": 1779382726.0301034,
-    "ast_hash": "7ca7f8a9c6c848acaeec993202322ee0",
-    "semantic_hash": "7ca7f8a9c6c848acaeec993202322ee0"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/TcpNatRelay.kt": {
-    "mtime": 1779382726.0314674,
-    "ast_hash": "fc3e590d6ac780738595afd70e0cb4b4",
-    "semantic_hash": "fc3e590d6ac780738595afd70e0cb4b4"
+    "mtime": 1779431743.078899,
+    "ast_hash": "1e6e08c75f7cca1a4f250476e2490c7e",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/VpnProtectedSocketFactory.kt": {
     "mtime": 1779382726.031653,
@@ -305,14 +240,9 @@
     "semantic_hash": "fcaec787b01efc1a341b7249e8128e54"
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/DnsUpstreamManager.kt": {
-    "mtime": 1779382726.0308669,
-    "ast_hash": "f2cdcabf18829117a15b97bcffe55c4a",
-    "semantic_hash": "f2cdcabf18829117a15b97bcffe55c4a"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/QuicInspector.kt": {
-    "mtime": 1779382726.0312047,
-    "ast_hash": "ce14498888a72e154f62727503a83ac5",
-    "semantic_hash": "ce14498888a72e154f62727503a83ac5"
+    "mtime": 1779429093.5997238,
+    "ast_hash": "a6cd25c3d2f9a387fdd86aa095a71fff",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/ConnectionTracker.kt": {
     "mtime": 1779382726.0306058,
@@ -320,19 +250,14 @@
     "semantic_hash": "c5b1ccaffcfdcd165eba47fa5928477a"
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/PacketRouter.kt": {
-    "mtime": 1779382726.0310702,
-    "ast_hash": "8812249b030d71262d6e16d708f3eed3",
-    "semantic_hash": "8812249b030d71262d6e16d708f3eed3"
+    "mtime": 1779444643.1667376,
+    "ast_hash": "934deba97779eae151f4d82e6da74304",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/DnsFilterEngine.kt": {
-    "mtime": 1779382726.0307648,
-    "ast_hash": "ac7b8d4ac8697486727957d30792be8c",
-    "semantic_hash": "ac7b8d4ac8697486727957d30792be8c"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/CertificateManager.kt": {
-    "mtime": 1779382726.0304906,
-    "ast_hash": "9168d45942a2350c4648645b27140508",
-    "semantic_hash": "9168d45942a2350c4648645b27140508"
+    "mtime": 1779444643.1452794,
+    "ast_hash": "e39d9a79de6444827bfb85724df23e19",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/VpnProtector.kt": {
     "mtime": 1779382726.031721,
@@ -350,64 +275,9 @@
     "semantic_hash": "5a289b567353776194cffb174783288f"
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/RuleEngine.kt": {
-    "mtime": 1779382726.031343,
-    "ast_hash": "faa196ac1d53c2d831bc4afee65cb7ad",
-    "semantic_hash": "faa196ac1d53c2d831bc4afee65cb7ad"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/UdpRelay.kt": {
-    "mtime": 1779382726.0315843,
-    "ast_hash": "30686a1cddbe0729e624c0b6bf24d302",
-    "semantic_hash": "30686a1cddbe0729e624c0b6bf24d302"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/proxy/ArgusProxyServer.kt": {
-    "mtime": 1779382726.0318608,
-    "ast_hash": "2a487653445907d09277a5f31670bd68",
-    "semantic_hash": "2a487653445907d09277a5f31670bd68"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/proxy/MitmSocketHandler.kt": {
-    "mtime": 1779382726.031999,
-    "ast_hash": "5d7d1d8ce60389aff14a58c0db319daa",
-    "semantic_hash": "5d7d1d8ce60389aff14a58c0db319daa"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/transformers/QuickJsTransformer.kt": {
-    "mtime": 1779382726.0321236,
-    "ast_hash": "e81fef80e7047ae675644f00c287159c",
-    "semantic_hash": "e81fef80e7047ae675644f00c287159c"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/transformers/TransformerEngine.kt": {
-    "mtime": 1779382726.0322049,
-    "ast_hash": "1518abaedbb73222495ade6f5966a5c3",
-    "semantic_hash": "1518abaedbb73222495ade6f5966a5c3"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/transformers/plugins/SpotifyTransformer.kt": {
-    "mtime": 1779382726.032421,
-    "ast_hash": "176c420bc65bf612f31996d537f752a7",
-    "semantic_hash": "176c420bc65bf612f31996d537f752a7"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/transformers/plugins/YoutubeTransformer.kt": {
-    "mtime": 1779382726.0325277,
-    "ast_hash": "7b7bb315201b45d7b5bd6a272dd05719",
-    "semantic_hash": "7b7bb315201b45d7b5bd6a272dd05719"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/transformers/plugins/GenericJsonTransformer.kt": {
-    "mtime": 1779382726.0323324,
-    "ast_hash": "898575d392d69df880260dea247cb6a0",
-    "semantic_hash": "898575d392d69df880260dea247cb6a0"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/router/StrategyRouter.kt": {
-    "mtime": 1779382726.032946,
-    "ast_hash": "64e90f922e7c9c038cf8b597d585c0d3",
-    "semantic_hash": "64e90f922e7c9c038cf8b597d585c0d3"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/router/StrategyMatrix.kt": {
-    "mtime": 1779382726.032868,
-    "ast_hash": "81270f0e0a1a6279483c526cdf1d0053",
-    "semantic_hash": "81270f0e0a1a6279483c526cdf1d0053"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/router/AppProfile.kt": {
-    "mtime": 1779382726.0327573,
-    "ast_hash": "dd79cb5a7c990f9ec3959b545e0f0800",
-    "semantic_hash": "dd79cb5a7c990f9ec3959b545e0f0800"
+    "mtime": 1779444643.1453383,
+    "ast_hash": "c342c00620bbdccacaae1f25537a6958",
+    "semantic_hash": ""
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/assets/transformers/youtube.js": {
     "mtime": 1779382726.028128,
@@ -423,16 +293,6 @@
     "mtime": 1779382726.0279768,
     "ast_hash": "1ffc82046a1db40a1401edbcf4a55868",
     "semantic_hash": "1ffc82046a1db40a1401edbcf4a55868"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/tun2socks/build-android.sh": {
-    "mtime": 1779382726.0405455,
-    "ast_hash": "40edbbbd2c2f006408df8324363c8bd7",
-    "semantic_hash": "40edbbbd2c2f006408df8324363c8bd7"
-  },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/tun2socks/tun2socks.go": {
-    "mtime": 1779382726.04069,
-    "ast_hash": "a8c29e86835fc75fea6e1b6fa663d5cf",
-    "semantic_hash": "a8c29e86835fc75fea6e1b6fa663d5cf"
   },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/ARGUS_REDESIGN.md": {
     "mtime": 1779382725.260363,
@@ -474,14 +334,44 @@
     "ast_hash": "dc4a41116a0955ad90e6761c5578f8cb",
     "semantic_hash": "dc4a41116a0955ad90e6761c5578f8cb"
   },
-  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/tun2socks/README.md": {
-    "mtime": 1779382726.040475,
-    "ast_hash": "222984dc21987482196dda0f62b292de",
-    "semantic_hash": "222984dc21987482196dda0f62b292de"
-  },
   "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/.github/workflows/build.yml": {
-    "mtime": 1779382725.2587879,
-    "ast_hash": "ba542e58d936a910128c355fec42f03a",
-    "semantic_hash": "ba542e58d936a910128c355fec42f03a"
+    "mtime": 1779444643.172722,
+    "ast_hash": "f229a5b3b1556e2f9c919a86da537e09",
+    "semantic_hash": ""
+  },
+  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/.gemini/settings.json": {
+    "mtime": 1779428013.2352397,
+    "ast_hash": "f080aabf772e803c9e24b9ad0acbf2b6",
+    "semantic_hash": ""
+  },
+  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/SniExtractor.kt": {
+    "mtime": 1779444643.1465676,
+    "ast_hash": "c5fb00427d0c9fc276f9b7a4c2d81d6f",
+    "semantic_hash": ""
+  },
+  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/dns/DnsProfileManager.kt": {
+    "mtime": 1779431833.8397388,
+    "ast_hash": "97fabc81c94ae0dbd7e1a67c2eace955",
+    "semantic_hash": ""
+  },
+  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/java/com/nexusblock/engine/dns/DnsProviderProfile.kt": {
+    "mtime": 1779429018.2921047,
+    "ast_hash": "9d29446efe4eb87c9e075a04f8f85285",
+    "semantic_hash": ""
+  },
+  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/.vscode/mcp.json": {
+    "mtime": 1779445240.615801,
+    "ast_hash": "c122a7a8d557adcdd9abdb6deee59bd5",
+    "semantic_hash": ""
+  },
+  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/GEMINI.md": {
+    "mtime": 1779428013.2350557,
+    "ast_hash": "82efb97a359f5c7290bf2513d14686be",
+    "semantic_hash": ""
+  },
+  "/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/.github/copilot-instructions.md": {
+    "mtime": 1779445280.697114,
+    "ast_hash": "e2bc4aa3d584ea3c6121404607b2fac1",
+    "semantic_hash": ""
   }
 }

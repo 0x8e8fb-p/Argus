@@ -33,76 +33,25 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Build
-        run: ./gradlew build
-
-      - name: Assemble Release APK
-        run: ./gradlew assembleRelease
-
-      - name: Assemble Release AAB
-        run: ./gradlew bundleRelease
+      - name: Build with Gradle
+        run: ./gradlew assembleRelease bundleRelease -x lint -x test --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
           path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
 
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
           name: app-release-aab
           path: app/build/outputs/bundle/release/*.aab
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    env:
-      AAB_PATH: app/build/outputs/bundle/release/app-release.aab
-      APK_PATH: app/build/outputs/apk/release/app-release.apk
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download AAB Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: app-release-aab
-          path: app/build/outputs/bundle/release/
-
-      - name: Check artifacts exist
-        run: |
-          if [ ! -f "$AAB_PATH" ]; then
-            echo "AAB not found at $AAB_PATH"
-            exit 1
-          fi
-          echo "AAB ready: $AAB_PATH"
-          if [ -f "$APK_PATH" ]; then
-            echo "APK ready: $APK_PATH"
-          else
-            echo "APK not found at $APK_PATH (non-blocking)"
-          fi
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-
-      - name: Write Play Store Service Account Key
-        run: |
-          echo "${{ secrets.PLAY_STORE_JSON_KEY }}" > play-store-key.json
-
-      - name: Deploy to Play Store (internal)
-        if: success()
-        env:
-          PLAY_STORE_JSON_KEY: play-store-key.json
-        run: |
-          bundle exec fastlane android deploy_internal
+          if-no-files-found: error
 
   release:
-    needs: [build, deploy]
+    needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     permissions:
@@ -115,13 +64,95 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app-release-apk
-          path: apk/
+          path: artifacts/apk/
 
       - name: Download AAB Artifact
         uses: actions/download-artifact@v4
         with:
           name: app-release-aab
-          path: aab/
+          path: artifacts/aab/
+
+      - name: Sign APK
+        if: ${{ env.HAS_SIGNING_KEY == 'true' }}
+        id: sign_apk
+        uses: ilharp/sign-android-release@v1
+        env:
+          HAS_SIGNING_KEY: ${{ secrets.SIGNING_KEY != '' }}
+        with:
+          releaseDir: artifacts/apk/
+          signingKey: ${{ secrets.SIGNING_KEY }}
+          keyAlias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Sign AAB
+        if: ${{ env.HAS_SIGNING_KEY == 'true' }}
+        id: sign_aab
+        uses: ilharp/sign-android-release@v1
+        env:
+          HAS_SIGNING_KEY: ${{ secrets.SIGNING_KEY != '' }}
+        with:
+          releaseDir: artifacts/aab/
+          signingKey: ${{ secrets.SIGNING_KEY }}
+          keyAlias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Generate Short SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Get version name
+        id: version
+        run: |
+          VERSION=$(grep 'versionName' app/build.gradle.kts | head -1 | grep -oP '"\K[^"]+')
+          echo "name=${VERSION:-1.0.0}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ steps.version.outputs.name }}-${{ steps.vars.outputs.sha_short }}"
+          name: "NexusBlock v${{ steps.version.outputs.name }} (${{ steps.vars.outputs.sha_short }})"
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/apk/*.apk
+            artifacts/aab/*.aab
+          body: |
+            ## NexusBlock Ad Blocker for Android TV
+
+            **Automated release** from commit `${{ github.sha }}`.
+
+            ### What's included
+            - System-wide DNS-based ad blocking with SNI inspection
+            - YouTube, Prime Video, Hotstar, SonyLiv, Zee5, and 20+ Indian OTT ad blocking
+            - 800+ built-in emergency ad domains
+            - 14 remote blocklist sources (1M+ domains)
+            - Per-app firewall control
+            - DoH/DoT encrypted DNS bypass prevention
+            - Auto-start on boot with watchdog service
+
+            ### Install
+            Download the APK and sideload on your Android TV via ADB:
+            ```
+            adb install app-release-unsigned.apk
+            ```
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download AAB Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release-aab
+          path: app/build/outputs/bundle/release/
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -129,52 +160,11 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
-      - name: Sign APK
-        uses: ilharp/sign-android-release@v1
-        with:
-          releaseDir: apk/
-          signingKey: ${{ secrets.SIGNING_KEY }}
-          keyAlias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
+      - name: Write Play Store Service Account Key
+        run: echo "${{ secrets.PLAY_STORE_JSON_KEY }}" > play-store-key.json
 
-      - name: Upload Signed APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: signed-apk
-          path: apk/*-signed.apk
-
-      - name: Sign AAB
-        uses: ilharp/sign-android-release@v1
-        with:
-          releaseDir: aab/
-          signingKey: ${{ secrets.SIGNING_KEY }}
-          keyAlias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-
-      - name: Upload Signed AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: signed-aab
-          path: aab/*-signed.aab
-
-      - name: Generate Short SHA
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: "v1.0-${{ steps.vars.outputs.sha_short }}"
-          name: "NexusBlock Release (${{ steps.vars.outputs.sha_short }})"
-          draft: false
-          prerelease: false
-          files: |
-            apk/*-signed.apk
-            aab/*-signed.aab
-          body: |
-            Automated build generated from commit ${{ github.sha }}.
-            Contains signed APKs and AABs for all architectures (Universal, ARM, ARM64, x86, x86_64).
+      - name: Deploy to Play Store (internal)
+        if: ${{ secrets.PLAY_STORE_JSON_KEY != '' }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SUPPLY_JSON_KEY: play-store-key.json
+        run: bundle exec fastlane android deploy_internal

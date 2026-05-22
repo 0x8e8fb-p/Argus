@@ -188,36 +188,82 @@ class RuleEngine {
     }
 
     /**
-     * Check if a googlevideo.com hostname matches known ad-serving patterns.
-     * YouTube uses specific subdomain patterns for ad video servers.
-     * This is imperfect but catches a significant percentage of ad video CDN hostnames.
+     * Check if a hostname matches known ad-serving CDN patterns.
+     * Covers googlevideo.com (YouTube), aiv-cdn.net (Amazon Prime), and
+     * akamaized.net (Hotstar/OTT) ad delivery domains.
      */
     fun isAdVideoServer(hostname: String): Boolean {
         val lower = hostname.lowercase()
-        if (!lower.endsWith("googlevideo.com")) return false
-        // Known ad-serving patterns in googlevideo.com subdomains.
-        // These are imperfect heuristics based on observed YouTube ad CDN
-        // hostnames. Content hostnames occasionally collide, but the
-        // intersection is small enough that the noise is acceptable.
-        return lower.contains("-ad-") ||
-               lower.contains("-ads-") ||
-               lower.contains("-oad-") ||
-               lower.startsWith("redirector.") ||
-               lower.contains("---ad") ||
-               lower.contains("_ad_") ||
-               lower.contains(".ad.") ||
-               lower.startsWith("ad-") ||
-               lower.startsWith("ads.") ||
-               lower.startsWith("pagead.") ||
-               lower.contains("googleads") ||
-               lower.contains("doubleclick") ||
-               // Known high-certainty ad-serving replica patterns
-               // (observed primarily on ad-initiated googlevideo streams)
-               lower.contains("-sn-4g5edn7y.") ||
-               lower.contains("-sn-ni5eln7l.") ||
-               lower.contains("-sn-5hnedn7l.") ||
-               lower.contains("-sn-a5meknzk.") ||
-               lower.contains("-sn-5ualdn7y.")
+
+        // YouTube ad CDN patterns on googlevideo.com
+        if (lower.endsWith("googlevideo.com")) {
+            return lower.contains("-ad-") ||
+                   lower.contains("-ads-") ||
+                   lower.contains("-oad-") ||
+                   lower.startsWith("redirector.") ||
+                   lower.startsWith("redirects.") ||
+                   lower.contains("---ad") ||
+                   lower.contains("_ad_") ||
+                   lower.contains(".ad.") ||
+                   lower.startsWith("ad-") ||
+                   lower.startsWith("ads.") ||
+                   lower.startsWith("pagead.") ||
+                   lower.contains("googleads") ||
+                   lower.contains("doubleclick") ||
+                   lower.contains("-ptracking") ||
+                   lower.contains("-initplayback") ||
+                   // Regex-like patterns for known ad CDN node identifiers
+                   lower.contains("-sn-4g5edn7y.") ||
+                   lower.contains("-sn-ni5eln7l.") ||
+                   lower.contains("-sn-5hnedn7l.") ||
+                   lower.contains("-sn-a5meknzk.") ||
+                   lower.contains("-sn-5ualdn7y.") ||
+                   lower.contains("-sn-4g5ednsy.") ||
+                   lower.contains("-sn-4g5ednsz.") ||
+                   lower.contains("-sn-4g5ednsk.") ||
+                   lower.contains("-sn-4g5ednsl.") ||
+                   lower.contains("-sn-4g5edns7.") ||
+                   lower.contains("-sn-4g5ednse.") ||
+                   lower.contains("-sn-4g5ednsd.") ||
+                   lower.contains("-sn-a5mekn7k.") ||
+                   lower.contains("-sn-a5mekn7l.") ||
+                   lower.contains("-sn-a5mekn7z.") ||
+                   lower.contains("-sn-a5mekney.") ||
+                   lower.contains("-sn-a5meknez.") ||
+                   // Ad payload marker patterns in URL-encoded paths
+                   lower.contains("ctier=l") ||
+                   lower.contains("oad=") ||
+                   lower.contains("atr=") ||
+                   lower.contains("dclk_video_ads")
+        }
+
+        // Amazon Prime Video ad rolls CDN
+        if (lower.endsWith("aiv-cdn.net")) {
+            return lower.contains("videorolls") ||
+                   lower.contains("interstitial") ||
+                   lower.contains("ad-creative")
+        }
+
+        // Akamai CDN ad-serving subdomains
+        if (lower.endsWith("akamaized.net")) {
+            return lower.startsWith("ads") ||
+                   lower.startsWith("hotstarads") ||
+                   lower.startsWith("hesads") ||
+                   lower.startsWith("jiocinema-ad") ||
+                   lower.startsWith("jiocinema-ads") ||
+                   lower.startsWith("jioads") ||
+                   lower.startsWith("sonyliv-ads") ||
+                   lower.startsWith("zee5ads") ||
+                   lower.startsWith("zee5-ads") ||
+                   lower.startsWith("vootads") ||
+                   lower.startsWith("adserver") ||
+                   lower.startsWith("speee-ad") ||
+                   lower.startsWith("freewheel") ||
+                   lower.startsWith("inmobisdk") ||
+                   lower.startsWith("113vod-adaptive")
+        }
+
+        return false
     }
 
     @Synchronized
@@ -236,6 +282,8 @@ class RuleEngine {
         cidrBlocks.clear()
         bloomFilter.clear()
     }
+
+    fun ruleCount(): Int = exactBlocks.size + blockTrie.size() + prefixBlocks.size + suffixBlocks.size + blockRegexes.size + exactIpBlocks.size + cidrBlocks.size
 
     private fun addHostRule(host: String, isAllow: Boolean, isSubdomain: Boolean = false) {
         val normalized = host.lowercase().trimEnd('.')

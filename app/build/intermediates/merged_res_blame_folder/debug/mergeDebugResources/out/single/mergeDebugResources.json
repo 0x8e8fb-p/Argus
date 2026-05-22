@@ -72,10 +72,6 @@
         "source": "com.nexusblock.app-main-56:/drawable/ic_vpn_key.xml"
     },
     {
-        "merged": "com.nexusblock.app-debug-54:/xml_accessibility_service_config.xml.flat",
-        "source": "com.nexusblock.app-main-56:/xml/accessibility_service_config.xml"
-    },
-    {
         "merged": "com.nexusblock.app-debug-54:/mipmap-anydpi_ic_launcher.xml.flat",
         "source": "com.nexusblock.app-main-56:/mipmap-anydpi/ic_launcher.xml"
     },

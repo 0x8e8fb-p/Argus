@@ -15,9 +15,6 @@ import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 import androidx.work.ListenableWorker;
 import androidx.work.WorkerParameters;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.nexusblock.data.db.AppDatabase;
 import com.nexusblock.data.db.BlockedDomainDao;
 import com.nexusblock.data.db.BlockedEventDao;
@@ -35,17 +32,10 @@ import com.nexusblock.di.DatabaseModule_ProvideBlockedDomainDaoFactory;
 import com.nexusblock.di.DatabaseModule_ProvideBlockedEventDaoFactory;
 import com.nexusblock.di.DatabaseModule_ProvideCustomRuleDaoFactory;
 import com.nexusblock.di.DatabaseModule_ProvideDatabaseFactory;
-import com.nexusblock.engine.CertificateManager;
 import com.nexusblock.engine.ConnectionTracker;
 import com.nexusblock.engine.DnsFilterEngine;
 import com.nexusblock.engine.PacketRouter;
-import com.nexusblock.engine.proxy.ArgusProxyServer;
-import com.nexusblock.engine.transformers.QuickJsTransformer;
-import com.nexusblock.engine.transformers.TransformerEngine;
-import com.nexusblock.router.StrategyMatrix;
-import com.nexusblock.router.StrategyRouter;
-import com.nexusblock.service.ArgusAccessibilityService;
-import com.nexusblock.service.ArgusAccessibilityService_MembersInjector;
+import com.nexusblock.engine.dns.DnsProfileManager;
 import com.nexusblock.service.BootReceiver;
 import com.nexusblock.service.BootReceiver_MembersInjector;
 import com.nexusblock.service.NexusVpnService;
@@ -66,7 +56,6 @@ import com.nexusblock.ui.viewmodel.LogsViewModel;
 import com.nexusblock.ui.viewmodel.LogsViewModel_HiltModules;
 import com.nexusblock.ui.viewmodel.SettingsViewModel;
 import com.nexusblock.ui.viewmodel.SettingsViewModel_HiltModules;
-import com.nexusblock.vision.LiteRTClassifier;
 import dagger.hilt.android.ActivityRetainedLifecycle;
 import dagger.hilt.android.ViewModelLifecycle;
 import dagger.hilt.android.internal.builders.ActivityComponentBuilder;
@@ -88,9 +77,11 @@ import dagger.internal.DoubleCheck;
 import dagger.internal.IdentifierNameString;
 import dagger.internal.KeepFieldType;
 import dagger.internal.LazyClassKeyMap;
+import dagger.internal.MapBuilder;
 import dagger.internal.Preconditions;
 import dagger.internal.Provider;
 import dagger.internal.SingleCheck;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.processing.Generated;
@@ -430,7 +421,7 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
 
     @Override
     public Map<Class<?>, Boolean> getViewModelKeys() {
-      return LazyClassKeyMap.<Boolean>of(ImmutableMap.<String, Boolean>builderWithExpectedSize(6).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_BlocklistViewModel, BlocklistViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_CustomRulesViewModel, CustomRulesViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_DashboardViewModel, DashboardViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_FirewallViewModel, FirewallViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_LogsViewModel, LogsViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_SettingsViewModel, SettingsViewModel_HiltModules.KeyModule.provide()).build());
+      return LazyClassKeyMap.<Boolean>of(MapBuilder.<String, Boolean>newMapBuilder(6).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_BlocklistViewModel, BlocklistViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_CustomRulesViewModel, CustomRulesViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_DashboardViewModel, DashboardViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_FirewallViewModel, FirewallViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_LogsViewModel, LogsViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_SettingsViewModel, SettingsViewModel_HiltModules.KeyModule.provide()).build());
     }
 
     @Override
@@ -448,7 +439,6 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
       return new ViewCBuilder(singletonCImpl, activityRetainedCImpl, activityCImpl);
     }
 
-    @CanIgnoreReturnValue
     private MainActivity injectMainActivity2(MainActivity instance) {
       MainActivity_MembersInjector.injectSettingsRepo(instance, singletonCImpl.settingsRepositoryProvider.get());
       return instance;
@@ -456,35 +446,35 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_nexusblock_ui_viewmodel_SettingsViewModel = "com.nexusblock.ui.viewmodel.SettingsViewModel";
-
-      static String com_nexusblock_ui_viewmodel_FirewallViewModel = "com.nexusblock.ui.viewmodel.FirewallViewModel";
+      static String com_nexusblock_ui_viewmodel_CustomRulesViewModel = "com.nexusblock.ui.viewmodel.CustomRulesViewModel";
 
       static String com_nexusblock_ui_viewmodel_LogsViewModel = "com.nexusblock.ui.viewmodel.LogsViewModel";
 
-      static String com_nexusblock_ui_viewmodel_BlocklistViewModel = "com.nexusblock.ui.viewmodel.BlocklistViewModel";
-
-      static String com_nexusblock_ui_viewmodel_CustomRulesViewModel = "com.nexusblock.ui.viewmodel.CustomRulesViewModel";
+      static String com_nexusblock_ui_viewmodel_FirewallViewModel = "com.nexusblock.ui.viewmodel.FirewallViewModel";
 
       static String com_nexusblock_ui_viewmodel_DashboardViewModel = "com.nexusblock.ui.viewmodel.DashboardViewModel";
 
-      @KeepFieldType
-      SettingsViewModel com_nexusblock_ui_viewmodel_SettingsViewModel2;
+      static String com_nexusblock_ui_viewmodel_SettingsViewModel = "com.nexusblock.ui.viewmodel.SettingsViewModel";
 
-      @KeepFieldType
-      FirewallViewModel com_nexusblock_ui_viewmodel_FirewallViewModel2;
-
-      @KeepFieldType
-      LogsViewModel com_nexusblock_ui_viewmodel_LogsViewModel2;
-
-      @KeepFieldType
-      BlocklistViewModel com_nexusblock_ui_viewmodel_BlocklistViewModel2;
+      static String com_nexusblock_ui_viewmodel_BlocklistViewModel = "com.nexusblock.ui.viewmodel.BlocklistViewModel";
 
       @KeepFieldType
       CustomRulesViewModel com_nexusblock_ui_viewmodel_CustomRulesViewModel2;
 
       @KeepFieldType
+      LogsViewModel com_nexusblock_ui_viewmodel_LogsViewModel2;
+
+      @KeepFieldType
+      FirewallViewModel com_nexusblock_ui_viewmodel_FirewallViewModel2;
+
+      @KeepFieldType
       DashboardViewModel com_nexusblock_ui_viewmodel_DashboardViewModel2;
+
+      @KeepFieldType
+      SettingsViewModel com_nexusblock_ui_viewmodel_SettingsViewModel2;
+
+      @KeepFieldType
+      BlocklistViewModel com_nexusblock_ui_viewmodel_BlocklistViewModel2;
     }
   }
 
@@ -530,42 +520,42 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
 
     @Override
     public Map<Class<?>, javax.inject.Provider<ViewModel>> getHiltViewModelMap() {
-      return LazyClassKeyMap.<javax.inject.Provider<ViewModel>>of(ImmutableMap.<String, javax.inject.Provider<ViewModel>>builderWithExpectedSize(6).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_BlocklistViewModel, ((Provider) blocklistViewModelProvider)).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_CustomRulesViewModel, ((Provider) customRulesViewModelProvider)).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_DashboardViewModel, ((Provider) dashboardViewModelProvider)).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_FirewallViewModel, ((Provider) firewallViewModelProvider)).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_LogsViewModel, ((Provider) logsViewModelProvider)).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_SettingsViewModel, ((Provider) settingsViewModelProvider)).build());
+      return LazyClassKeyMap.<javax.inject.Provider<ViewModel>>of(MapBuilder.<String, javax.inject.Provider<ViewModel>>newMapBuilder(6).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_BlocklistViewModel, ((Provider) blocklistViewModelProvider)).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_CustomRulesViewModel, ((Provider) customRulesViewModelProvider)).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_DashboardViewModel, ((Provider) dashboardViewModelProvider)).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_FirewallViewModel, ((Provider) firewallViewModelProvider)).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_LogsViewModel, ((Provider) logsViewModelProvider)).put(LazyClassKeyProvider.com_nexusblock_ui_viewmodel_SettingsViewModel, ((Provider) settingsViewModelProvider)).build());
     }
 
     @Override
     public Map<Class<?>, Object> getHiltViewModelAssistedMap() {
-      return ImmutableMap.<Class<?>, Object>of();
+      return Collections.<Class<?>, Object>emptyMap();
     }
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_nexusblock_ui_viewmodel_BlocklistViewModel = "com.nexusblock.ui.viewmodel.BlocklistViewModel";
-
-      static String com_nexusblock_ui_viewmodel_DashboardViewModel = "com.nexusblock.ui.viewmodel.DashboardViewModel";
+      static String com_nexusblock_ui_viewmodel_SettingsViewModel = "com.nexusblock.ui.viewmodel.SettingsViewModel";
 
       static String com_nexusblock_ui_viewmodel_FirewallViewModel = "com.nexusblock.ui.viewmodel.FirewallViewModel";
 
-      static String com_nexusblock_ui_viewmodel_SettingsViewModel = "com.nexusblock.ui.viewmodel.SettingsViewModel";
+      static String com_nexusblock_ui_viewmodel_BlocklistViewModel = "com.nexusblock.ui.viewmodel.BlocklistViewModel";
 
       static String com_nexusblock_ui_viewmodel_CustomRulesViewModel = "com.nexusblock.ui.viewmodel.CustomRulesViewModel";
 
+      static String com_nexusblock_ui_viewmodel_DashboardViewModel = "com.nexusblock.ui.viewmodel.DashboardViewModel";
+
       static String com_nexusblock_ui_viewmodel_LogsViewModel = "com.nexusblock.ui.viewmodel.LogsViewModel";
-
-      @KeepFieldType
-      BlocklistViewModel com_nexusblock_ui_viewmodel_BlocklistViewModel2;
-
-      @KeepFieldType
-      DashboardViewModel com_nexusblock_ui_viewmodel_DashboardViewModel2;
-
-      @KeepFieldType
-      FirewallViewModel com_nexusblock_ui_viewmodel_FirewallViewModel2;
 
       @KeepFieldType
       SettingsViewModel com_nexusblock_ui_viewmodel_SettingsViewModel2;
 
       @KeepFieldType
+      FirewallViewModel com_nexusblock_ui_viewmodel_FirewallViewModel2;
+
+      @KeepFieldType
+      BlocklistViewModel com_nexusblock_ui_viewmodel_BlocklistViewModel2;
+
+      @KeepFieldType
       CustomRulesViewModel com_nexusblock_ui_viewmodel_CustomRulesViewModel2;
+
+      @KeepFieldType
+      DashboardViewModel com_nexusblock_ui_viewmodel_DashboardViewModel2;
 
       @KeepFieldType
       LogsViewModel com_nexusblock_ui_viewmodel_LogsViewModel2;
@@ -608,7 +598,7 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
           return (T) new LogsViewModel(singletonCImpl.statsRepositoryProvider.get());
 
           case 5: // com.nexusblock.ui.viewmodel.SettingsViewModel 
-          return (T) new SettingsViewModel(ApplicationContextModule_ProvideApplicationFactory.provideApplication(singletonCImpl.applicationContextModule), singletonCImpl.settingsRepositoryProvider.get(), singletonCImpl.certificateManagerProvider.get());
+          return (T) new SettingsViewModel(ApplicationContextModule_ProvideApplicationFactory.provideApplication(singletonCImpl.applicationContextModule), singletonCImpl.settingsRepositoryProvider.get());
 
           default: throw new AssertionError(id);
         }
@@ -685,12 +675,6 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
     }
 
     @Override
-    public void injectArgusAccessibilityService(
-        ArgusAccessibilityService argusAccessibilityService) {
-      injectArgusAccessibilityService2(argusAccessibilityService);
-    }
-
-    @Override
     public void injectNexusVpnService(NexusVpnService nexusVpnService) {
       injectNexusVpnService2(nexusVpnService);
     }
@@ -700,27 +684,16 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
       injectVpnWatchdogService2(vpnWatchdogService);
     }
 
-    @CanIgnoreReturnValue
-    private ArgusAccessibilityService injectArgusAccessibilityService2(
-        ArgusAccessibilityService instance) {
-      ArgusAccessibilityService_MembersInjector.injectStrategyRouter(instance, singletonCImpl.strategyRouterProvider.get());
-      ArgusAccessibilityService_MembersInjector.injectLiteRTClassifier(instance, singletonCImpl.liteRTClassifierProvider.get());
+    private NexusVpnService injectNexusVpnService2(NexusVpnService instance) {
+      NexusVpnService_MembersInjector.injectPacketRouter(instance, singletonCImpl.packetRouterProvider.get());
+      NexusVpnService_MembersInjector.injectDnsEngine(instance, singletonCImpl.dnsFilterEngineProvider.get());
+      NexusVpnService_MembersInjector.injectSettingsRepo(instance, singletonCImpl.settingsRepositoryProvider.get());
       return instance;
     }
 
-    @CanIgnoreReturnValue
-    private NexusVpnService injectNexusVpnService2(NexusVpnService instance2) {
-      NexusVpnService_MembersInjector.injectPacketRouter(instance2, singletonCImpl.packetRouterProvider.get());
-      NexusVpnService_MembersInjector.injectDnsEngine(instance2, singletonCImpl.dnsFilterEngineProvider.get());
-      NexusVpnService_MembersInjector.injectProxyServer(instance2, singletonCImpl.argusProxyServerProvider.get());
-      NexusVpnService_MembersInjector.injectSettingsRepo(instance2, singletonCImpl.settingsRepositoryProvider.get());
+    private VpnWatchdogService injectVpnWatchdogService2(VpnWatchdogService instance2) {
+      VpnWatchdogService_MembersInjector.injectSettingsRepo(instance2, singletonCImpl.settingsRepositoryProvider.get());
       return instance2;
-    }
-
-    @CanIgnoreReturnValue
-    private VpnWatchdogService injectVpnWatchdogService2(VpnWatchdogService instance3) {
-      VpnWatchdogService_MembersInjector.injectSettingsRepo(instance3, singletonCImpl.settingsRepositoryProvider.get());
-      return instance3;
     }
   }
 
@@ -735,15 +708,17 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
 
     private Provider<StatsRepository> statsRepositoryProvider;
 
-    private Provider<OkHttpClient> provideOkHttpClientProvider;
-
-    private Provider<ConnectionTracker> connectionTrackerProvider;
-
     private Provider<DataStore<Preferences>> provideDataStoreProvider;
 
     private Provider<SharedPreferences> provideSharedPreferencesProvider;
 
     private Provider<SettingsRepository> settingsRepositoryProvider;
+
+    private Provider<OkHttpClient> provideOkHttpClientProvider;
+
+    private Provider<DnsProfileManager> dnsProfileManagerProvider;
+
+    private Provider<ConnectionTracker> connectionTrackerProvider;
 
     private Provider<DnsFilterEngine> dnsFilterEngineProvider;
 
@@ -752,20 +727,6 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
     private Provider<CustomRuleRepository> customRuleRepositoryProvider;
 
     private Provider<PacketRouter> packetRouterProvider;
-
-    private Provider<CertificateManager> certificateManagerProvider;
-
-    private Provider<StrategyMatrix> strategyMatrixProvider;
-
-    private Provider<StrategyRouter> strategyRouterProvider;
-
-    private Provider<LiteRTClassifier> liteRTClassifierProvider;
-
-    private Provider<QuickJsTransformer> quickJsTransformerProvider;
-
-    private Provider<TransformerEngine> transformerEngineProvider;
-
-    private Provider<ArgusProxyServer> argusProxyServerProvider;
 
     private SingletonCImpl(ApplicationContextModule applicationContextModuleParam) {
       this.applicationContextModule = applicationContextModuleParam;
@@ -787,7 +748,7 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
 
     private Map<String, javax.inject.Provider<WorkerAssistedFactory<? extends ListenableWorker>>> mapOfStringAndProviderOfWorkerAssistedFactoryOf(
         ) {
-      return ImmutableMap.<String, javax.inject.Provider<WorkerAssistedFactory<? extends ListenableWorker>>>of("com.nexusblock.data.worker.BlocklistUpdateWorker", ((Provider) blocklistUpdateWorker_AssistedFactoryProvider));
+      return Collections.<String, javax.inject.Provider<WorkerAssistedFactory<? extends ListenableWorker>>>singletonMap("com.nexusblock.data.worker.BlocklistUpdateWorker", ((Provider) blocklistUpdateWorker_AssistedFactoryProvider));
     }
 
     private HiltWorkerFactory hiltWorkerFactory() {
@@ -799,22 +760,16 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
       this.provideDatabaseProvider = DoubleCheck.provider(new SwitchingProvider<AppDatabase>(singletonCImpl, 2));
       this.blocklistRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<BlocklistRepository>(singletonCImpl, 1));
       this.statsRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<StatsRepository>(singletonCImpl, 4));
-      this.provideOkHttpClientProvider = DoubleCheck.provider(new SwitchingProvider<OkHttpClient>(singletonCImpl, 5));
-      this.connectionTrackerProvider = DoubleCheck.provider(new SwitchingProvider<ConnectionTracker>(singletonCImpl, 6));
-      this.provideDataStoreProvider = DoubleCheck.provider(new SwitchingProvider<DataStore<Preferences>>(singletonCImpl, 8));
-      this.provideSharedPreferencesProvider = DoubleCheck.provider(new SwitchingProvider<SharedPreferences>(singletonCImpl, 9));
-      this.settingsRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<SettingsRepository>(singletonCImpl, 7));
+      this.provideDataStoreProvider = DoubleCheck.provider(new SwitchingProvider<DataStore<Preferences>>(singletonCImpl, 6));
+      this.provideSharedPreferencesProvider = DoubleCheck.provider(new SwitchingProvider<SharedPreferences>(singletonCImpl, 7));
+      this.settingsRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<SettingsRepository>(singletonCImpl, 5));
+      this.provideOkHttpClientProvider = DoubleCheck.provider(new SwitchingProvider<OkHttpClient>(singletonCImpl, 9));
+      this.dnsProfileManagerProvider = DoubleCheck.provider(new SwitchingProvider<DnsProfileManager>(singletonCImpl, 8));
+      this.connectionTrackerProvider = DoubleCheck.provider(new SwitchingProvider<ConnectionTracker>(singletonCImpl, 10));
       this.dnsFilterEngineProvider = DoubleCheck.provider(new SwitchingProvider<DnsFilterEngine>(singletonCImpl, 3));
       this.blocklistUpdateWorker_AssistedFactoryProvider = SingleCheck.provider(new SwitchingProvider<BlocklistUpdateWorker_AssistedFactory>(singletonCImpl, 0));
-      this.customRuleRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<CustomRuleRepository>(singletonCImpl, 10));
-      this.packetRouterProvider = DoubleCheck.provider(new SwitchingProvider<PacketRouter>(singletonCImpl, 11));
-      this.certificateManagerProvider = DoubleCheck.provider(new SwitchingProvider<CertificateManager>(singletonCImpl, 12));
-      this.strategyMatrixProvider = DoubleCheck.provider(new SwitchingProvider<StrategyMatrix>(singletonCImpl, 14));
-      this.strategyRouterProvider = DoubleCheck.provider(new SwitchingProvider<StrategyRouter>(singletonCImpl, 13));
-      this.liteRTClassifierProvider = DoubleCheck.provider(new SwitchingProvider<LiteRTClassifier>(singletonCImpl, 15));
-      this.quickJsTransformerProvider = DoubleCheck.provider(new SwitchingProvider<QuickJsTransformer>(singletonCImpl, 18));
-      this.transformerEngineProvider = DoubleCheck.provider(new SwitchingProvider<TransformerEngine>(singletonCImpl, 17));
-      this.argusProxyServerProvider = DoubleCheck.provider(new SwitchingProvider<ArgusProxyServer>(singletonCImpl, 16));
+      this.customRuleRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<CustomRuleRepository>(singletonCImpl, 11));
+      this.packetRouterProvider = DoubleCheck.provider(new SwitchingProvider<PacketRouter>(singletonCImpl, 12));
     }
 
     @Override
@@ -829,7 +784,7 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
 
     @Override
     public Set<Boolean> getDisableFragmentGetContextFix() {
-      return ImmutableSet.<Boolean>of();
+      return Collections.<Boolean>emptySet();
     }
 
     @Override
@@ -842,14 +797,11 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
       return new ServiceCBuilder(singletonCImpl);
     }
 
-    @CanIgnoreReturnValue
     private NexusBlockApplication injectNexusBlockApplication2(NexusBlockApplication instance) {
       NexusBlockApplication_MembersInjector.injectWorkerFactory(instance, hiltWorkerFactory());
-      NexusBlockApplication_MembersInjector.injectOnCreate(instance);
       return instance;
     }
 
-    @CanIgnoreReturnValue
     private BootReceiver injectBootReceiver2(BootReceiver instance2) {
       BootReceiver_MembersInjector.injectSettingsRepo(instance2, settingsRepositoryProvider.get());
       return instance2;
@@ -884,52 +836,34 @@ public final class DaggerNexusBlockApplication_HiltComponents_SingletonC {
           return (T) DatabaseModule_ProvideDatabaseFactory.provideDatabase(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           case 3: // com.nexusblock.engine.DnsFilterEngine 
-          return (T) new DnsFilterEngine(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.blocklistRepositoryProvider.get(), singletonCImpl.statsRepositoryProvider.get(), singletonCImpl.customRuleDao(), singletonCImpl.provideOkHttpClientProvider.get(), singletonCImpl.connectionTrackerProvider.get(), singletonCImpl.settingsRepositoryProvider.get());
+          return (T) new DnsFilterEngine(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.statsRepositoryProvider.get(), singletonCImpl.customRuleDao(), singletonCImpl.blocklistRepositoryProvider.get(), singletonCImpl.settingsRepositoryProvider.get(), singletonCImpl.dnsProfileManagerProvider.get(), singletonCImpl.provideOkHttpClientProvider.get(), singletonCImpl.connectionTrackerProvider.get());
 
           case 4: // com.nexusblock.data.repository.StatsRepository 
           return (T) new StatsRepository(singletonCImpl.blockedEventDao());
 
-          case 5: // okhttp3.OkHttpClient 
-          return (T) AppModule_ProvideOkHttpClientFactory.provideOkHttpClient();
-
-          case 6: // com.nexusblock.engine.ConnectionTracker 
-          return (T) new ConnectionTracker(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
-
-          case 7: // com.nexusblock.data.repository.SettingsRepository 
+          case 5: // com.nexusblock.data.repository.SettingsRepository 
           return (T) new SettingsRepository(singletonCImpl.provideDataStoreProvider.get(), singletonCImpl.provideSharedPreferencesProvider.get());
 
-          case 8: // androidx.datastore.core.DataStore<androidx.datastore.preferences.core.Preferences> 
+          case 6: // androidx.datastore.core.DataStore<androidx.datastore.preferences.core.Preferences> 
           return (T) AppModule_ProvideDataStoreFactory.provideDataStore(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
-          case 9: // android.content.SharedPreferences 
+          case 7: // android.content.SharedPreferences 
           return (T) AppModule_ProvideSharedPreferencesFactory.provideSharedPreferences(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
-          case 10: // com.nexusblock.data.repository.CustomRuleRepository 
+          case 8: // com.nexusblock.engine.dns.DnsProfileManager 
+          return (T) new DnsProfileManager(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.provideDataStoreProvider.get(), singletonCImpl.settingsRepositoryProvider.get(), singletonCImpl.provideOkHttpClientProvider.get());
+
+          case 9: // okhttp3.OkHttpClient 
+          return (T) AppModule_ProvideOkHttpClientFactory.provideOkHttpClient();
+
+          case 10: // com.nexusblock.engine.ConnectionTracker 
+          return (T) new ConnectionTracker(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 11: // com.nexusblock.data.repository.CustomRuleRepository 
           return (T) new CustomRuleRepository(singletonCImpl.customRuleDao());
 
-          case 11: // com.nexusblock.engine.PacketRouter 
-          return (T) new PacketRouter(singletonCImpl.dnsFilterEngineProvider.get(), singletonCImpl.statsRepositoryProvider.get(), singletonCImpl.connectionTrackerProvider.get(), singletonCImpl.settingsRepositoryProvider.get());
-
-          case 12: // com.nexusblock.engine.CertificateManager 
-          return (T) new CertificateManager(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.settingsRepositoryProvider.get());
-
-          case 13: // com.nexusblock.router.StrategyRouter 
-          return (T) new StrategyRouter(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.strategyMatrixProvider.get());
-
-          case 14: // com.nexusblock.router.StrategyMatrix 
-          return (T) new StrategyMatrix();
-
-          case 15: // com.nexusblock.vision.LiteRTClassifier 
-          return (T) new LiteRTClassifier(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
-
-          case 16: // com.nexusblock.engine.proxy.ArgusProxyServer 
-          return (T) new ArgusProxyServer(singletonCImpl.certificateManagerProvider.get(), singletonCImpl.transformerEngineProvider.get(), singletonCImpl.strategyRouterProvider.get());
-
-          case 17: // com.nexusblock.engine.transformers.TransformerEngine 
-          return (T) new TransformerEngine(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.quickJsTransformerProvider.get());
-
-          case 18: // com.nexusblock.engine.transformers.QuickJsTransformer 
-          return (T) new QuickJsTransformer(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.settingsRepositoryProvider.get());
+          case 12: // com.nexusblock.engine.PacketRouter 
+          return (T) new PacketRouter(singletonCImpl.dnsFilterEngineProvider.get(), singletonCImpl.statsRepositoryProvider.get(), singletonCImpl.settingsRepositoryProvider.get());
 
           default: throw new AssertionError(id);
         }

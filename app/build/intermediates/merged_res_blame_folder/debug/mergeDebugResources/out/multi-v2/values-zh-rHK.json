@@ -4,7 +4,7 @@
             "outputFile": "com.nexusblock.app-mergeDebugResources-52:/values-zh-rHK/values-zh-rHK.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Prabha\\.gradle\\caches\\9.5.1\\transforms\\4b6f2fe17b28d5ccbc4418e084e9ce74\\transformed\\ui\\res\\values-zh-rHK\\values-zh-rHK.xml",
+                    "source": "/Users/prabha/.gradle/caches/9.5.1/transforms/4b6f2fe17b28d5ccbc4418e084e9ce74/transformed/ui/res/values-zh-rHK/values-zh-rHK.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -21,24 +21,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\Prabha\\.gradle\\caches\\9.5.1\\transforms\\f838a2d59193160cbeaa30d02f789fc7\\transformed\\foundation\\res\\values-zh-rHK\\values-zh-rHK.xml",
-                    "from": {
-                        "startLines": "2,3,4",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "55,155,236",
-                        "endColumns": "99,80,76",
-                        "endOffsets": "150,231,308"
-                    },
-                    "to": {
-                        "startLines": "2,97,98",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "105,8911,8992",
-                        "endColumns": "99,80,76",
-                        "endOffsets": "200,8987,9064"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\Prabha\\.gradle\\caches\\9.5.1\\transforms\\32eed959d002fa4ef56d330e9bad7c62\\transformed\\core-1.18.0\\res\\values-zh-rHK\\values-zh-rHK.xml",
+                    "source": "/Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/res/values-zh-rHK/values-zh-rHK.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -55,7 +38,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\Prabha\\.gradle\\caches\\9.5.1\\transforms\\b573722039fdadeb556a21889b3e9be6\\transformed\\material3\\res\\values-zh-rHK\\values-zh-rHK.xml",
+                    "source": "/Users/prabha/.gradle/caches/9.5.1/transforms/b573722039fdadeb556a21889b3e9be6/transformed/material3/res/values-zh-rHK/values-zh-rHK.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -69,6 +52,23 @@
                         "startOffsets": "1516,1619,1721,1825,1926,2017,2106,2211,2316,2421,2537,2619,2715,2799,2887,2992,3105,3206,3314,3420,3528,3644,3749,3851,3956,4062,4147,4242,4347,4456,4546,4648,4746,4855,4969,5069,5160,5233,5323,5412,5503,5597,5689,5772,5854,5939,6028,6118,6198,6290,6372,6469,6563,6656,6749,6833,6929,7025,7120,7228,7308,7414,7515,7607,7697,7796",
                         "endColumns": "102,101,103,100,90,88,104,104,104,115,81,95,83,87,104,112,100,107,105,107,115,104,101,104,105,84,94,104,108,89,101,97,108,113,99,90,72,89,88,90,93,91,82,81,84,88,89,79,91,81,96,93,92,92,83,95,95,94,107,79,105,100,91,89,98,97",
                         "endOffsets": "1614,1716,1820,1921,2012,2101,2206,2311,2416,2532,2614,2710,2794,2882,2987,3100,3201,3309,3415,3523,3639,3744,3846,3951,4057,4142,4237,4342,4451,4541,4643,4741,4850,4964,5064,5155,5228,5318,5407,5498,5592,5684,5767,5849,5934,6023,6113,6193,6285,6367,6464,6558,6651,6744,6828,6924,7020,7115,7223,7303,7409,7510,7602,7692,7791,7889"
+                    }
+                },
+                {
+                    "source": "/Users/prabha/.gradle/caches/9.5.1/transforms/f838a2d59193160cbeaa30d02f789fc7/transformed/foundation/res/values-zh-rHK/values-zh-rHK.xml",
+                    "from": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,155,236",
+                        "endColumns": "99,80,76",
+                        "endOffsets": "150,231,308"
+                    },
+                    "to": {
+                        "startLines": "2,97,98",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "105,8911,8992",
+                        "endColumns": "99,80,76",
+                        "endOffsets": "200,8987,9064"
                     }
                 }
             ]

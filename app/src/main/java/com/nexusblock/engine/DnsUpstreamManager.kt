@@ -1,113 +1,83 @@
 package com.nexusblock.engine
 
 import android.util.Log
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.Dns
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import com.nexusblock.engine.dns.DnsProviderProfile
+import com.nexusblock.engine.dns.DnsProfileManager
+import kotlinx.coroutines.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import okhttp3.dnsoverhttps.DnsOverHttps
-import okhttp3.tls.HandshakeCertificates
-import org.xbill.DNS.DClass
-import org.xbill.DNS.Flags
 import org.xbill.DNS.Message
-import org.xbill.DNS.Opcode
-import org.xbill.DNS.Rcode
-import org.xbill.DNS.Record
-import org.xbill.DNS.Section
-import org.xbill.DNS.*
-import java.io.IOException
+import java.net.DatagramPacket
+import java.net.DatagramSocket
 import java.net.InetAddress
-import java.util.concurrent.TimeUnit
-import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocketFactory
-import javax.net.ssl.TrustManager
-import javax.net.ssl.X509TrustManager
-import kotlinx.coroutines.*
 
 /**
- * Manages upstream DNS resolution with support for plain DNS, DNS-over-TLS (DoT),
- * and DNS-over-HTTPS (DoH).
+ * Rewritten upstream DNS resolver that delegates to the currently selected
+ * [DnsProviderProfile] from [DnsProfileManager].
  *
- * Default upstreams:
- * - Plain: 8.8.8.8, 1.1.1.1
- * - DoH: https://cloudflare-dns.com/dns-query, https://dns.google/dns-query
- * - DoT: cloudflare-dns.com, dns.google
+ * Strategy:
+ * 1. Try DoH (most private, ads already blocked by the resolver).
+ * 2. If DoH fails, try DoT (encrypted, fast).
+ * 3. If DoT fails, fall back to plain UDP (fastest, least private).
+ * 4. If plain UDP fails, try the built-in fallback servers (8.8.8.8, 1.1.1.1).
+ *
+ * Resolution order is chosen because:
+ * - DoH = maximum ad-blocking effectiveness (the resolver sees the full hostname).
+ * - DoT = good balance of speed + privacy.
+ * - Plain UDP = fastest, works on all networks (some mobile/carrier Wi-Fi
+ *   blocks DoH/DoT entirely).
+ *
+ * All DNS queries are sent through VpnProtector so they exit via the
+ * underlying (non-VPN) network, avoiding recursive loops.
  */
 class DnsUpstreamManager(
     private val okHttpClient: OkHttpClient,
-    private var mode: DnsMode = DnsMode.PLAIN
+    private val profileManager: DnsProfileManager
 ) {
     companion object {
         private const val TAG = "NexusBlock/DnsUpstream"
+        private const val PLAIN_DNS_TIMEOUT_MS = 5000
+        private const val DOH_TIMEOUT_MS = 10000
 
-        val CLOUDFLARE_DOH = "https://cloudflare-dns.com/dns-query"
-        val GOOGLE_DOH = "https://dns.google/dns-query"
-        val QUAD9_DOH = "https://dns.quad9.net/dns-query"
-
-        val PLAIN_DNS_SERVERS = listOf("8.8.8.8", "1.1.1.1", "9.9.9.9")
+        /** Absolute fallback — these are queried only when the active profile fails. */
+        val FALLBACK_SERVERS = listOf("8.8.8.8", "1.1.1.1", "9.9.9.9")
     }
 
-    private var plainDnsClient: PlainDnsClient? = null
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    init {
-        initializeClient()
-    }
+    fun resolve(queryBytes: ByteArray): ByteArray? = runBlocking {
+        val profile = profileManager.activeProfile()
+        val protocols = profile.resolutionOrder()
 
-    fun setMode(newMode: DnsMode) {
-        if (mode == newMode) return
-        mode = newMode
-        initializeClient()
-        Log.i(TAG, "Switched to DNS mode: $mode")
-    }
-
-    fun getMode(): DnsMode = mode
-
-    private fun initializeClient() {
-        when (mode) {
-            DnsMode.PLAIN -> {
-                plainDnsClient = PlainDnsClient(PLAIN_DNS_SERVERS)
+        for (proto in protocols) {
+            val result = when (proto) {
+                Protocol.DOH -> resolveDoh(profile, queryBytes)
+                Protocol.DOT -> resolveDot(profile, queryBytes)
+                Protocol.PLAIN -> resolvePlain(profile, queryBytes)
             }
-            DnsMode.DOH_CLOUDFLARE, DnsMode.DOH_GOOGLE, DnsMode.DOH_QUAD9 -> {
-                // Using raw DoH messaging in resolve()
-                plainDnsClient = PlainDnsClient(PLAIN_DNS_SERVERS)
+            if (result != null) {
+                return@runBlocking result
             }
         }
+
+        // All profile protocols failed — try generic fallbacks so the user
+        // doesn't lose internet entirely.
+        Log.w(TAG, "All profile protocols failed for ${profile.name}, using generic fallbacks")
+        resolvePlainFallback(queryBytes)
     }
 
-    fun resolve(queryBytes: ByteArray): ByteArray? {
-        return runBlocking {
-            when (mode) {
-                DnsMode.PLAIN -> plainDnsClient?.resolve(queryBytes)
-                else -> {
-                    // Parallel resolution: DoH and Fallback Plain DNS
-                    val dohDeferred = async(Dispatchers.IO) { resolveDohMessage(queryBytes) }
-                    val plainDeferred = async(Dispatchers.IO) { plainDnsClient?.resolve(queryBytes) }
-                    
-                    val dohResult = dohDeferred.await()
-                    if (dohResult != null) {
-                        plainDeferred.cancel()
-                        dohResult
-                    } else {
-                        plainDeferred.await()
-                    }
-                }
-            }
-        }
-    }
+    // ─────────────────────────────────────────────────────────────
+    // DoH
+    // ─────────────────────────────────────────────────────────────
 
-    private fun resolveDohMessage(queryBytes: ByteArray): ByteArray? {
-        val url = when (mode) {
-            DnsMode.DOH_CLOUDFLARE -> CLOUDFLARE_DOH
-            DnsMode.DOH_GOOGLE -> GOOGLE_DOH
-            DnsMode.DOH_QUAD9 -> QUAD9_DOH
-            else -> return null
-        }
-
+    private suspend fun resolveDoh(
+        profile: DnsProviderProfile,
+        queryBytes: ByteArray
+    ): ByteArray? = withContext(Dispatchers.IO) {
+        val url = profile.dohUrl ?: return@withContext null
         val request = Request.Builder()
             .url(url)
             .header("Content-Type", "application/dns-message")
@@ -115,56 +85,128 @@ class DnsUpstreamManager(
             .post(queryBytes.toRequestBody("application/dns-message".toMediaType()))
             .build()
 
-        return try {
-            okHttpClient.newCall(request).execute().use { response ->
-                if (response.isSuccessful) {
-                    response.body?.bytes()
-                } else null
-            }
+        try {
+            okHttpClient.newBuilder()
+                .callTimeout(DOH_TIMEOUT_MS.toLong(), java.util.concurrent.TimeUnit.MILLISECONDS)
+                .build()
+                .newCall(request)
+                .execute()
+                .use { response ->
+                    if (response.isSuccessful) {
+                        response.body?.bytes()
+                    } else null
+                }
         } catch (e: Exception) {
-            Log.w(TAG, "DoH Message resolution failed for $url", e)
+            Log.w(TAG, "DoH failed for ${profile.name}: ${e.message}")
             null
         }
     }
 
-    /**
-     * Plain UDP DNS client with retry and failover
-     */
-    private class PlainDnsClient(
-        private val servers: List<String>,
-        private val port: Int = 53,
-        private val timeoutMs: Int = 5000
-    ) {
-        fun resolve(queryBytes: ByteArray): ByteArray? {
-            for (server in servers) {
-                try {
-                    java.net.DatagramSocket().use { socket ->
-                        VpnProtector.protect(socket)
-                        socket.soTimeout = timeoutMs
+    // ─────────────────────────────────────────────────────────────
+    // DoT (DNS-over-TLS)
+    // We implement DoT by wrapping a plain UDP query inside an TLS
+    // connection to port 853. For simplicity we fallback to plain
+    // DNS tunnelled over TLS via an SSLSocket to the resolver.
+    // ─────────────────────────────────────────────────────────────
 
-                        val packet = java.net.DatagramPacket(
-                            queryBytes,
-                            queryBytes.size,
-                            java.net.InetAddress.getByName(server),
-                            port
-                        )
-                        socket.send(packet)
+    private suspend fun resolveDot(
+        profile: DnsProviderProfile,
+        queryBytes: ByteArray
+    ): ByteArray? = withContext(Dispatchers.IO) {
+        val hostname = profile.dotHostname ?: return@withContext null
+        val servers = profile.plainIpv4.takeIf { it.isNotEmpty() } ?: return@withContext null
 
-                        val responseBuffer = ByteArray(4096)
-                        val responsePacket = java.net.DatagramPacket(responseBuffer, responseBuffer.size)
-                        socket.receive(responsePacket)
+        for (server in servers) {
+            try {
+                val sslSocket = SSLSocketFactory.getDefault().createSocket(server, 853) as javax.net.ssl.SSLSocket
+                VpnProtector.protect(sslSocket)
+                sslSocket.use { socket ->
+                    socket.startHandshake()
 
-                        return responsePacket.data.copyOf(responsePacket.length)
+                    // DNS-over-TLS framing: 2-byte length prefix + raw DNS message
+                    val out = socket.outputStream
+                    out.write(queryBytes.size shr 8 and 0xFF)
+                    out.write(queryBytes.size and 0xFF)
+                    out.write(queryBytes)
+                    out.flush()
+
+                    val input = socket.inputStream
+                    val lenHi = input.read()
+                    val lenLo = input.read()
+                    if (lenHi < 0 || lenLo < 0) return@use null
+                    val len = (lenHi shl 8) or lenLo
+                    val response = ByteArray(len)
+                    var read = 0
+                    while (read < len) {
+                        val r = input.read(response, read, len - read)
+                        if (r < 0) return@use null
+                        read += r
                     }
-                } catch (e: Exception) {
-                    Log.w(TAG, "DNS server $server failed", e)
+                    return@withContext response
                 }
+            } catch (e: Exception) {
+                Log.w(TAG, "DoT failed for $server:$hostname: ${e.message}")
             }
-            return null
         }
+        null
     }
 
-    enum class DnsMode {
-        PLAIN, DOH_CLOUDFLARE, DOH_GOOGLE, DOH_QUAD9
+    // ─────────────────────────────────────────────────────────────
+    // Plain UDP (profile servers)
+    // ─────────────────────────────────────────────────────────────
+
+    private suspend fun resolvePlain(
+        profile: DnsProviderProfile,
+        queryBytes: ByteArray
+    ): ByteArray? = withContext(Dispatchers.IO) {
+        val servers = profile.plainIpv4.takeIf { it.isNotEmpty() } ?: return@withContext null
+        resolveWithServers(servers, queryBytes)
     }
+
+    // ─────────────────────────────────────────────────────────────
+    // Plain UDP (generic fallbacks)
+    // ─────────────────────────────────────────────────────────────
+
+    private suspend fun resolvePlainFallback(queryBytes: ByteArray): ByteArray? =
+        withContext(Dispatchers.IO) {
+            resolveWithServers(FALLBACK_SERVERS, queryBytes)
+        }
+
+    private fun resolveWithServers(servers: List<String>, queryBytes: ByteArray): ByteArray? {
+        for (server in servers) {
+            try {
+                DatagramSocket().use { socket ->
+                    VpnProtector.protect(socket)
+                    socket.soTimeout = PLAIN_DNS_TIMEOUT_MS
+
+                    val packet = DatagramPacket(
+                        queryBytes, queryBytes.size,
+                        InetAddress.getByName(server), 53
+                    )
+                    socket.send(packet)
+
+                    val buf = ByteArray(4096)
+                    val resp = DatagramPacket(buf, buf.size)
+                    socket.receive(resp)
+                    return resp.data.copyOf(resp.length)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Plain DNS server $server failed: ${e.message}")
+            }
+        }
+        return null
+    }
+
+    /** Determine the preferred resolution order for a profile. */
+    private fun DnsProviderProfile.resolutionOrder(): List<Protocol> {
+        // Prefer DoH when available because the resolver blocks ads at the
+        // resolution layer with the clearest view of the full domain name.
+        val list = mutableListOf<Protocol>()
+        if (!dohUrl.isNullOrBlank()) list.add(Protocol.DOH)
+        if (!dotHostname.isNullOrBlank()) list.add(Protocol.DOT)
+        list.add(Protocol.PLAIN)
+        return list
+    }
+
+    private enum class Protocol { DOH, DOT, PLAIN }
 }

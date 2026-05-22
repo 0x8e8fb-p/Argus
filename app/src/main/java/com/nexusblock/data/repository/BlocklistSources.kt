@@ -27,22 +27,19 @@ object BlocklistSources {
             id = "oisd",
             name = "OISD Big",
             url = Constants.BLOCKLIST_OISD,
-            format = BlocklistFormat.ADGUARD,
-            defaultEnabled = false
+            format = BlocklistFormat.ADGUARD
         ),
         BlocklistSourceDefinition(
             id = "hagezi_pro",
             name = "HaGeZi Multi Pro",
             url = Constants.BLOCKLIST_HAGEZI_PRO,
-            format = BlocklistFormat.ADGUARD,
-            defaultEnabled = false
+            format = BlocklistFormat.ADGUARD
         ),
         BlocklistSourceDefinition(
             id = "hagezi_pro_plus",
             name = "HaGeZi Multi Pro++",
             url = Constants.BLOCKLIST_HAGEZI_PRO_PLUS,
-            format = BlocklistFormat.ADGUARD,
-            defaultEnabled = false
+            format = BlocklistFormat.ADGUARD
         ),
         BlocklistSourceDefinition(
             id = "hagezi_doh",
@@ -54,29 +51,25 @@ object BlocklistSources {
             id = "hagezi_native",
             name = "HaGeZi Native Trackers",
             url = Constants.BLOCKLIST_HAGEZI_NATIVE,
-            format = BlocklistFormat.ADGUARD,
-            defaultEnabled = false
+            format = BlocklistFormat.ADGUARD
         ),
         BlocklistSourceDefinition(
             id = "hagezi_popup",
             name = "HaGeZi Pop-up Ads",
             url = Constants.BLOCKLIST_HAGEZI_POPUP,
-            format = BlocklistFormat.ADGUARD,
-            defaultEnabled = false
+            format = BlocklistFormat.ADGUARD
         ),
         BlocklistSourceDefinition(
             id = "stevenblack",
             name = "StevenBlack Hosts",
             url = Constants.BLOCKLIST_STEVENBLACK,
-            format = BlocklistFormat.HOSTS,
-            defaultEnabled = false
+            format = BlocklistFormat.HOSTS
         ),
         BlocklistSourceDefinition(
             id = "firebog",
             name = "Firebog Ads",
             url = Constants.BLOCKLIST_FIREBOG,
-            format = BlocklistFormat.HOSTS,
-            defaultEnabled = false
+            format = BlocklistFormat.HOSTS
         ),
         BlocklistSourceDefinition(
             id = "perflyst_android",
@@ -88,8 +81,25 @@ object BlocklistSources {
             id = "adaway",
             name = "AdAway Hosts",
             url = Constants.BLOCKLIST_ADAWAY,
-            format = BlocklistFormat.HOSTS,
-            defaultEnabled = false
+            format = BlocklistFormat.HOSTS
+        ),
+        BlocklistSourceDefinition(
+            id = "hagezi_native_amazon",
+            name = "HaGeZi Amazon Trackers",
+            url = Constants.BLOCKLIST_HAGEZI_NATIVE_AMAZON,
+            format = BlocklistFormat.ADGUARD
+        ),
+        BlocklistSourceDefinition(
+            id = "perflyst_firetv",
+            name = "Perflyst Fire TV Tracking",
+            url = Constants.BLOCKLIST_PERFLYST_FIRETV,
+            format = BlocklistFormat.HOSTS
+        ),
+        BlocklistSourceDefinition(
+            id = "hagezi_tif",
+            name = "HaGeZi Threat Intelligence",
+            url = Constants.BLOCKLIST_HAGEZI_TIF,
+            format = BlocklistFormat.ADGUARD
         )
     )
 

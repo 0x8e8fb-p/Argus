@@ -32,6 +32,9 @@ object Constants {
     const val BLOCKLIST_HAGEZI_POPUP = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/popupads.txt"
     const val BLOCKLIST_PERFLYST_ANDROID = "https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/android-tracking.txt"
     const val BLOCKLIST_ADAWAY = "https://adaway.org/hosts.txt"
+    const val BLOCKLIST_HAGEZI_NATIVE_AMAZON = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/native.amazon.txt"
+    const val BLOCKLIST_PERFLYST_FIRETV = "https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/AmazonFireTV.txt"
+    const val BLOCKLIST_HAGEZI_TIF = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/tif.txt"
 
     val DNS_BYPASS_IPV4_ROUTES = listOf(
         "1.1.1.1",

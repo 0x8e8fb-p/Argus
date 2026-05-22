@@ -47,6 +47,18 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Auto-trigger VPN permission dialog on first launch so user can approve from TV remote
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            val intent = VpnService.prepare(this)
+            if (intent != null) {
+                Log.i(TAG, "Auto-requesting VPN permission on launch")
+                pendingVpnStart = true
+                startActivityForResult(intent, REQUEST_VPN)
+            } else {
+                Log.i(TAG, "VPN permission already granted, auto-starting service")
+                if (!NexusVpnService.isRunning) startVpnService()
+            }
+        }, 1500)
         setContent {
             NexusBlockTheme {
                 NexusBlockApp(

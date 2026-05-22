@@ -127,7 +127,7 @@ class BlocklistUpdateWorker @AssistedInject constructor(
         // Reload engine rules if VPN is running
         if (NexusVpnService.isRunning) {
             try {
-                dnsEngine.reloadBlocklists()
+                dnsEngine.reloadRules()
                 Log.i(TAG, "DNS engine rules reloaded after blocklist update")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to reload DNS engine rules", e)

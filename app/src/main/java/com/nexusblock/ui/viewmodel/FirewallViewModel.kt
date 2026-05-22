@@ -62,7 +62,9 @@ class FirewallViewModel @Inject constructor(
 
     fun setMode(packageName: String, mode: FirewallMode) {
         viewModelScope.launch {
-            settingsRepo.setFirewallModeNow(packageName, mode)
+            val current = settingsRepo.firewallModes.toMutableMap()
+            current[packageName] = mode
+            settingsRepo.firewallModes = current
             _apps.value = _apps.value.map {
                 if (it.packageName == packageName) it.copy(mode = mode) else it
             }

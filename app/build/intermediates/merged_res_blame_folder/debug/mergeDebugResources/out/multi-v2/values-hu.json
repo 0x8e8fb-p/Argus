@@ -4,41 +4,7 @@
             "outputFile": "com.nexusblock.app-mergeDebugResources-52:/values-hu/values-hu.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Prabha\\.gradle\\caches\\9.5.1\\transforms\\f838a2d59193160cbeaa30d02f789fc7\\transformed\\foundation\\res\\values-hu\\values-hu.xml",
-                    "from": {
-                        "startLines": "2,3,4",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "55,171,260",
-                        "endColumns": "115,88,96",
-                        "endOffsets": "166,255,352"
-                    },
-                    "to": {
-                        "startLines": "2,97,98",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "105,10131,10220",
-                        "endColumns": "115,88,96",
-                        "endOffsets": "216,10215,10312"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\Prabha\\.gradle\\caches\\9.5.1\\transforms\\4b6f2fe17b28d5ccbc4418e084e9ce74\\transformed\\ui\\res\\values-hu\\values-hu.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "107,215,310,398,495,594,681,763,859,948,1035,1118,1206,1280,1373,1448,1519,1589,1668,1734",
-                        "endColumns": "107,94,87,96,98,86,81,95,88,86,82,87,73,92,74,70,69,78,65,124",
-                        "endOffsets": "210,305,393,490,589,676,758,854,943,1030,1113,1201,1275,1368,1443,1514,1584,1663,1729,1854"
-                    },
-                    "to": {
-                        "startLines": "3,11,12,13,14,15,16,17,84,85,86,87,88,89,90,91,92,94,95,96",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "221,1051,1146,1234,1331,1430,1517,1599,9034,9123,9210,9293,9381,9455,9548,9623,9694,9865,9944,10010",
-                        "endColumns": "107,94,87,96,98,86,81,95,88,86,82,87,73,92,74,70,69,78,65,120",
-                        "endOffsets": "324,1141,1229,1326,1425,1512,1594,1690,9118,9205,9288,9376,9450,9543,9618,9689,9759,9939,10005,10126"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\Prabha\\.gradle\\caches\\9.5.1\\transforms\\32eed959d002fa4ef56d330e9bad7c62\\transformed\\core-1.18.0\\res\\values-hu\\values-hu.xml",
+                    "source": "/Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/res/values-hu/values-hu.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -55,7 +21,41 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\Prabha\\.gradle\\caches\\9.5.1\\transforms\\b573722039fdadeb556a21889b3e9be6\\transformed\\material3\\res\\values-hu\\values-hu.xml",
+                    "source": "/Users/prabha/.gradle/caches/9.5.1/transforms/4b6f2fe17b28d5ccbc4418e084e9ce74/transformed/ui/res/values-hu/values-hu.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "107,215,310,398,495,594,681,763,859,948,1035,1118,1206,1280,1373,1448,1519,1589,1668,1734",
+                        "endColumns": "107,94,87,96,98,86,81,95,88,86,82,87,73,92,74,70,69,78,65,124",
+                        "endOffsets": "210,305,393,490,589,676,758,854,943,1030,1113,1201,1275,1368,1443,1514,1584,1663,1729,1854"
+                    },
+                    "to": {
+                        "startLines": "3,11,12,13,14,15,16,17,84,85,86,87,88,89,90,91,92,94,95,96",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "221,1051,1146,1234,1331,1430,1517,1599,9034,9123,9210,9293,9381,9455,9548,9623,9694,9865,9944,10010",
+                        "endColumns": "107,94,87,96,98,86,81,95,88,86,82,87,73,92,74,70,69,78,65,120",
+                        "endOffsets": "324,1141,1229,1326,1425,1512,1594,1690,9118,9205,9288,9376,9450,9543,9618,9689,9759,9939,10005,10126"
+                    }
+                },
+                {
+                    "source": "/Users/prabha/.gradle/caches/9.5.1/transforms/f838a2d59193160cbeaa30d02f789fc7/transformed/foundation/res/values-hu/values-hu.xml",
+                    "from": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,171,260",
+                        "endColumns": "115,88,96",
+                        "endOffsets": "166,255,352"
+                    },
+                    "to": {
+                        "startLines": "2,97,98",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "105,10131,10220",
+                        "endColumns": "115,88,96",
+                        "endOffsets": "216,10215,10312"
+                    }
+                },
+                {
+                    "source": "/Users/prabha/.gradle/caches/9.5.1/transforms/b573722039fdadeb556a21889b3e9be6/transformed/material3/res/values-hu/values-hu.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",

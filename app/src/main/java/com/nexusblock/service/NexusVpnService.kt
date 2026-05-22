@@ -16,8 +16,6 @@ import com.nexusblock.Constants
 import com.nexusblock.R
 import com.nexusblock.data.repository.SettingsRepository
 import com.nexusblock.engine.DnsFilterEngine
-import com.nexusblock.engine.DnsUpstreamManager
-import com.nexusblock.engine.proxy.ArgusProxyServer
 import com.nexusblock.engine.PacketRouter
 import com.nexusblock.ui.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,9 +46,6 @@ class NexusVpnService : VpnService() {
 
     @Inject
     lateinit var dnsEngine: DnsFilterEngine
-
-    @Inject
-    lateinit var proxyServer: ArgusProxyServer
 
     @Inject
     lateinit var settingsRepo: SettingsRepository
@@ -123,18 +118,10 @@ class NexusVpnService : VpnService() {
                 .addAddress(Constants.VPN_ADDRESS, 24)
                 .addDnsServer(Constants.VPN_DNS)
 
-            // Routing mode: DNS-only (default) or full tunnel (deep inspection)
-            // EMERGENCY: force DNS-only mode until TcpNatRelay is production-ready
-            val fullTunnel = false
-            if (fullTunnel) {
-                // Full tunnel: capture ALL IPv4 and IPv6 traffic for SNI inspection
-                builder.addRoute("0.0.0.0", 0)
-                builder.addRoute("::", 0)
-                Log.i(TAG, "Full-tunnel mode enabled")
-            } else {
-                // DNS-only: only DNS packets enter TUN. Everything else bypasses.
-                builder.addRoute(Constants.VPN_DNS, 32)
-            }
+            // Routing mode: DNS capture + DNS bypass routes.
+            // All DNS queries enter TUN for filtering. TCP/UDP to known DNS servers
+            // on alternate ports (DoH/DoT) also captured to prevent bypass.
+            builder.addRoute(Constants.VPN_DNS, 32)
 
             // IPv6: minimal local address for IPv6 DNS capture.
             // Do NOT block all IPv6 (2000::/3) — that breaks dual-stack apps
@@ -171,19 +158,6 @@ class NexusVpnService : VpnService() {
 
             isRunning = true
             settingsRepo.vpnActive = true
-
-            // Apply DNS upstream mode from settings
-            val dnsModeStr = settingsRepo.dnsMode
-            val dnsMode = try {
-                DnsUpstreamManager.DnsMode.valueOf(dnsModeStr)
-            } catch (e: Exception) {
-                DnsUpstreamManager.DnsMode.PLAIN
-            }
-            dnsEngine.setUpstreamMode(dnsMode)
-
-            if (settingsRepo.techniques.mitmProxy) {
-                proxyServer.start()
-            }
 
             // Start packet router (includes DNS engine)
             val dnsAddr = InetAddress.getByName(Constants.VPN_DNS)
@@ -230,7 +204,6 @@ class NexusVpnService : VpnService() {
 
         try {
             packetRouter.stop()
-            proxyServer.stop()
             dnsEngine.clearCache()
         } catch (e: Exception) {
             Log.w(TAG, "Error stopping engines", e)

@@ -37,9 +37,9 @@ fun SettingsScreen(
 ) {
     val autoStart by viewModel.autoStart.collectAsState()
     val isBatteryOptimized by viewModel.isBatteryOptimized.collectAsState()
-    val caInstalled by viewModel.caInstalled.collectAsState()
-    val dnsMode by viewModel.dnsMode.collectAsState()
-    val youtubeRecommendations by viewModel.youtubeRecommendations.collectAsState()
+    // CA certificate removed with proxy layer
+    val dnsProfile by viewModel.dnsProfile.collectAsState()
+    
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -64,19 +64,6 @@ fun SettingsScreen(
         }
 
         item {
-            SettingSwitchRow(
-                title = "Allow YouTube recommendations",
-                subtitle = if (youtubeRecommendations) {
-                    "Keeps home, related videos, and playback APIs available"
-                } else {
-                    "Stricter mode may disrupt YouTube feeds or playback"
-                },
-                checked = youtubeRecommendations,
-                onCheckedChange = viewModel::setYoutubeRecommendations
-            )
-        }
-
-        item {
             FocusPanel(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(18.dp)
@@ -88,25 +75,28 @@ fun SettingsScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "DNS Upstream",
+                            text = "DNS Filter",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "Current: ${formatDnsMode(dnsMode)}",
+                            text = "Current: ${formatDnsProfile(dnsProfile)}",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     SegmentedControl(
                         options = listOf(
-                            "PLAIN" to "Plain",
-                            "DOH_CLOUDFLARE" to "Cloudflare",
-                            "DOH_GOOGLE" to "Google",
-                            "DOH_QUAD9" to "Quad9"
+                            "adguard_standard" to "AdGuard",
+                            "adguard_family" to "Family",
+                            "cloudflare_1111" to "Cloudflare",
+                            "cloudflare_family" to "CF Family",
+                            "cleanbrowsing_adult" to "CleanBrowsing",
+                            "nextdns" to "NextDNS",
+                            "quad9" to "Quad9"
                         ),
-                        selectedKey = dnsMode,
-                        onSelected = viewModel::setDnsMode
+                        selectedKey = dnsProfile,
+                        onSelected = viewModel::setDnsProfile
                     )
                 }
             }
@@ -119,16 +109,6 @@ fun SettingsScreen(
                 buttonText = if (isBatteryOptimized) "Done" else "Request",
                 enabled = !isBatteryOptimized,
                 onClick = { viewModel.requestBatteryOptimization() }
-            )
-        }
-
-        item {
-            SettingActionRow(
-                title = "CA Certificate",
-                subtitle = if (caInstalled) "Certificate flow completed" else "Optional proxy mode for compatible clients",
-                buttonText = if (caInstalled) "Done" else "Open",
-                enabled = !caInstalled,
-                onClick = { viewModel.openCaInstallScreen() }
             )
         }
     }
@@ -220,10 +200,18 @@ private fun SettingActionRow(
     }
 }
 
-private fun formatDnsMode(mode: String): String = when (mode) {
-    "PLAIN" -> "Plain DNS"
-    "DOH_CLOUDFLARE" -> "Cloudflare DoH"
-    "DOH_GOOGLE" -> "Google DoH"
-    "DOH_QUAD9" -> "Quad9 DoH"
-    else -> mode
+private fun formatDnsProfile(id: String): String = when (id) {
+    "adguard_standard" -> "AdGuard Standard"
+    "adguard_family" -> "AdGuard Family"
+    "adguard_nonfiltering" -> "AdGuard Non-filtering"
+    "cloudflare_1111" -> "Cloudflare 1.1.1.1"
+    "cloudflare_security" -> "Cloudflare Security"
+    "cloudflare_family" -> "Cloudflare Family"
+    "cleanbrowsing_adult" -> "CleanBrowsing Adult"
+    "cleanbrowsing_security" -> "CleanBrowsing Security"
+    "nextdns" -> "NextDNS"
+    "controld_free" -> "ControlD"
+    "quad9" -> "Quad9"
+    "google" -> "Google DNS"
+    else -> id
 }

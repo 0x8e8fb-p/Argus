@@ -68,4 +68,3 @@ string watchdog_notification_text
 string watchdog_notification_title
 string whitelist_description
 style Theme.NexusBlock
-xml accessibility_service_config

@@ -2,7 +2,6 @@ package com.nexusblock.ui.viewmodel;
 
 import android.app.Application;
 import com.nexusblock.data.repository.SettingsRepository;
-import com.nexusblock.engine.CertificateManager;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
 import dagger.internal.QualifierMetadata;
@@ -30,29 +29,24 @@ public final class SettingsViewModel_Factory implements Factory<SettingsViewMode
 
   private final Provider<SettingsRepository> settingsRepoProvider;
 
-  private final Provider<CertificateManager> certificateManagerProvider;
-
   public SettingsViewModel_Factory(Provider<Application> applicationProvider,
-      Provider<SettingsRepository> settingsRepoProvider,
-      Provider<CertificateManager> certificateManagerProvider) {
+      Provider<SettingsRepository> settingsRepoProvider) {
     this.applicationProvider = applicationProvider;
     this.settingsRepoProvider = settingsRepoProvider;
-    this.certificateManagerProvider = certificateManagerProvider;
   }
 
   @Override
   public SettingsViewModel get() {
-    return newInstance(applicationProvider.get(), settingsRepoProvider.get(), certificateManagerProvider.get());
+    return newInstance(applicationProvider.get(), settingsRepoProvider.get());
   }
 
   public static SettingsViewModel_Factory create(Provider<Application> applicationProvider,
-      Provider<SettingsRepository> settingsRepoProvider,
-      Provider<CertificateManager> certificateManagerProvider) {
-    return new SettingsViewModel_Factory(applicationProvider, settingsRepoProvider, certificateManagerProvider);
+      Provider<SettingsRepository> settingsRepoProvider) {
+    return new SettingsViewModel_Factory(applicationProvider, settingsRepoProvider);
   }
 
   public static SettingsViewModel newInstance(Application application,
-      SettingsRepository settingsRepo, CertificateManager certificateManager) {
-    return new SettingsViewModel(application, settingsRepo, certificateManager);
+      SettingsRepository settingsRepo) {
+    return new SettingsViewModel(application, settingsRepo);
   }
 }

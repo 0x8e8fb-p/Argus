@@ -21,11 +21,9 @@ class NexusBlockApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
-    @Inject
-
     override fun onCreate() {
         super.onCreate()
-        Security.addProvider(org.bouncycastle.jce.provider.BouncyCastleProvider())
+        // BouncyCastle provider removed — no proxy/MitM layer needs it anymore.
         createNotificationChannels()
         initializeWorkManager()
 

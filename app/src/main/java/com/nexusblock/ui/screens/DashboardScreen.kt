@@ -277,13 +277,10 @@ private val TECHNIQUES = listOf(
 private fun com.nexusblock.data.repository.BlockingTechniques.isEnabled(key: String): Boolean {
     return when (key) {
         "dns" -> dnsFiltering
-        "sni" -> sniInspection
-        "mitm" -> mitmProxy
         "header" -> headerFilter
         "ip" -> ipBlocking
         "stealth" -> stealthMode
         "firewall" -> appFirewall
-        "albania" -> albaniaMode
         else -> false
     }
 }

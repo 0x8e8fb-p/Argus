@@ -1,139 +1,78 @@
 package com.nexusblock.engine
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.util.Log
 import com.nexusblock.data.model.BlockedDomain
-import com.nexusblock.data.model.CustomRule
-import com.nexusblock.data.repository.BuiltInBlockRules
+import com.nexusblock.data.db.CustomRuleDao
 import com.nexusblock.data.repository.BlocklistRepository
-import com.nexusblock.data.repository.RawBlocklistLoader
 import com.nexusblock.data.repository.SettingsRepository
 import com.nexusblock.data.repository.StatsRepository
-import com.nexusblock.data.db.CustomRuleDao
+import com.nexusblock.engine.dns.DnsProfileManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import okhttp3.OkHttpClient
 import org.xbill.DNS.*
-import java.net.DatagramPacket
-import java.net.DatagramSocket
 import java.net.InetAddress
-import java.net.InetSocketAddress
-import java.net.Inet4Address
-import java.net.Inet6Address
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Simplified DNS filter engine that delegates the heavy ad-blocking work to
+ * the upstream filtered DNS resolver (AdGuard DNS, Cloudflare Family, etc.).
+ *
+ * Local blocking is now limited to:
+ * 1. **User custom rules** — always respected.
+ * 2. **Indian OTT emergency rules** — lightweight hardcoded list for regional
+ *    streaming apps whose ad domains may not be in global DNS blocklists.
+ * 3. **DoH/DoT bypass prevention** — blocking known public resolver hostnames
+ *    so apps cannot tunnel around our filter.
+ *
+ * Why this is better:
+ * - AdGuard DNS blocks ~3M+ ad/tracker/malware domains AND updates daily.
+ * - No more stale local blocklists consuming memory and missing new domains.
+ * - No more "Albania Mode" hacks or YouTube whitelist wars.
+ * - Battery efficient: single upstream query instead of local trie + bloom
+ *   filter lookups on every DNS packet.
+ *
+ * The upstream resolver choice is managed by [DnsProfileManager] and can be
+ * refreshed remotely every ~2 months.
+ */
 @Singleton
 class DnsFilterEngine @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val blocklistRepo: BlocklistRepository,
     private val statsRepo: StatsRepository,
     private val customRuleDao: CustomRuleDao,
+    private val blocklistRepo: BlocklistRepository,
+    private val settingsRepo: SettingsRepository,
+    private val dnsProfileManager: DnsProfileManager,
     private val okHttpClient: OkHttpClient,
-    private val connectionTracker: ConnectionTracker,
-    private val settingsRepo: SettingsRepository
+    private val connectionTracker: ConnectionTracker
 ) {
     companion object {
         private const val TAG = "NexusBlock/DNS"
         private const val DNS_PORT = 53
         private const val BUFFER_SIZE = 4096
 
-        // YouTube essential domain whitelist.
-        // These are injected as narrow allow-rules when the user
-        // has "Allow YouTube recommendations" enabled (default: ON).
-        //
-        // CRITICAL: This list is intentionally MINIMAL. Previous versions
-        // whitelisted far too much (googlevideo.com, googleapis.com, gstatic.com,
-        // google.com, s.youtube.com) which ALLOWED ads through. The trimmed list
-        // keeps only domains essential for basic playback:
-        // - youtube.com / www / m: core site and app
-        // - ytimg.com / i.ytimg.com: thumbnails and images
-        // - youtubei.googleapis.com: API (unfortunately also serves ads)
-        // - accounts.google.com: login
-        // - youtube-nocookie.com / youtu.be: embeds and short links
-        //
-        // REMOVED from whitelist:
-        // - googlevideo.com: video CDN serves BOTH ads and content. Cannot be
-        //   whitelisted without allowing video ads. DNS blocking alone cannot
-        //   distinguish ad videos from content videos on this domain.
-        // - s.youtube.com: tracking / ad-signal endpoint
-        // - gstatic.com, ggpht.com, googleapis.com: too broad
-        // - google.com, play.google.com, clients4.google.com: not needed for playback
-        // Upstream resolver domains that must NEVER be blocked, even by
-        // emergency rules, otherwise DoH/DoT bootstrap fails and all
-        // resolution stops working.
+        /**
+         * Upstream resolver domains that must NEVER be blocked, otherwise
+         * DoH/DoT bootstrap self-sabotages and all resolution stops.
+         */
         private val UPSTREAM_DOMAINS = setOf(
-            "cloudflare-dns.com",
-            "dns.google",
-            "dns.quad9.net",
-            "dns11.quad9.net",
-            "dns12.quad9.net"
+            "cloudflare-dns.com", "dns.cloudflare.com", "one.one.one.one",
+            "dns.google", "dns.google.com",
+            "dns.quad9.net", "dns9.quad9.net", "dns10.quad9.net",
+            "dns11.quad9.net", "dns12.quad9.net",
+            "dns.adguard-dns.com", "family.adguard-dns.com",
+            "unfiltered.adguard-dns.com",
+            "doh.opendns.com", "dns.nextdns.io",
+            "doh.cleanbrowsing.org",
+            "freedns.controld.com", "p1.freedns.controld.com"
         )
 
         fun isUpstreamDomain(host: String): Boolean {
             val h = host.trimEnd('.').lowercase()
             return UPSTREAM_DOMAINS.any { h == it || h.endsWith(".$it") }
-        }
-
-        val YOUTUBE_WHITELIST_RULES = listOf(
-            BlockedDomain(host = "@@youtube.com", source = "nexusblock_whitelist"),
-            BlockedDomain(host = "@@www.youtube.com", source = "nexusblock_whitelist"),
-            BlockedDomain(host = "@@m.youtube.com", source = "nexusblock_whitelist"),
-            BlockedDomain(host = "@@youtubei.googleapis.com", source = "nexusblock_whitelist"),
-            BlockedDomain(host = "@@innertube.googleapis.com", source = "nexusblock_whitelist"),
-            BlockedDomain(host = "@@||i.ytimg.com^", source = "nexusblock_whitelist"),
-            BlockedDomain(host = "@@||ytimg.com^", source = "nexusblock_whitelist"),
-            BlockedDomain(host = "@@accounts.google.com", source = "nexusblock_whitelist"),
-            BlockedDomain(host = "@@youtube-nocookie.com", source = "nexusblock_whitelist"),
-            BlockedDomain(host = "@@www.youtube-nocookie.com", source = "nexusblock_whitelist"),
-            BlockedDomain(host = "@@youtu.be", source = "nexusblock_whitelist")
-        )
-
-        // ============================================================
-        // ALBANIA-MODE: Aggressive YouTube ad / tracking domains.
-        // These are blocked ONLY when Albania Mode is enabled.
-        // They target ad-serving infrastructure that is NOT needed
-        // for video playback but IS needed for ad delivery and
-        // ad-view measurement.
-        // ============================================================
-        private val ALBANIA_BLOCKLIST = setOf(
-            // Pure ad serving — never serves real content
-            "pagead2.googlesyndication.com",
-            "tpc.googlesyndication.com",
-            "video-ad-stats.googlesyndication.com",
-            "www.googletagservices.com",
-            "adservice.google.com",
-            "pagead.l.doubleclick.net",
-            "googleadservices.com",
-            "ad-g.doubleclick.net",
-            "ads.g.doubleclick.net",
-            "cm.g.doubleclick.net",
-            "iv.doubleclick.net",
-            "fls.doubleclick.net",
-            "googleads4.g.doubleclick.net",
-            "googleads5.g.doubleclick.net",
-            "googleads6.g.doubleclick.net",
-            "dfp.doubleclick.net",
-            "pubads.g.doubleclick.net",
-            "securepubads.g.doubleclick.net",
-            "googletagmanager.com",
-            "www.googletagmanager.com",
-            // Google analytics — safe to block
-            "ssl.google-analytics.com",
-            "www.google-analytics.com",
-            "analytics.google.com"
-            // NOTE: Removed YouTube-specific domains like s.youtube.com,
-            // redirector.googlevideo.com, manifest.googlevideo.com because
-            // they caused playback breakage. googlevideo.com ad subdomains
-            // are handled by RuleEngine.isAdVideoServer() when Albania Mode is ON.
-        )
-
-        fun isAlbaniaBlocked(host: String): Boolean {
-            val h = host.trimEnd('.').lowercase()
-            return ALBANIA_BLOCKLIST.any { h == it || h.endsWith(".$it") }
         }
     }
 
@@ -142,53 +81,39 @@ class DnsFilterEngine @Inject constructor(
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    // Core rule engine (replaces old HashSet/Trie approach)
     @Volatile
     private var ruleEngine = RuleEngine()
+    @Volatile
+    private var criticalAllowSet = HashSet<String>()
+    @Volatile
+    private var criticalSubdomainSet = HashSet<String>()
     private var upstreamManager: DnsUpstreamManager? = null
-    private var requestedDnsMode = DnsUpstreamManager.DnsMode.PLAIN
     private var startJob: Job? = null
     private var customRulesJob: Job? = null
 
-    // DNS Cache
     private val dnsCache = object : LinkedHashMap<String, Message>(1024, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Message>?): Boolean {
-            return size > 1000
-        }
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Message>?): Boolean = size > 1000
     }
 
-    // Batch logging
+    private val blockedIpCache = object : LinkedHashMap<String, Long>(512, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Long>?): Boolean = size > 500
+    }
+
     private val pendingLogs = mutableListOf<com.nexusblock.data.model.BlockedEvent>()
     private var logJob: Job? = null
 
-    // Stats counter for diagnostics
     private var queriesProcessed = 0L
     private var queriesBlocked = 0L
     private var queriesAllowed = 0L
 
-    private var lastYoutubeSetting: Boolean = true
-
     init {
-        // Auto-reload blocklists when YouTube recommendation setting changes
-        scope.launch {
-            settingsRepo.observeYoutubeRecommendations().collect { newValue ->
-                if (lastYoutubeSetting != newValue) {
-                    lastYoutubeSetting = newValue
-                    if (_isRunning.value) {
-                        Log.i(TAG, "YouTube recommendation setting changed to $newValue, reloading rules")
-                        reloadBlocklists()
-                    }
-                }
-            }
-        }
-
         customRulesJob = scope.launch {
             customRuleDao.observeEnabled()
                 .drop(1)
                 .collect {
                     if (_isRunning.value) {
                         Log.i(TAG, "Custom rules changed, reloading DNS rules")
-                        reloadBlocklists()
+                        reloadRules()
                     }
                 }
         }
@@ -197,21 +122,19 @@ class DnsFilterEngine @Inject constructor(
     fun start(localAddress: InetAddress = InetAddress.getByName("127.0.0.1"), localPort: Int = DNS_PORT) {
         if (_isRunning.value || startJob?.isActive == true) return
         startJob = scope.launch {
-            // Default to PLAIN DNS for reliability.
-            // DoH causes recursive resolution loops when VPN is active.
-            requestedDnsMode = parseDnsMode(settingsRepo.dnsMode)
-            if (requestedDnsMode == DnsUpstreamManager.DnsMode.PLAIN) {
-                Log.i(TAG, "Using plain DNS upstream")
+            upstreamManager = DnsUpstreamManager(okHttpClient, dnsProfileManager)
+            reloadRules()
+            // If no rules loaded from DB (first launch), load emergency rules immediately
+            if (ruleEngine.ruleCount() == 0) {
+                Log.i(TAG, "No DB rules found, loading built-in emergency rules directly")
+                val builtins = com.nexusblock.data.repository.BuiltInBlockRules.emergencyRules()
+                val newRuleEngine = RuleEngine()
+                newRuleEngine.loadRules(builtins)
+                ruleEngine = newRuleEngine
             }
-            upstreamManager = DnsUpstreamManager(okHttpClient, requestedDnsMode)
-            lastYoutubeSetting = settingsRepo.youtubeRecommendationsEnabled
-            loadBootstrapRules()
             startLogBatcher()
             _isRunning.value = true
-            Log.i(TAG, "DNS engine initialized with upstream mode $requestedDnsMode")
-            launch {
-                reloadBlocklists()
-            }
+            Log.i(TAG, "DNS engine started with upstream: ${dnsProfileManager.activeProfile().name}")
         }
     }
 
@@ -230,8 +153,8 @@ class DnsFilterEngine @Inject constructor(
     }
 
     /**
-     * Resolve a DNS query payload. Returns response payload bytes, or null if
-     * resolution failed and caller should forward packet transparently.
+     * Resolve a DNS query. Delegates to the upstream filtered resolver
+     * unless the domain matches a local custom rule or emergency block.
      */
     suspend fun resolveDns(queryPayload: ByteArray): ByteArray? {
         startJob?.join()
@@ -256,15 +179,10 @@ class DnsFilterEngine @Inject constructor(
         if ((type == 65 || type == 64) && !isUpstreamDomain(host) && ruleEngine.isBlocked(host)) {
             queriesBlocked++
             queueLog(host, "dns-svcb")
-            val response = Message(query.header.id)
-            response.header.setFlag(Flags.QR.toInt())
-            response.header.setFlag(Flags.RA.toInt())
-            response.header.rcode = Rcode.NOERROR
-            response.addRecord(question, Section.QUESTION)
-            return response.toWire()
+            return buildSinkholeResponse(query, type).toWire()
         }
 
-        // 1. Check Cache
+        // 1. Check cache
         synchronized(dnsCache) {
             val cached = dnsCache[cacheKey]
             if (cached != null) {
@@ -280,31 +198,34 @@ class DnsFilterEngine @Inject constructor(
             }
         }
 
-        // 2. Check Rule Engine before any upstream lookup.
-        //    Returns sinkhole (0.0.0.0 / ::) instead of NXDOMAIN to prevent
-        //    aggressive retry via DoH/DoT/IPv6.
-        //    EXCEPTION: upstream resolver hostnames must always be allowed
-        //    so that DoH/DoT bootstrap does not self-sabotage.
+        // 2. Critical allows — bypass ALL blocking (local + upstream) and use
+        //    plain unfiltered DNS so video playback isn't broken by AdGuard.
+        //    Only EXACT matches and non-blocked subdomains are allowed through.
+        val isCritical = criticalAllowSet.contains(host) ||
+            criticalSubdomainSet.any { host.endsWith(".$it") }
+        if (!isUpstreamDomain(host) && isCritical && !ruleEngine.isBlocked(host)) {
+            val plainResponse = plainDnsResolve(queryPayload)
+            if (plainResponse != null) {
+                Log.d(TAG, "DNS critical-allow bypass: $host")
+                cacheAllowedResponse(cacheKey, plainResponse)
+                queriesAllowed++
+                return plainResponse
+            }
+        }
+
+        // 3. Local rule check (custom rules + blocklist domains)
         if (!isUpstreamDomain(host) && ruleEngine.isBlocked(host)) {
             queriesBlocked++
-            Log.i(TAG, "DNS sinkhole: $host (type=$type)")
+            Log.i(TAG, "DNS sinkhole (local): $host")
             val response = buildSinkholeResponse(query, type)
             queueLog(host, "dns")
             return response.toWire()
         }
 
-        // ALBANIA-MODE: aggressively block known YouTube ad CDN subdomains
-        // and dedicated ad/tracking domains at DNS resolution.
-        if (settingsRepo.techniques.albaniaMode && !isUpstreamDomain(host)) {
-            if (ruleEngine.isAdVideoServer(host) || isAlbaniaBlocked(host)) {
-                queriesBlocked++
-                Log.i(TAG, "DNS Albania block: $host")
-                queueLog(host, "dns-albania")
-                return buildSinkholeResponse(query, type).toWire()
-            }
-        }
-
+        // 4. Everything else → upstream filtered resolver (AdGuard, etc.)
         val upstreamResponse = upstreamResolve(queryPayload) ?: return null
+
+        // Check CNAME chain for local blocks
         val blockedAlias = findBlockedAnswer(upstreamResponse, host)
         if (blockedAlias != null) {
             queriesBlocked++
@@ -319,17 +240,31 @@ class DnsFilterEngine @Inject constructor(
 
     private suspend fun upstreamResolve(queryPayload: ByteArray): ByteArray? {
         return try {
-            val responseBytes = withContext(Dispatchers.IO) {
+            withContext(Dispatchers.IO) {
                 upstreamManager?.resolve(queryPayload)
-            }
-            if (responseBytes != null) {
-                responseBytes
-            } else {
-                fallbackResolve(queryPayload)
             }
         } catch (e: Exception) {
             Log.w(TAG, "Upstream resolution error", e)
-            fallbackResolve(queryPayload)
+            null
+        }
+    }
+
+    /**
+     * Fallback plain-DNS resolver to Google (8.8.8.8) for critical-allowed
+     * domains that AdGuard or other filtered upstreams may block.
+     */
+    private suspend fun plainDnsResolve(queryPayload: ByteArray): ByteArray? {
+        return try {
+            withContext(Dispatchers.IO) {
+                val resolver = SimpleResolver("8.8.8.8")
+                resolver.setTimeout(5)
+                val query = Message(queryPayload)
+                val response = resolver.send(query)
+                response.toWire()
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Plain DNS resolution error", e)
+            null
         }
     }
 
@@ -337,12 +272,9 @@ class DnsFilterEngine @Inject constructor(
         try {
             val response = Message(responseBytes)
             if (response.rcode == Rcode.NOERROR) {
-                synchronized(dnsCache) {
-                    dnsCache[cacheKey] = response
-                }
+                synchronized(dnsCache) { dnsCache[cacheKey] = response }
             }
-        } catch (_: Exception) {
-        }
+        } catch (_: Exception) {}
     }
 
     private fun findBlockedAnswer(responseBytes: ByteArray, originalHost: String): String? {
@@ -350,19 +282,25 @@ class DnsFilterEngine @Inject constructor(
             val response = Message(responseBytes)
             for (record in response.getSectionArray(Section.ANSWER)) {
                 val owner = record.name.toString(true).lowercase().trimEnd('.')
-                if (owner != originalHost && ruleEngine.isBlocked(owner)) return owner
+                if (owner != originalHost && ruleEngine.isBlocked(owner)) {
+                    cacheBlockedIpsFromResponse(response)
+                    return owner
+                }
 
                 when (record) {
                     is CNAMERecord -> {
                         val target = record.target.toString(true).lowercase().trimEnd('.')
-                        if (ruleEngine.isBlocked(target)) return target
+                        if (ruleEngine.isBlocked(target)) {
+                            cacheBlockedIpsFromResponse(response)
+                            return target
+                        }
                     }
                     is ARecord -> {
-                        val address = record.address.hostAddress
+                        val address = record.address.hostAddress ?: continue
                         if (ruleEngine.isIpBlocked(address)) return address
                     }
                     is AAAARecord -> {
-                        val address = record.address.hostAddress
+                        val address = record.address.hostAddress ?: continue
                         if (ruleEngine.isIpBlocked(address)) return address
                     }
                 }
@@ -374,447 +312,105 @@ class DnsFilterEngine @Inject constructor(
         }
     }
 
-    private suspend fun systemResolve(queryPayload: ByteArray): ByteArray? = withContext(Dispatchers.IO) {
-        try {
-            val query = Message(queryPayload)
-            val question = query.question ?: return@withContext null
-            val type = question.type
-            if (type != Type.A && type != Type.AAAA) return@withContext null
-
-            val host = question.name.toString(true).trimEnd('.')
-            val addresses = InetAddress.getAllByName(host)
-            val response = Message(query.header.id)
-            response.header.setFlag(Flags.QR.toInt())
-            response.header.setFlag(Flags.RA.toInt())
-            response.addRecord(question, Section.QUESTION)
-
-            val ttl = 60L
-            addresses.forEach { address ->
-                when {
-                    type == Type.A && address is Inet4Address -> {
-                        response.addRecord(ARecord(question.name, DClass.IN, ttl, address), Section.ANSWER)
+    private fun cacheBlockedIpsFromResponse(response: Message) {
+        val now = System.currentTimeMillis()
+        for (record in response.getSectionArray(Section.ANSWER)) {
+            when (record) {
+                is ARecord -> {
+                    record.address.hostAddress?.let { ip ->
+                        synchronized(blockedIpCache) { blockedIpCache[ip] = now }
                     }
-                    type == Type.AAAA && address is Inet6Address -> {
-                        response.addRecord(AAAARecord(question.name, DClass.IN, ttl, address), Section.ANSWER)
+                }
+                is AAAARecord -> {
+                    record.address.hostAddress?.let { ip ->
+                        synchronized(blockedIpCache) { blockedIpCache[ip] = now }
                     }
                 }
             }
-
-            if (response.getSectionArray(Section.ANSWER).isEmpty()) null else response.toWire()
-        } catch (e: Exception) {
-            Log.w(TAG, "System DNS fallback failed", e)
-            null
         }
     }
 
-    private suspend fun fallbackResolve(queryPayload: ByteArray): ByteArray? {
-        return withContext(Dispatchers.IO) {
-            val servers = getNonVpnDnsServers() + listOf(
-                InetAddress.getByName("8.8.8.8"),
-                InetAddress.getByName("1.1.1.1"),
-                InetAddress.getByName("9.9.9.9")
-            )
+    suspend fun reloadRules() {
+        val allRules = mutableListOf<BlockedDomain>()
 
-            for (server in servers.distinctBy { it.hostAddress }) {
-                try {
-                    java.net.DatagramSocket().use { upstream ->
-                        VpnProtector.protect(upstream)
-                        upstream.soTimeout = 5000
-                        upstream.send(DatagramPacket(queryPayload, queryPayload.size, server, 53))
-                        val buf = ByteArray(BUFFER_SIZE)
-                        val resp = DatagramPacket(buf, buf.size)
-                        upstream.receive(resp)
-                        return@withContext resp.data.copyOf(resp.length)
-                    }
-                } catch (e: Exception) {
-                    Log.w(TAG, "Fallback DNS server ${server.hostAddress} failed", e)
-                }
-            }
-            null
-        }
-    }
-
-    private fun getNonVpnDnsServers(): List<InetAddress> {
-        val cm = context.getSystemService(ConnectivityManager::class.java) ?: return emptyList()
-        return cm.allNetworks
-            .filter { network ->
-                val caps = cm.getNetworkCapabilities(network)
-                caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true &&
-                    caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN).not()
-            }
-            .flatMap { network ->
-                cm.getLinkProperties(network)?.dnsServers.orEmpty()
-            }
-    }
-
-    suspend fun reloadBlocklists() {
-        val domains = blocklistRepo.getEnabledDomains()
+        // 1. Custom user rules
         val customRules = customRuleDao.getEnabled()
-
-        // Convert custom rules to BlockedDomain format for the rule engine
-        val allRules = domains.toMutableList()
-
-        for (rule in customRules) {
-            allRules.add(
-                BlockedDomain(
-                    host = if (rule.isAllow) "@@${rule.rule}" else rule.rule,
-                    source = "custom",
-                    isRegex = rule.rule.startsWith("/") && rule.rule.endsWith("/"),
-                    regexPattern = if (rule.rule.startsWith("/") && rule.rule.endsWith("/"))
-                        rule.rule.substring(1, rule.rule.length - 1) else null
-                )
+        allRules.addAll(customRules.map { rule ->
+            BlockedDomain(
+                host = if (rule.isAllow) "@@${rule.rule}" else rule.rule,
+                source = "custom",
+                isRegex = rule.rule.startsWith("/") && rule.rule.endsWith("/"),
+                regexPattern = if (rule.rule.startsWith("/") && rule.rule.endsWith("/"))
+                    rule.rule.substring(1, rule.rule.length - 1) else null
             )
+        })
+
+        // 2. Critical allowlist — domains that must NEVER be blocked to keep apps functional.
+        // These use plain DNS (bypassing filtered upstream) because AdGuard/Cloudflare
+        // may independently block domains we need for video playback.
+        // NOTE: googlevideo.com is NOT here — ad subdomains get caught by isAdVideoServer().
+        // We only allow the specific content patterns through.
+        val criticalAllows = listOf(
+            // Amazon Prime Video APIs — blocking these breaks playback
+            "api.eu-west-1.aiv-delivery.net",
+            "api.us-east-1.aiv-delivery.net",
+            "api.us-west-2.aiv-delivery.net",
+            "manifest.aiv-delivery.net",
+            // Google Play Services core
+            "play.googleapis.com",
+            "android.googleapis.com",
+            // Netflix content delivery
+            "nflxvideo.net",
+            "nflxso.net",
+            // YouTube content delivery (not ads) — ad patterns intercepted above
+            "youtube.com",
+            "youtubei.googleapis.com",
+            "www.youtube.com",
+            "m.youtube.com",
+            "i.ytimg.com",
+            "yt3.ggpht.com",
+            // Hotstar/JioHotstar content delivery
+            "hotstar.com",
+            "www.hotstar.com",
+            "api.hotstar.com",
+            "www.jiohotstar.com",
+            "api.jiohotstar.com",
+            // SonyLiv content delivery
+            "www.sonyliv.com",
+            "api.sonyliv.com",
+            // Zee5 content delivery
+            "www.zee5.com",
+            "api.zee5.com"
+        )
+        // Subdomain-matching critical allows — these need *.domain matching
+        // for content CDN subdomains (NOT used for domains with ad subdomains)
+        val criticalSubdomains = listOf(
+            "nflxvideo.net",
+            "nflxso.net",
+            "aiv-delivery.net",
+            "googleapis.com"
+        )
+        val newCriticalAllowSet = HashSet<String>()
+        newCriticalAllowSet.addAll(criticalAllows)
+        criticalAllowSet = newCriticalAllowSet
+        val newSubdomainSet = HashSet<String>()
+        newSubdomainSet.addAll(criticalSubdomains)
+        criticalSubdomainSet = newSubdomainSet
+
+        // 3. Downloaded blocklists from database (builtin + remote sources)
+        val enabledSources = blocklistRepo.observeSourceStates().first()
+            .filter { it.enabled }
+        for (source in enabledSources) {
+            val domains = blocklistRepo.getDomainsBySource(source.source)
+            allRules.addAll(domains)
         }
 
-        // Load built-in raw blocklist if database is empty (first launch)
-        if (allRules.isEmpty()) {
-            Log.i(TAG, "Database empty, loading built-in OISD blocklist from raw resource")
-            try {
-                val builtin = RawBlocklistLoader.loadBuiltinBlocklist(context)
-                allRules.addAll(builtin)
-                Log.i(TAG, "Loaded ${builtin.size} domains from built-in OISD blocklist")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to load built-in blocklist, falling back to emergency rules", e)
-                allRules.addAll(getBuiltinRules())
-            }
-        }
-
-        // Always merge emergency rules (Indian OTT, YouTube ad domains, DoH
-        // blockers) even on first launch before remote blocklists are downloaded.
-        val emergencyRules = getBuiltinRules()
-        allRules.addAll(emergencyRules)
-        Log.i(TAG, "Merged ${emergencyRules.size} built-in emergency rules")
-
-        /*
-            // Database has downloaded blocklists — still merge built-in emergency rules
-            // (Indian OTT, YouTube ad domains, DoH blockers) so they are always active
-            // regardless of whether downloaded lists include them.
-            val emergencyRules = getBuiltinRules()
-            allRules.addAll(emergencyRules)
-            Log.i(TAG, "Merged ${emergencyRules.size} built-in emergency rules")
-        */
-
-        // Inject hard allow-list for YouTube recommendation / essential domains.
-        // These MUST resolve even if a blocklist accidentally includes them.
-        // Added BEFORE loadRules so they go in as allow-rules in a single pass.
-        // Only applied when the user has "Allow YouTube recommendations" enabled (default: ON).
-        if (settingsRepo.youtubeRecommendationsEnabled) {
-            allRules.addAll(YOUTUBE_WHITELIST_RULES)
-            Log.i(TAG, "YouTube whitelist applied (${YOUTUBE_WHITELIST_RULES.size} rules)")
-        } else {
-            Log.i(TAG, "YouTube whitelist DISABLED by user setting")
-        }
+        Log.i(TAG, "Loaded ${customRules.size} custom rules + ${criticalAllows.size} critical allows + ${allRules.size - customRules.size} blocklist domains from ${enabledSources.size} sources")
 
         val newRuleEngine = RuleEngine()
         newRuleEngine.loadRules(allRules)
         ruleEngine = newRuleEngine
         clearCache()
-        Log.i(TAG, "Loaded ${domains.size} blocklist domains + ${customRules.size} custom rules + built-ins = ${allRules.size} total")
-    }
-
-    private suspend fun loadBootstrapRules() {
-        val rules = getBuiltinRules().toMutableList()
-        customRuleDao.getEnabled().forEach { rule ->
-            rules.add(
-                BlockedDomain(
-                    host = if (rule.isAllow) "@@${rule.rule}" else rule.rule,
-                    source = "custom",
-                    isRegex = rule.rule.startsWith("/") && rule.rule.endsWith("/"),
-                    regexPattern = if (rule.rule.startsWith("/") && rule.rule.endsWith("/"))
-                        rule.rule.substring(1, rule.rule.length - 1) else null
-                )
-            )
-        }
-        if (settingsRepo.youtubeRecommendationsEnabled) {
-            rules.addAll(YOUTUBE_WHITELIST_RULES)
-        }
-        val newRuleEngine = RuleEngine()
-        newRuleEngine.loadRules(rules)
-        ruleEngine = newRuleEngine
-        clearCache()
-        Log.i(TAG, "Loaded ${rules.size} bootstrap DNS rules")
-    }
-
-    private fun getBuiltinRules(): List<BlockedDomain> {
-        val rules = BuiltInBlockRules.emergencyRules().toMutableList()
-        val domains = listOf(
-            // ============================================================
-            // GOOGLE / YOUTUBE ADS & TRACKING
-            // ============================================================
-            "adservice.google.com",
-            "doubleclick.net",
-            "googlesyndication.com",
-            "googleadservices.com",
-            "google-analytics.com",
-            "youtube.cleverads.vn",
-            "s0.2mdn.net",
-            "static.doubleclick.net",
-            "pubads.g.doubleclick.net",
-            "tpc.googlesyndication.com",
-            "pagead2.googlesyndication.com",
-            "ad.youtube.com",
-            "ads.youtube.com",
-            "googleadapis.l.google.com",
-            "video-ad-stats.googlesyndication.com",
-            "pagead-googlehosted.l.google.com",
-            "clients.l.google.com",
-            "pagead.l.doubleclick.net",
-            "pagead.google.com",
-            "partnerad.l.doubleclick.net",
-            "ad.doubleclick.net",
-            "ad.mo.doubleclick.net",
-            "adm.doubleclick.net",
-            "ad-emea.doubleclick.net",
-            "ad-apac.doubleclick.net",
-            "m.doubleclick.net",
-            "mediavisor.doubleclick.net",
-            "gg.google.com",
-            "id.google.com",
-            "googleads.g.doubleclick.net",
-            "www.googleadservices.com",
-            "www.googletagmanager.com",
-            "www.google-analytics.com",
-            "ssl.google-analytics.com",
-            "googletagservices.com",
-            "fwmrm.net",
-            "adm.fwmrm.net",
-            "m1.fwmrm.net",
-            "googleads4.g.doubleclick.net",
-            "googleads5.g.doubleclick.net",
-            "googleads6.g.doubleclick.net",
-            "fls.doubleclick.net",
-            "cm.g.doubleclick.net",
-            "ads.g.doubleclick.net",
-            "iv.doubleclick.net",
-            "ad-g.doubleclick.net",
-            // YouTube-specific ad / tracking endpoints
-            "s.youtube.com",
-            "r.youtube.com",
-            "csp.withgoogle.com",
-            "breakage.withgoogle.com",
-            "youtube-ui.l.google.com",
-            "video-stats.l.google.com",
-            "ytimg.l.google.com",
-            // YouTube SSAI / embedded ad domains (DANGER: googlevideo.com
-            // serves both ads AND content. Only block specific ad-prefixed
-            // subdomains via RuleEngine.isAdVideoServer() with Albania Mode.)
-            // REMOVED from built-ins: redirector and manifest break playback.
-            // "r1---sn-4g5edn7y" etc. removed — handled by isAdVideoServer().
-            // YouTube ad serving via known patterns (exact matches for common ad CDN endpoints)
-            // DANGER: innertube.googleapis.com is the PRIMARY YouTube API endpoint.
-            // Do NOT block it here — it breaks all YouTube playback.
-            // Whitelisted in YOUTUBE_WHITELIST_RULES.
-            // "youtube-nocookie.com" is whitelisted in YOUTUBE_WHITELIST_RULES,
-            // so the allow-rule takes precedence when recommendations are enabled.
-            "youtube-nocookie.com",
-            // ============================================================
-            // ALBANIA-MODE: Region-dependent ad domains that Albanian
-            // YouTube infrastructure does NOT serve. Blocking these
-            // globally removes the ad metadata even if the IP geolocation
-            // is not actually Albanian.
-            // ============================================================
-            "pagead2.googlesyndication.com",
-            "tpc.googlesyndication.com",
-            "video-ad-stats.googlesyndication.com",
-            "www.googletagservices.com",
-            "adservice.google.com",
-            "pagead.l.doubleclick.net",
-            "googleadservices.com",
-            // ============================================================
-            // YOUTUBE AD PLAYBACK SIGNALS
-            // ============================================================
-            "video.google.com",
-            "innovation.withgoogle.com",
-            // ============================================================
-            // INDIAN OTT AD DOMAINS
-            // ============================================================
-            // Hotstar / Disney+ Hotstar
-            "ads.hotstar.com",
-            "hb-api.omtrdc.net",
-            "smetrics.hotstar.com",
-            "tracking.hotstar.com",
-            "sa.hotstar.com",
-            "in-star.ads.yieldmo.com",
-            "ads-internal.hotstar.com",
-            "hotstar.ad.g.doubleclick.net",
-            "hotstarads.akamaized.net",
-            "pubads.g.doubleclick.net",
-            "securepubads.g.doubleclick.net",
-            "googleads4.g.doubleclick.net",
-            // JioCinema
-            "ads.jiocinema.com",
-            "analytics.jiocinema.com",
-            "metrics.jiocinema.com",
-            "tracking.jiocinema.com",
-            "telemetry.jiocinema.com",
-            "jiocinema-ad.akamaized.net",
-            "jiobeats.cdn.jio.com",
-            "jiocinema.com.pagead",
-            // SonyLIV
-            "ads.sonyliv.com",
-            "tracking.sonyliv.com",
-            "analytics.sonyliv.com",
-            "telemetry.sonyliv.com",
-            "adserver.sonyliv.com",
-            "sony.ads.yieldmo.com",
-            // ZEE5
-            "ads.zee5.com",
-            "analytics.zee5.com",
-            "tracking.zee5.com",
-            "telemetry.zee5.com",
-            "adserver.zee5.com",
-            "zee5ads.akamaized.net",
-            // MX Player
-            "ads.mxplay.com",
-            "ads-server.mxplay.com",
-            "analytics.mxplay.com",
-            "tracking.mxplay.com",
-            // Voot
-            "ads.voot.com",
-            "tracking.voot.com",
-            "analytics.voot.com",
-            "vootads.akamaized.net",
-            // Alt Balaji
-            "ads.altbalaji.com",
-            "tracking.altbalaji.com",
-            // Eros Now
-            "ads.erosnow.com",
-            "tracking.erosnow.com",
-            // Generic Indian streaming ad infra
-            "ads.akamaized.net",
-            "adserver.akamaized.net",
-            "tvads.indiatimes.com",
-            "ads.indiatimes.com",
-            "agi-static.indiatimes.com",
-            // ============================================================
-            // INDIAN AD NETWORKS
-            // ============================================================
-            "inmobi.com",
-            "ads.inmobi.com",
-            "i.l.inmobicdn.net",
-            "inmobicdn.net",
-            "komli.com",
-            "tyroo.com",
-            "madstreetden.com",
-            "adpushup.com",
-            "adgebra.in",
-            "dgm.in",
-            "network18.com",
-            "svg.com",
-            "timesinternet.com",
-            "adtech.de",
-            "adform.net",
-            "adition.com",
-            "adition.de",
-            // ============================================================
-            // MOBILE / TV SDK ANALYTICS & TRACKERS
-            // ============================================================
-            "clevertap.com",
-            "sdk.clevertap.com",
-            "wzrkt.com",
-            "moengage.com",
-            "api.moengage.com",
-            "branch.io",
-            "api2.branch.io",
-            "appsflyer.com",
-            "impressions.appsflyer.com",
-            "events.appsflyer.com",
-            "firebaseinstallations.googleapis.com",
-            "firebaselogging.googleapis.com",
-            "firebase-settings.crashlytics.com",
-            "crashlyticsreports-pa.googleapis.com",
-            "mtalk.google.com",
-            "checkin.gstatic.com",
-            // ============================================================
-            // DNS-OVER-HTTPS (DoH) PROVIDERS — Force apps to use our filter
-            // ============================================================
-            "cloudflare-dns.com",
-            "dns.cloudflare.com",
-            "one.one.one.one",
-            "dns.google",
-            "dns.google.com",
-            "dns.quad9.net",
-            "dns9.quad9.net",
-            "dns10.quad9.net",
-            "doh.opendns.com",
-            "dns.nextdns.io",
-            "dns.adguard.com",
-            "family.adguard-dns.com",
-            "unfiltered.adguard-dns.com",
-            "dns.switch.ch",
-            "dns.twnic.tw",
-            "dns.rubyfish.cn",
-            "doh.dns.sb",
-            "doh-fi.blahdns.com",
-            "dns.digitale-gesellschaft.ch",
-            "dnsforge.de",
-            // ============================================================
-            // GENERIC AD / TRACKING NETWORKS
-            // ============================================================
-            "amazon-adsystem.com",
-            "c.amazon-adsystem.com",
-            "s.amazon-adsystem.com",
-            "aax.amazon-adsystem.com",
-            "app-measurement.com",
-            "scorecardresearch.com",
-            "secure-us.imrworldwide.com",
-            "crwdcntrl.net",
-            "agkn.com",
-            "tapad.com",
-            "moatads.com",
-            "adsrvr.org",
-            "adsystem.com",
-            "adnxs.com",
-            "criteo.com",
-            "taboola.com",
-            "outbrain.com",
-            "vungle.com",
-            "unity3d.com",
-            "applovin.com",
-            "chartboost.com",
-            "adcolony.com",
-            "ironsrc.com",
-            "inner-active.mobi",
-            "mopub.com",
-            "startapp.com",
-            "supersonicads.com",
-            "facebook.com/tr",
-            "facebook.com/tr/",
-            "graph.facebook.com",
-            "connect.facebook.net",
-            "analytics.facebook.com",
-            "pixel.facebook.com",
-            "an.facebook.com",
-            "atdmt.com",
-            "ads.yahoo.com",
-            "analytics.yahoo.com",
-            "gemini.yahoo.com",
-            // ============================================================
-            // VIDEO AD SERVERS (used by OTT apps)
-            // ============================================================
-            "freewheel.tv",
-            "freewheel.mb",
-            "ads.freewheel.tv",
-            "hub.com",
-            "ads.hub.com",
-            "adsafeprotected.com",
-            "adsystem.com"
-        )
-        domains.forEach { rules.add(BlockedDomain(host = it.trim(), source = "builtin_emergency")) }
-        return rules
-    }
-
-    fun setUpstreamMode(mode: DnsUpstreamManager.DnsMode) {
-        requestedDnsMode = mode
-        upstreamManager?.setMode(mode)
-    }
-
-    private fun parseDnsMode(mode: String): DnsUpstreamManager.DnsMode {
-        return try {
-            DnsUpstreamManager.DnsMode.valueOf(mode)
-        } catch (_: Exception) {
-            DnsUpstreamManager.DnsMode.PLAIN
-        }
     }
 
     fun getStats(): DnsStats = DnsStats(
@@ -823,54 +419,39 @@ class DnsFilterEngine @Inject constructor(
         allowed = queriesAllowed
     )
 
-    fun isDomainBlocked(host: String): Boolean {
-        return ruleEngine.isBlocked(host) ||
-               (settingsRepo.techniques.albaniaMode &&
-                (ruleEngine.isAdVideoServer(host) || isAlbaniaBlocked(host)))
+    fun isDomainBlocked(host: String): Boolean = ruleEngine.isBlocked(host)
+    fun isIpBlocked(ip: String): Boolean {
+        if (ruleEngine.isIpBlocked(ip)) return true
+        synchronized(blockedIpCache) {
+            val ts = blockedIpCache[ip]
+            if (ts != null && System.currentTimeMillis() - ts < 600_000) return true
+        }
+        return false
     }
 
-    fun isIpBlocked(ip: String): Boolean = ruleEngine.isIpBlocked(ip)
+    fun buildNxDomainBytes(queryPayload: ByteArray): ByteArray? = try {
+        val query = Message(queryPayload)
+        buildNxDomainResponse(query).toWire()
+    } catch (_: Exception) { null }
 
-    /** Build an NXDOMAIN response for a raw DNS query payload. Used by PacketRouter
-     * when a BLOCK-mode app's DNS query is intercepted (total internet denial). */
-    fun buildNxDomainBytes(queryPayload: ByteArray): ByteArray? {
-        return try {
-            val query = Message(queryPayload)
-            buildNxDomainResponse(query).toWire()
-        } catch (_: Exception) { null }
-    }
+    fun buildSinkholeBytes(queryPayload: ByteArray): ByteArray? = try {
+        val query = Message(queryPayload)
+        val type = query.question?.type ?: Type.A
+        buildSinkholeResponse(query, type).toWire()
+    } catch (_: Exception) { null }
 
-    /** Build a sinkhole response for a raw DNS query payload. Used externally when
-     * an ad domain needs to be blocked without triggering DoH/DoT retries. */
-    fun buildSinkholeBytes(queryPayload: ByteArray): ByteArray? {
-        return try {
-            val query = Message(queryPayload)
-            val type = query.question?.type ?: Type.A
-            buildSinkholeResponse(query, type).toWire()
-        } catch (_: Exception) { null }
-    }
+    fun buildIPv6SinkholeBytes(queryPayload: ByteArray): ByteArray? = try {
+        val query = Message(queryPayload)
+        val response = Message(query.header.id)
+        response.header.setFlag(Flags.QR.toInt())
+        response.header.setFlag(Flags.RA.toInt())
+        response.header.rcode = Rcode.NOERROR
+        response.addRecord(query.question, Section.QUESTION)
+        val sinkhole = InetAddress.getByName("::")
+        response.addRecord(AAAARecord(query.question.name, DClass.IN, 300L, sinkhole), Section.ANSWER)
+        response.toWire()
+    } catch (_: Exception) { null }
 
-    /**
-     * Build synthetic AAAA sinkhole response (returns ::) instead of dropping IPv6.
-     * This prevents apps from failing when IPv6 is unavailable.
-     */
-    fun buildIPv6SinkholeBytes(queryPayload: ByteArray): ByteArray? {
-        return try {
-            val query = Message(queryPayload)
-            val response = Message(query.header.id)
-            response.header.setFlag(Flags.QR.toInt())
-            response.header.setFlag(Flags.RA.toInt())
-            response.header.rcode = Rcode.NOERROR
-            response.addRecord(query.question, Section.QUESTION)
-            val name = query.question.name
-            val sinkhole = InetAddress.getByName("::")
-            response.addRecord(AAAARecord(name, DClass.IN, 300L, sinkhole), Section.ANSWER)
-            response.toWire()
-        } catch (_: Exception) { null }
-    }
-
-    /** NXDOMAIN response — reserved for BLOCK-mode firewall (total internet denial).
-     * Ad-domain blocking uses [buildSinkholeResponse] instead. */
     private fun buildNxDomainResponse(query: Message): Message {
         val response = Message(query.header.id)
         response.header.setFlag(Flags.QR.toInt())
@@ -880,27 +461,22 @@ class DnsFilterEngine @Inject constructor(
         return response
     }
 
-    /** Sinkhole response — returns 0.0.0.0 (A) or :: (AAAA) so the app accepts it,
-     * caches it, and the TCP connect to the sinkhole IP fails instantly with no retries.
-     * For non-A/AAAA query types, returns NOERROR with no answer records. */
     private fun buildSinkholeResponse(query: Message, queryType: Int): Message {
         val response = Message(query.header.id)
         response.header.setFlag(Flags.QR.toInt())
         response.header.setFlag(Flags.RA.toInt())
         response.header.rcode = Rcode.NOERROR
         response.addRecord(query.question, Section.QUESTION)
-        val name = query.question.name
         val ttl = 300L
         when (queryType) {
             Type.A -> {
                 val sinkhole = InetAddress.getByName("0.0.0.0")
-                response.addRecord(ARecord(name, DClass.IN, ttl, sinkhole), Section.ANSWER)
+                response.addRecord(ARecord(query.question.name, DClass.IN, ttl, sinkhole), Section.ANSWER)
             }
             Type.AAAA -> {
                 val sinkhole = InetAddress.getByName("::")
-                response.addRecord(AAAARecord(name, DClass.IN, ttl, sinkhole), Section.ANSWER)
+                response.addRecord(AAAARecord(query.question.name, DClass.IN, ttl, sinkhole), Section.ANSWER)
             }
-            // Other types (MX, TXT, etc.): NOERROR with empty answer
         }
         return response
     }
@@ -908,12 +484,9 @@ class DnsFilterEngine @Inject constructor(
     private fun queueLog(host: String, type: String, appPackage: String? = null) {
         synchronized(pendingLogs) {
             pendingLogs.add(com.nexusblock.data.model.BlockedEvent(
-                host = host, 
-                type = type, 
-                appPackage = appPackage
+                host = host, type = type, appPackage = appPackage
             ))
         }
-        // Limit queue size to prevent memory issues
         if (pendingLogs.size > 1000) {
             scope.launch(Dispatchers.IO) {
                 val batch = synchronized(pendingLogs) {
@@ -931,9 +504,8 @@ class DnsFilterEngine @Inject constructor(
             while (isActive) {
                 delay(5000)
                 val batch = synchronized(pendingLogs) {
-                    if (pendingLogs.isEmpty()) {
-                        null
-                    } else {
+                    if (pendingLogs.isEmpty()) null
+                    else {
                         val copy = pendingLogs.toList()
                         pendingLogs.clear()
                         copy

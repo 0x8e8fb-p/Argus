@@ -4,7 +4,7 @@
             "outputFile": "com.nexusblock.app-mergeDebugResources-52:/values-v30/values-v30.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Prabha\\.gradle\\caches\\9.5.1\\transforms\\b573722039fdadeb556a21889b3e9be6\\transformed\\material3\\res\\values-v30\\values-v30.xml",
+                    "source": "/Users/prabha/.gradle/caches/9.5.1/transforms/b573722039fdadeb556a21889b3e9be6/transformed/material3/res/values-v30/values-v30.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

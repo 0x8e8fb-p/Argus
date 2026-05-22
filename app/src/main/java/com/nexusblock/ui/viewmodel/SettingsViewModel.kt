@@ -3,23 +3,19 @@ package com.nexusblock.ui.viewmodel
 import android.app.Application
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.nexusblock.data.repository.SettingsRepository
-import com.nexusblock.engine.CertificateManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     application: Application,
-    private val settingsRepo: SettingsRepository,
-    private val certificateManager: CertificateManager
+    private val settingsRepo: SettingsRepository
 ) : AndroidViewModel(application) {
 
     private val context = application.applicationContext
@@ -27,14 +23,8 @@ class SettingsViewModel @Inject constructor(
     val autoStart: StateFlow<Boolean> = settingsRepo.observeAutoStart()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
-    val dnsMode: StateFlow<String> = settingsRepo.observeDnsMode()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "PLAIN")
-
-    val youtubeRecommendations: StateFlow<Boolean> = settingsRepo.observeYoutubeRecommendations()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
-
-    val caInstalled: StateFlow<Boolean> = MutableStateFlow(certificateManager.isCaInstalled())
-        .asStateFlow()
+    val dnsProfile: StateFlow<String> = settingsRepo.observeDnsProfile()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "adguard_standard")
 
     private val _isBatteryOptimized = MutableStateFlow(false)
     val isBatteryOptimized: StateFlow<Boolean> = _isBatteryOptimized.asStateFlow()
@@ -47,12 +37,8 @@ class SettingsViewModel @Inject constructor(
         settingsRepo.autoStart = enabled
     }
 
-    fun setDnsMode(mode: String) {
-        settingsRepo.dnsMode = mode
-    }
-
-    fun setYoutubeRecommendations(enabled: Boolean) {
-        settingsRepo.youtubeRecommendationsEnabled = enabled
+    fun setDnsProfile(profileId: String) {
+        settingsRepo.dnsProfile = profileId
     }
 
     fun requestBatteryOptimization(): Boolean {
@@ -66,13 +52,6 @@ class SettingsViewModel @Inject constructor(
         } else {
             false
         }
-    }
-
-    fun openCaInstallScreen() {
-        val intent = Intent(Settings.ACTION_SECURITY_SETTINGS).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        }
-        context.startActivity(intent)
     }
 
     fun checkBatteryOptimization() {

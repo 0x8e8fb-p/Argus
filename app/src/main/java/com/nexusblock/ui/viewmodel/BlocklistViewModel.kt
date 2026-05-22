@@ -60,7 +60,7 @@ class BlocklistViewModel @Inject constructor(
                 if (it.id == id) it.copy(enabled = enabled) else it
             }
             if (NexusVpnService.isRunning) {
-                dnsEngine.reloadBlocklists()
+                dnsEngine.reloadRules()
             }
         }
     }

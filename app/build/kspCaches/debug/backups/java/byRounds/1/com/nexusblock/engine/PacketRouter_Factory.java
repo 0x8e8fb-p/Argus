@@ -29,34 +29,29 @@ public final class PacketRouter_Factory implements Factory<PacketRouter> {
 
   private final Provider<StatsRepository> statsRepoProvider;
 
-  private final Provider<ConnectionTracker> connectionTrackerProvider;
-
   private final Provider<SettingsRepository> settingsRepoProvider;
 
   public PacketRouter_Factory(Provider<DnsFilterEngine> dnsEngineProvider,
       Provider<StatsRepository> statsRepoProvider,
-      Provider<ConnectionTracker> connectionTrackerProvider,
       Provider<SettingsRepository> settingsRepoProvider) {
     this.dnsEngineProvider = dnsEngineProvider;
     this.statsRepoProvider = statsRepoProvider;
-    this.connectionTrackerProvider = connectionTrackerProvider;
     this.settingsRepoProvider = settingsRepoProvider;
   }
 
   @Override
   public PacketRouter get() {
-    return newInstance(dnsEngineProvider.get(), statsRepoProvider.get(), connectionTrackerProvider.get(), settingsRepoProvider.get());
+    return newInstance(dnsEngineProvider.get(), statsRepoProvider.get(), settingsRepoProvider.get());
   }
 
   public static PacketRouter_Factory create(Provider<DnsFilterEngine> dnsEngineProvider,
       Provider<StatsRepository> statsRepoProvider,
-      Provider<ConnectionTracker> connectionTrackerProvider,
       Provider<SettingsRepository> settingsRepoProvider) {
-    return new PacketRouter_Factory(dnsEngineProvider, statsRepoProvider, connectionTrackerProvider, settingsRepoProvider);
+    return new PacketRouter_Factory(dnsEngineProvider, statsRepoProvider, settingsRepoProvider);
   }
 
   public static PacketRouter newInstance(DnsFilterEngine dnsEngine, StatsRepository statsRepo,
-      ConnectionTracker connectionTracker, SettingsRepository settingsRepo) {
-    return new PacketRouter(dnsEngine, statsRepo, connectionTracker, settingsRepo);
+      SettingsRepository settingsRepo) {
+    return new PacketRouter(dnsEngine, statsRepo, settingsRepo);
   }
 }

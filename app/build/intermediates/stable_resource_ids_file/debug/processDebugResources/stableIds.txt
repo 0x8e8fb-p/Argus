@@ -1,4 +1,3 @@
-com.nexusblock.debug:xml/accessibility_service_config = 0x7f110000
 com.nexusblock.debug:styleable/SplitPlaceholderRule = 0x7f100016
 com.nexusblock.debug:styleable/SplitPairRule = 0x7f100015
 com.nexusblock.debug:styleable/Navigator = 0x7f100013

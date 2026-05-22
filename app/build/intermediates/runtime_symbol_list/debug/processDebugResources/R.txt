@@ -586,4 +586,3 @@ int styleable SplitPlaceholderRule_splitOpenAnimation 11
 int styleable SplitPlaceholderRule_splitRatio 12
 int styleable SplitPlaceholderRule_stickyPlaceholder 13
 int styleable SplitPlaceholderRule_tag 14
-int xml accessibility_service_config 0x7f110000

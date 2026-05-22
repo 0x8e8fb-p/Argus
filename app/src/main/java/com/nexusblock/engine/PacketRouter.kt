@@ -18,7 +18,6 @@ import javax.inject.Singleton
 class PacketRouter @Inject constructor(
     private val dnsEngine: DnsFilterEngine,
     private val statsRepo: StatsRepository,
-    private val connectionTracker: ConnectionTracker,
     private val settingsRepo: com.nexusblock.data.repository.SettingsRepository
 ) {
     companion object {
@@ -30,9 +29,6 @@ class PacketRouter @Inject constructor(
         private const val PROTO_UDP = 17
 
         private const val TCP_RST = 0x04
-
-        private const val TLS_HANDSHAKE = 22
-        private const val TLS_CLIENT_HELLO = 1
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -41,9 +37,6 @@ class PacketRouter @Inject constructor(
     private var techniques = com.nexusblock.data.repository.BlockingTechniques()
     private val outputLock = Any()
 
-    private var tcpNatRelay: TcpNatRelay? = null
-    private var udpRelay: UdpRelay? = null
-
     @Volatile
     var isRunning = false
         private set
@@ -51,7 +44,6 @@ class PacketRouter @Inject constructor(
     // Diagnostics counters
     var packetsProcessed = 0L
     var packetsBlocked = 0L
-    var sniBlocks = 0L
     var dnsBlocks = 0L
     var bytesTotal = 0L
     private var lastStatsUpdate = 0L
@@ -65,13 +57,11 @@ class PacketRouter @Inject constructor(
         isRunning = true
 
         dnsEngine.start(dnsAddress)
-        connectionTracker.start()
 
         techniquesJob?.cancel()
         techniquesJob = scope.launch {
             settingsRepo.observeTechniques().collect {
-                // EMERGENCY: force full tunnel OFF until TcpNatRelay is production-ready
-                techniques = it.copy(fullTunnel = false)
+                techniques = it
                 Log.d(TAG, "Techniques updated: $techniques")
             }
         }
@@ -80,13 +70,6 @@ class PacketRouter @Inject constructor(
             val input = FileInputStream(tunFd.fileDescriptor).channel
             val output = FileOutputStream(tunFd.fileDescriptor).channel
             val buffer = ByteBuffer.allocateDirect(BUFFER_SIZE)
-
-            tcpNatRelay = TcpNatRelay(
-                vpnService, output,
-                shouldInspectSni = { techniques.sniInspection },
-                isDomainBlocked = { dnsEngine.isDomainBlocked(it) }
-            )
-            udpRelay = UdpRelay(vpnService, output)
 
             while (isActive && isRunning) {
                 try {
@@ -114,19 +97,13 @@ class PacketRouter @Inject constructor(
         routerJob = null
         techniquesJob?.cancel()
         techniquesJob = null
-        tcpNatRelay?.stop()
-        tcpNatRelay = null
-        udpRelay?.stop()
-        udpRelay = null
         dnsEngine.stop()
-        connectionTracker.stop()
         Log.i(TAG, "Packet router stopped")
     }
 
     fun getRouterStats(): RouterStats = RouterStats(
         packetsProcessed = packetsProcessed,
         packetsBlocked = packetsBlocked,
-        sniBlocks = sniBlocks,
         dnsBlocks = dnsBlocks,
         bytesTotal = bytesTotal
     )
@@ -191,50 +168,7 @@ class PacketRouter @Inject constructor(
                         return
                     }
 
-                    // 2a. Per-app firewall BLOCK check (before DNS)
-                    if (techniques.appFirewall && isSourceAppBlocked(srcIp, srcPort, dstIp, dstPort, "udp")) {
-                        // App is blocked — drop DNS silently, drop everything else silently too
-                        if (dstPort == 53) {
-                            val udpLen = (buffer.getShort(udpOffset + 4).toInt() and 0xFFFF)
-                            val payloadLen = udpLen - 8
-                            if (payloadLen > 0 && buffer.remaining() >= udpOffset + 8 + payloadLen) {
-                                val mark = buffer.position()
-                                buffer.position(udpOffset + 8)
-                                val queryPayload = ByteArray(payloadLen)
-                                buffer.get(queryPayload)
-                                buffer.position(mark)
-                                val nxdomain = dnsEngine.buildNxDomainBytes(queryPayload)
-                                if (nxdomain != null) {
-                                    sendDnsResponse(output, srcIp, dstIp, srcPort, dstPort, nxdomain)
-                                }
-                            }
-                        }
-                        packetsBlocked++
-                        return
-                    }
-
-                    // 2b. QUIC SNI inspection (UDP/443)
-                    if (dstPort == 443 && techniques.sniInspection) {
-                        val udpLen = (buffer.getShort(udpOffset + 4).toInt() and 0xFFFF)
-                        val payloadLen = udpLen - 8
-                        if (payloadLen > 0 && buffer.remaining() >= udpOffset + 8 + payloadLen) {
-                            val quicPayload = ByteArray(payloadLen)
-                            val mark = buffer.position()
-                            buffer.position(udpOffset + 8)
-                            buffer.get(quicPayload)
-                            buffer.position(mark)
-
-                            val sni = QuicInspector.extractSni(quicPayload)
-                            if (sni != null && dnsEngine.isDomainBlocked(sni)) {
-                                Log.v(TAG, "QUIC SNI block: $sni")
-                                sniBlocks++
-                                packetsBlocked++
-                                return
-                            }
-                        }
-                    }
-
-                    // 2c. DNS interception
+                    // DNS interception
                     if (dstPort == 53 && techniques.dnsFiltering) {
                         val udpLen = (buffer.getShort(udpOffset + 4).toInt() and 0xFFFF)
                         val payloadLen = udpLen - 8
@@ -259,10 +193,6 @@ class PacketRouter @Inject constructor(
                         }
                     }
                 }
-                if (buffer.remaining() >= udpOffset + 8 && techniques.fullTunnel && dstPort != 53) {
-                    udpRelay?.process(buffer, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort)
-                    return
-                }
                 writePacket(output, buffer.duplicate())
             }
             PROTO_TCP -> {
@@ -284,42 +214,28 @@ class PacketRouter @Inject constructor(
                     return
                 }
 
-                // Per-app firewall BLOCK check
-                if (techniques.appFirewall && isSourceAppBlocked(srcIp, srcPort, dstIp, dstPort, "tcp")) {
-                    sendRst(output, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort)
-                    packetsBlocked++
-                    return
-                }
+                // SNI-based blocking: inspect TLS ClientHello for ad domains
+                if (dstPort == 443 && tcpPayloadLen > 0 && techniques.dnsFiltering) {
+                    if (buffer.remaining() >= tcpPayloadOffset + tcpPayloadLen) {
+                        val tcpPayloadBytes = ByteArray(tcpPayloadLen)
+                        val mark = buffer.position()
+                        buffer.position(tcpPayloadOffset)
+                        buffer.get(tcpPayloadBytes)
+                        buffer.position(mark)
 
-                if (techniques.fullTunnel && dstPort != 53) {
-                    tcpNatRelay?.process(buffer, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort, tcpPayloadLen)
-                    return
-                }
-
-                // SNI inspection on HTTPS (port 443) — DNS-only mode path
-                if (techniques.sniInspection && dstPort == 443 && tcpPayloadLen > 0) {
-                    val sni = extractSni(buffer, tcpPayloadOffset, tcpPayloadLen)
-                    if (sni != null && dnsEngine.isDomainBlocked(sni)) {
-                        Log.v(TAG, "SNI block: $sni")
-                        sniBlocks++
-                        packetsBlocked++
-
-                        // App Attribution
-                        val pkgName = connectionTracker.getPackageForConnection(
-                            InetAddress.getByAddress(srcIp),
-                            srcPort,
-                            InetAddress.getByAddress(dstIp),
-                            dstPort,
-                            "tcp"
-                        ) ?: "Unknown"
-
-                        sendRst(output, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort)
-                        scope.launch {
-                            statsRepo.logBlocked(sni, appPackage = pkgName, type = "sni")
+                        val sni = SniExtractor.extractSni(tcpPayloadBytes, 0, tcpPayloadLen)
+                        if (sni != null && dnsEngine.isDomainBlocked(sni)) {
+                            sendRst(output, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort)
+                            packetsBlocked++
+                            dnsBlocks++
+                            scope.launch {
+                                statsRepo.logBlocked(sni, type = "sni")
+                            }
+                            return
                         }
-                        return
                     }
                 }
+
                 writePacket(output, buffer.duplicate())
             }
             else -> writePacket(output, buffer.duplicate())
@@ -377,77 +293,6 @@ class PacketRouter @Inject constructor(
 
     private fun readIpv4(buffer: ByteBuffer, offset: Int): ByteArray {
         return byteArrayOf(buffer.get(offset), buffer.get(offset + 1), buffer.get(offset + 2), buffer.get(offset + 3))
-    }
-
-    /** Check if the source app of a connection is in BLOCK firewall mode. */
-    private fun isSourceAppBlocked(srcIp: ByteArray, srcPort: Int, dstIp: ByteArray, dstPort: Int, proto: String): Boolean {
-        return try {
-            val pkg = connectionTracker.getPackageForConnection(
-                InetAddress.getByAddress(srcIp), srcPort,
-                InetAddress.getByAddress(dstIp), dstPort, proto
-            )
-            pkg != null && settingsRepo.getBlockedPackages().contains(pkg)
-        } catch (_: Exception) {
-            false
-        }
-    }
-
-    private fun extractSni(buffer: ByteBuffer, offset: Int, length: Int): String? {
-        if (length < 6) return null
-        val contentType = buffer.get(offset).toInt() and 0xFF
-        if (contentType != TLS_HANDSHAKE) return null
-        val handshakeType = buffer.get(offset + 5).toInt() and 0xFF
-        if (handshakeType != TLS_CLIENT_HELLO) return null
-
-        try {
-            if (offset + 9 > offset + length) return null
-            var pos = offset + 9
-            pos += 2 // version
-            pos += 32 // random
-
-            val sessionIdLen = buffer.get(pos).toInt() and 0xFF
-            pos += 1 + sessionIdLen
-
-            if (pos + 2 > offset + length) return null
-            val cipherSuitesLen = buffer.getShort(pos).toInt() and 0xFFFF
-            pos += 2 + cipherSuitesLen
-
-            if (pos + 1 > offset + length) return null
-            val compressionLen = buffer.get(pos).toInt() and 0xFF
-            pos += 1 + compressionLen
-
-            if (pos + 2 > offset + length) return null
-            val extensionsLen = buffer.getShort(pos).toInt() and 0xFFFF
-            pos += 2
-            val extensionsEnd = pos + extensionsLen
-
-            while (pos + 4 <= extensionsEnd && pos + 4 <= offset + length) {
-                val extType = buffer.getShort(pos).toInt() and 0xFFFF
-                val extLen = buffer.getShort(pos + 2).toInt() and 0xFFFF
-                pos += 4
-                if (extType == 0x0000) { // SNI
-                    if (pos + 2 <= offset + length) {
-                        val sniListLen = buffer.getShort(pos).toInt() and 0xFFFF
-                        var sniPos = pos + 2
-                        val sniListEnd = sniPos + sniListLen
-                        while (sniPos + 3 <= sniListEnd && sniPos + 3 <= offset + length) {
-                            val nameType = buffer.get(sniPos).toInt() and 0xFF
-                            val nameLen = buffer.getShort(sniPos + 1).toInt() and 0xFFFF
-                            sniPos += 3
-                            if (nameType == 0 && sniPos + nameLen <= offset + length) {
-                                val sniBytes = ByteArray(nameLen)
-                                for (i in 0 until nameLen) sniBytes[i] = buffer.get(sniPos + i)
-                                return String(sniBytes, Charsets.UTF_8)
-                            }
-                            sniPos += nameLen
-                        }
-                    }
-                    return null
-                }
-                pos += extLen
-            }
-        } catch (_: Exception) {}
-        return null
     }
 
     private fun sendRst(
@@ -604,7 +449,6 @@ class PacketRouter @Inject constructor(
     data class RouterStats(
         val packetsProcessed: Long,
         val packetsBlocked: Long,
-        val sniBlocks: Long,
         val dnsBlocks: Long,
         val bytesTotal: Long
     )

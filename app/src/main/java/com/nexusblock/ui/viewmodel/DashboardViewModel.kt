@@ -148,13 +148,10 @@ class DashboardViewModel @Inject constructor(
         val current = settingsRepo.techniques
         val updated = when (name) {
             "dns" -> current.copy(dnsFiltering = enabled)
-            "sni" -> current.copy(sniInspection = enabled)
-            "mitm" -> current.copy(mitmProxy = enabled)
             "header" -> current.copy(headerFilter = enabled)
             "ip" -> current.copy(ipBlocking = enabled)
             "stealth" -> current.copy(stealthMode = enabled)
             "firewall" -> current.copy(appFirewall = enabled)
-            "albania" -> current.copy(albaniaMode = enabled)
             else -> current
         }
         settingsRepo.techniques = updated
