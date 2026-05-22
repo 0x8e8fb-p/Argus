@@ -9,13 +9,20 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.navigation.compose.NavHost
@@ -24,11 +31,13 @@ import androidx.navigation.compose.rememberNavController
 import com.nexusblock.data.repository.SettingsRepository
 import com.nexusblock.service.NexusVpnService
 import com.nexusblock.service.VpnWatchdogService
-import com.nexusblock.ui.components.NexusBackground
-import com.nexusblock.ui.components.NexusNavigationRail
-import kotlinx.coroutines.launch
+import com.nexusblock.ui.components.ArgusBackground
+import com.nexusblock.ui.components.ArgusNavigationRail
 import com.nexusblock.ui.screens.*
-import com.nexusblock.ui.theme.NexusBlockTheme
+import com.nexusblock.ui.theme.ArgusBlockTheme
+import com.nexusblock.ui.theme.LocalTvDimensions
+import com.nexusblock.ui.theme.dimensionsForWidth
+import com.nexusblock.ui.theme.tvDimensions
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -36,7 +45,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     companion object {
-        private const val TAG = "NexusBlock/Main"
+        private const val TAG = "ArgusBlock/Main"
         private const val REQUEST_VPN = 1001
     }
 
@@ -47,7 +56,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Auto-trigger VPN permission dialog on first launch so user can approve from TV remote
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             val intent = VpnService.prepare(this)
             if (intent != null) {
@@ -60,8 +68,8 @@ class MainActivity : ComponentActivity() {
             }
         }, 1500)
         setContent {
-            NexusBlockTheme {
-                NexusBlockApp(
+            ArgusBlockTheme {
+                ArgusBlockApp(
                     onRequestVpnPermission = {
                         val intent = VpnService.prepare(this)
                         if (intent != null) {
@@ -80,8 +88,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Resume only restores a user-desired active VPN. An explicit Stop should
-        // stay stopped when the app is reopened.
         val intent = VpnService.prepare(this)
         if (intent == null && settingsRepo.vpnActive && !NexusVpnService.isRunning) {
             Log.i(TAG, "Auto-starting VPN on resume")
@@ -119,42 +125,56 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun NexusBlockApp(
+fun ArgusBlockApp(
     onRequestVpnPermission: () -> Unit = {}
 ) {
     val navController = rememberNavController()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        NexusBackground()
-        Row(modifier = Modifier.fillMaxSize()) {
-            NexusNavigationRail(navController = navController)
-            NavHost(
-                navController = navController,
-                startDestination = Screen.Dashboard.route,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 28.dp, vertical = 24.dp)
-            ) {
-                composable(Screen.Dashboard.route) {
-                    DashboardScreen(
-                        onRequestVpnPermission = onRequestVpnPermission
-                    )
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val dims = dimensionsForWidth(maxWidth.value.toInt())
+        CompositionLocalProvider(LocalTvDimensions provides dims) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                ArgusBackground()
+                Row(modifier = Modifier.fillMaxSize()) {
+                    ArgusNavigationRail(navController = navController)
+                    NavHost(
+                        navController = navController,
+                        startDestination = Screen.Home.route,
+                        enterTransition = {
+                            fadeIn(tween(300)) + slideInHorizontally(tween(300)) { it / 12 }
+                        },
+                        exitTransition = {
+                            fadeOut(tween(200)) + slideOutHorizontally(tween(200)) { -it / 12 }
+                        },
+                        popEnterTransition = {
+                            fadeIn(tween(300)) + slideInHorizontally(tween(300)) { -it / 12 }
+                        },
+                        popExitTransition = {
+                            fadeOut(tween(200)) + slideOutHorizontally(tween(200)) { it / 12 }
+                        },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(
+                                horizontal = dims.contentPadding,
+                                vertical = dims.spacingLarge
+                            )
+                    ) {
+                        composable(Screen.Home.route) {
+                            DashboardScreen(
+                                onRequestVpnPermission = onRequestVpnPermission
+                            )
+                        }
+                        composable(Screen.Activity.route) { LogsScreen() }
+                        composable(Screen.Settings.route) { SettingsScreen() }
+                    }
                 }
-                composable(Screen.Blocklists.route) { BlocklistScreen() }
-                composable(Screen.CustomRules.route) { CustomRulesScreen() }
-                composable(Screen.Firewall.route) { FirewallScreen() }
-                composable(Screen.Logs.route) { LogsScreen() }
-                composable(Screen.Settings.route) { SettingsScreen() }
             }
         }
     }
 }
 
 sealed class Screen(val route: String, val title: String) {
-    object Dashboard : Screen("dashboard", "Dashboard")
-    object Blocklists : Screen("blocklists", "Blocklists")
-    object CustomRules : Screen("custom_rules", "Rules")
-    object Firewall : Screen("firewall", "Firewall")
-    object Logs : Screen("logs", "Logs")
+    object Home : Screen("home", "Home")
+    object Activity : Screen("activity", "Activity")
     object Settings : Screen("settings", "Settings")
 }

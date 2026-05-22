@@ -2,30 +2,36 @@
 
 package com.nexusblock.ui.screens
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.tv.material3.Button
@@ -36,9 +42,12 @@ import com.nexusblock.R
 import com.nexusblock.ui.components.AnimatedStateText
 import com.nexusblock.ui.components.FocusPanel
 import com.nexusblock.ui.components.MetricTile
-import com.nexusblock.ui.components.NexusScreenHeader
-import com.nexusblock.ui.components.StatusDot
+import com.nexusblock.ui.theme.tvDimensions
 import com.nexusblock.ui.viewmodel.DashboardViewModel
+
+private val EmeraldGreen = Color(0xFF00E676)
+private val EmeraldDark = Color(0xFF00C853)
+private val ErrorRed = Color(0xFFFF5252)
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -47,240 +56,150 @@ fun DashboardScreen(
     onRequestVpnPermission: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
-    val bandwidthTotal by viewModel.bandwidthTotal.collectAsState()
+    val dims = tvDimensions()
 
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(18.dp)
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        NexusScreenHeader(
-            title = "Command Center",
-            subtitle = if (state.vpnActive) {
-                "System DNS filtering is active across the TV profile."
-            } else {
-                "Start the shield to route DNS through NexusBlock."
+        Spacer(modifier = Modifier.height(dims.spacingMedium))
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            ShieldHero(
+                active = state.vpnActive,
+                shieldSize = dims.shieldSize
+            )
+
+            Spacer(modifier = Modifier.height(dims.spacingLarge))
+
+            Text(
+                text = if (state.vpnActive) "Protected" else "Unprotected",
+                style = MaterialTheme.typography.displaySmall,
+                color = if (state.vpnActive) EmeraldGreen else ErrorRed,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(dims.spacingSmall))
+
+            AnimatedStateText(
+                text = if (state.vpnActive) {
+                    "Filtering ads & trackers across all apps"
+                } else {
+                    "Tap below to activate protection"
+                }
+            )
+
+            Spacer(modifier = Modifier.height(dims.spacingLarge))
+
+            Button(
+                onClick = { viewModel.toggleVpn(onRequestVpnPermission) },
+                modifier = Modifier
+                    .width(dims.buttonWidth)
+                    .height(dims.buttonHeight)
+            ) {
+                Text(
+                    text = if (state.vpnActive) "Stop Protection" else "Start Protection",
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
-        )
+        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(18.dp)
+            horizontalArrangement = Arrangement.spacedBy(dims.spacingMedium)
         ) {
-            ProtectionPanel(
-                active = state.vpnActive,
-                statusText = state.statusText,
-                onToggle = { viewModel.toggleVpn(onRequestVpnPermission) },
-                modifier = Modifier
-                    .weight(1.2f)
-                    .height(292.dp)
-            )
-            Column(
+            MetricTile(
+                value = state.blockedCountText,
+                label = "Ads Blocked",
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                    MetricTile(
-                        value = state.blockedCountText,
-                        label = "Ads Blocked",
-                        modifier = Modifier.weight(1f),
-                        accent = MaterialTheme.colorScheme.primary
-                    )
-                    MetricTile(
-                        value = state.dataSavedText,
-                        label = "Data Saved",
-                        modifier = Modifier.weight(1f),
-                        accent = MaterialTheme.colorScheme.secondary
-                    )
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                    MetricTile(
-                        value = bandwidthTotal,
-                        label = "Traffic",
-                        modifier = Modifier.weight(1f),
-                        accent = MaterialTheme.colorScheme.tertiary
-                    )
-                    MetricTile(
-                        value = state.domainCountText,
-                        label = "Active Rules",
-                        modifier = Modifier.weight(1f),
-                        accent = Color(0xFFFF8A80)
-                    )
-                }
-            }
-        }
-
-        Text(
-            text = "Blocking Techniques",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(top = 6.dp)
-        )
-
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-            contentPadding = PaddingValues(bottom = 24.dp)
-        ) {
-            items(TECHNIQUES.chunked(2), key = { row -> row.joinToString { it.key } }) { row ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    row.forEach { technique ->
-                        val enabled = state.techniques.isEnabled(technique.key)
-                        TechniqueToggle(
-                            title = technique.title,
-                            subtitle = technique.subtitle,
-                            enabled = enabled,
-                            onToggle = { viewModel.setTechnique(technique.key, it) },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    if (row.size == 1) {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalTvMaterial3Api::class)
-@Composable
-private fun ProtectionPanel(
-    active: Boolean,
-    statusText: String,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val accent = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-
-    FocusPanel(
-        modifier = modifier,
-        selected = active,
-        contentPadding = PaddingValues(24.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(contentAlignment = Alignment.Center) {
-                    StatusDot(color = accent, modifier = Modifier.size(18.dp))
-                    Icon(
-                        painter = painterResource(if (active) R.drawable.ic_vpn_key else R.drawable.ic_shield),
-                        contentDescription = null,
-                        tint = accent,
-                        modifier = Modifier.size(72.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(20.dp))
-                Column {
-                    Text(
-                        text = if (active) "Protected" else "Disabled",
-                        style = MaterialTheme.typography.displaySmall,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        maxLines = 1
-                    )
-                    Text(
-                        text = statusText,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-
-            Column {
-                AnimatedStateText(
-                    text = if (active) "Filtering ad and tracker domains" else "DNS protection is paused"
-                )
-                Spacer(modifier = Modifier.height(18.dp))
-                Button(
-                    onClick = onToggle,
-                    modifier = Modifier
-                        .width(260.dp)
-                        .height(58.dp)
-                ) {
-                    Text(
-                        text = if (active) "Stop Blocking" else "Start Blocking",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TechniqueToggle(
-    title: String,
-    subtitle: String,
-    enabled: Boolean,
-    onToggle: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    FocusPanel(
-        modifier = modifier.height(86.dp),
-        selected = enabled,
-        onClick = { onToggle(!enabled) },
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Switch(
-                checked = enabled,
-                onCheckedChange = onToggle
+                accent = EmeraldGreen
+            )
+            MetricTile(
+                value = state.dataSavedText,
+                label = "Data Saved",
+                modifier = Modifier.weight(1f),
+                accent = Color(0xFF69F0AE)
+            )
+            MetricTile(
+                value = state.domainCountText,
+                label = "Active Rules",
+                modifier = Modifier.weight(1f),
+                accent = Color(0xFFB2FF59)
             )
         }
     }
 }
 
-private data class Technique(
-    val title: String,
-    val subtitle: String,
-    val key: String
-)
+@Composable
+private fun ShieldHero(
+    active: Boolean,
+    shieldSize: androidx.compose.ui.unit.Dp
+) {
+    val transition = rememberInfiniteTransition(label = "shieldBreath")
+    val breathScale by transition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.02f,
+        animationSpec = infiniteRepeatable(tween(3000), RepeatMode.Reverse),
+        label = "breathScale"
+    )
+    val glowPulse by transition.animateFloat(
+        initialValue = 0.1f,
+        targetValue = 0.35f,
+        animationSpec = infiniteRepeatable(tween(2800), RepeatMode.Reverse),
+        label = "glowPulse"
+    )
 
-private val TECHNIQUES = listOf(
-    Technique("DNS Filtering", "Blocks ad domains before apps connect", "dns"),
-    Technique("SNI Watch", "Flags encrypted connections to known ad hosts", "sni"),
-    Technique("HTTPS Proxy", "Optional browser-level inspection for unpinned clients", "mitm"),
-    Technique("Header Filter", "Removes common tracking headers in proxy mode", "header"),
-    Technique("IP Blocking", "Drops known ad server IP ranges when visible", "ip"),
-    Technique("Stealth Mode", "Blocks ICMP probes from the TV profile", "stealth"),
-    Technique("App Firewall", "Applies per-app VPN bypass and block modes", "firewall"),
-    Technique("Albania Mode", "YouTube region spoof — fewer ads via Albanian routing", "albania")
-)
+    val scale by animateFloatAsState(
+        if (active) breathScale else 1f, tween(500), label = "heroScale"
+    )
+    val iconColor by animateColorAsState(
+        if (active) EmeraldGreen else ErrorRed, tween(600), label = "iconColor"
+    )
+    val ringAlpha by animateFloatAsState(
+        if (active) glowPulse else 0f, tween(600), label = "ringAlpha"
+    )
 
-private fun com.nexusblock.data.repository.BlockingTechniques.isEnabled(key: String): Boolean {
-    return when (key) {
-        "dns" -> dnsFiltering
-        "header" -> headerFilter
-        "ip" -> ipBlocking
-        "stealth" -> stealthMode
-        "firewall" -> appFirewall
-        else -> false
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(shieldSize * 1.7f)
+            .drawBehind {
+                if (active) {
+                    drawCircle(
+                        color = EmeraldGreen.copy(alpha = ringAlpha * 0.25f),
+                        radius = size.minDimension / 2f
+                    )
+                    drawCircle(
+                        color = EmeraldGreen.copy(alpha = ringAlpha * 0.5f),
+                        radius = size.minDimension / 2.6f,
+                        style = Stroke(width = 1.5.dp.toPx())
+                    )
+                    drawCircle(
+                        color = EmeraldDark.copy(alpha = ringAlpha * 0.3f),
+                        radius = size.minDimension / 3.2f,
+                        style = Stroke(width = 1.dp.toPx())
+                    )
+                }
+            }
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_shield),
+            contentDescription = if (active) "Protected" else "Unprotected",
+            tint = iconColor,
+            modifier = Modifier
+                .size(shieldSize)
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                }
+        )
     }
 }

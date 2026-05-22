@@ -26,7 +26,7 @@ import androidx.tv.material3.Text
 import com.nexusblock.data.model.FirewallMode
 import com.nexusblock.data.model.description
 import com.nexusblock.ui.components.FocusPanel
-import com.nexusblock.ui.components.NexusScreenHeader
+import com.nexusblock.ui.components.ArgusScreenHeader
 import com.nexusblock.ui.components.SegmentedControl
 import com.nexusblock.ui.viewmodel.AppFirewallInfo
 import com.nexusblock.ui.viewmodel.FirewallViewModel
@@ -44,7 +44,7 @@ fun FirewallScreen(
         contentPadding = PaddingValues(bottom = 36.dp)
     ) {
         item {
-            NexusScreenHeader(
+            ArgusScreenHeader(
                 title = "App Firewall",
                 subtitle = "Launchable TV apps are included, even when preinstalled as system apps."
             )

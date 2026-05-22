@@ -32,7 +32,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nexusblock.data.model.CustomRule
 import com.nexusblock.ui.components.FocusPanel
-import com.nexusblock.ui.components.NexusScreenHeader
+import com.nexusblock.ui.components.ArgusScreenHeader
 import com.nexusblock.ui.components.SegmentedControl
 import com.nexusblock.ui.viewmodel.CustomRulesViewModel
 
@@ -50,7 +50,7 @@ fun CustomRulesScreen(
         contentPadding = PaddingValues(bottom = 36.dp)
     ) {
         item {
-            NexusScreenHeader(
+            ArgusScreenHeader(
                 title = "Custom Rules",
                 subtitle = "Add targeted block or allow rules when an app reveals a new domain.",
                 action = {

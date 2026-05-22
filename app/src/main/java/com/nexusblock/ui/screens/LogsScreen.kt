@@ -26,7 +26,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nexusblock.ui.components.FocusPanel
-import com.nexusblock.ui.components.NexusScreenHeader
+import com.nexusblock.ui.components.ArgusScreenHeader
 import com.nexusblock.ui.viewmodel.LogsViewModel
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -42,7 +42,7 @@ fun LogsScreen(
         contentPadding = PaddingValues(bottom = 36.dp)
     ) {
         item {
-            NexusScreenHeader(
+            ArgusScreenHeader(
                 title = "Blocked Log",
                 subtitle = "Recent DNS, CNAME, and SNI events caught by the app.",
                 action = {

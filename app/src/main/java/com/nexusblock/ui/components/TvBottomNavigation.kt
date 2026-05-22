@@ -21,11 +21,8 @@ fun TvBottomNavigation(
     val currentRoute = navBackStackEntry?.destination?.route
 
     val items = listOf(
-        Screen.Dashboard,
-        Screen.Blocklists,
-        Screen.CustomRules,
-        Screen.Firewall,
-        Screen.Logs,
+        Screen.Home,
+        Screen.Activity,
         Screen.Settings
     )
 

@@ -64,7 +64,7 @@ class DashboardViewModel @Inject constructor(
             vpnActive = running,
             vpnDesired = desiredActive,
             statusText = when {
-                running -> "NexusBlock is protecting your device"
+                running -> "ArgusBlock is protecting your device"
                 desiredActive -> "VPN permission or service restart is needed"
                 else -> "Ad blocking is disabled"
             },

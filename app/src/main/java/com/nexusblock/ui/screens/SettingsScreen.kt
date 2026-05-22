@@ -16,6 +16,9 @@ import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,8 +28,8 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import com.nexusblock.ui.components.ArgusScreenHeader
 import com.nexusblock.ui.components.FocusPanel
-import com.nexusblock.ui.components.NexusScreenHeader
 import com.nexusblock.ui.components.SegmentedControl
 import com.nexusblock.ui.viewmodel.SettingsViewModel
 
@@ -37,9 +40,13 @@ fun SettingsScreen(
 ) {
     val autoStart by viewModel.autoStart.collectAsState()
     val isBatteryOptimized by viewModel.isBatteryOptimized.collectAsState()
-    // CA certificate removed with proxy layer
     val dnsProfile by viewModel.dnsProfile.collectAsState()
-    
+    var showAdvanced by remember { mutableStateOf(false) }
+
+    if (showAdvanced) {
+        AdvancedSettingsScreen()
+        return
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -47,17 +54,17 @@ fun SettingsScreen(
         contentPadding = PaddingValues(bottom = 36.dp)
     ) {
         item {
-            NexusScreenHeader(
+            ArgusScreenHeader(
                 title = "Settings",
-                subtitle = "Keep blocking resilient without breaking TV app basics."
+                subtitle = "General configuration for ArgusBlock."
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         item {
             SettingSwitchRow(
                 title = "Auto-start on boot",
-                subtitle = "Restart protection after Android TV reboots",
+                subtitle = "Resume protection after TV reboots",
                 checked = autoStart,
                 onCheckedChange = viewModel::setAutoStart
             )
@@ -66,33 +73,26 @@ fun SettingsScreen(
         item {
             FocusPanel(
                 modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(18.dp)
+                contentPadding = PaddingValues(16.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "DNS Filter",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Current: ${formatDnsProfile(dnsProfile)}",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                Column {
+                    Text(
+                        text = "DNS Provider",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Current: ${formatDnsProfile(dnsProfile)}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
                     SegmentedControl(
                         options = listOf(
                             "adguard_standard" to "AdGuard",
                             "adguard_family" to "Family",
-                            "cloudflare_1111" to "Cloudflare",
-                            "cloudflare_family" to "CF Family",
-                            "cleanbrowsing_adult" to "CleanBrowsing",
-                            "nextdns" to "NextDNS",
+                            "cloudflare_1111" to "CF",
                             "quad9" to "Quad9"
                         ),
                         selectedKey = dnsProfile,
@@ -111,6 +111,41 @@ fun SettingsScreen(
                 onClick = { viewModel.requestBatteryOptimization() }
             )
         }
+
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            FocusPanel(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(72.dp),
+                onClick = { showAdvanced = true },
+                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 14.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text(
+                            text = "Advanced Configuration",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "Blocking techniques, blocklists, rules & firewall",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Text(
+                        text = "→",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -124,7 +159,7 @@ private fun SettingSwitchRow(
     FocusPanel(
         modifier = Modifier
             .fillMaxWidth()
-            .height(86.dp),
+            .height(76.dp),
         selected = checked,
         onClick = { onCheckedChange(!checked) },
         contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp)
@@ -146,7 +181,7 @@ private fun SettingSwitchRow(
                     text = subtitle,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
@@ -167,7 +202,7 @@ private fun SettingActionRow(
     FocusPanel(
         modifier = Modifier
             .fillMaxWidth()
-            .height(86.dp),
+            .height(76.dp),
         contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp)
     ) {
         Row(
@@ -185,15 +220,12 @@ private fun SettingActionRow(
                     text = subtitle,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Spacer(modifier = Modifier.width(18.dp))
-            Button(
-                onClick = onClick,
-                enabled = enabled
-            ) {
+            Spacer(modifier = Modifier.width(16.dp))
+            Button(onClick = onClick, enabled = enabled) {
                 Text(buttonText)
             }
         }

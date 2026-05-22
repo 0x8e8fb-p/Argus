@@ -45,7 +45,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -60,42 +62,78 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nexusblock.R
 import com.nexusblock.ui.Screen
+import com.nexusblock.ui.theme.tvDimensions
+import kotlin.math.cos
+import kotlin.math.sin
 
-private val PanelShape = RoundedCornerShape(8.dp)
+private val GlassShape = RoundedCornerShape(16.dp)
+private val GlassWhite = Color.White
+private val Emerald = Color(0xFF00E676)
 
 @Composable
-fun NexusBackground(modifier: Modifier = Modifier) {
+fun ArgusBackground(modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
-    val transition = rememberInfiniteTransition(label = "background")
-    val scan by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 9000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "scan"
+    val transition = rememberInfiniteTransition(label = "ambientBg")
+
+    val drift1 by transition.animateFloat(
+        initialValue = 0f, targetValue = 6.2832f,
+        animationSpec = infiniteRepeatable(tween(18000, easing = LinearEasing), RepeatMode.Restart),
+        label = "drift1"
+    )
+    val drift2 by transition.animateFloat(
+        initialValue = 0f, targetValue = 6.2832f,
+        animationSpec = infiniteRepeatable(tween(24000, easing = LinearEasing), RepeatMode.Restart),
+        label = "drift2"
+    )
+    val drift3 by transition.animateFloat(
+        initialValue = 0f, targetValue = 6.2832f,
+        animationSpec = infiniteRepeatable(tween(14000, easing = LinearEasing), RepeatMode.Restart),
+        label = "drift3"
     )
 
     Canvas(modifier = modifier.fillMaxSize()) {
         drawRect(colors.background)
-        val grid = 72.dp.toPx()
-        val lineColor = colors.primary.copy(alpha = 0.07f)
-        var x = -grid + scan * grid
-        while (x < size.width + grid) {
-            drawLine(lineColor, Offset(x, 0f), Offset(x + size.height * 0.22f, size.height), 1.dp.toPx())
-            x += grid
-        }
-        var y = 0f
-        while (y < size.height) {
-            drawLine(colors.tertiary.copy(alpha = 0.045f), Offset(0f, y), Offset(size.width, y), 1.dp.toPx())
-            y += grid
-        }
-        drawRect(
-            brush = Brush.verticalGradient(
-                0f to Color.Transparent,
-                1f to colors.surface.copy(alpha = 0.72f)
-            )
+
+        val orb1Center = Offset(
+            x = size.width * 0.15f + cos(drift1) * size.width * 0.05f,
+            y = size.height * 0.25f + sin(drift1) * size.height * 0.08f
+        )
+        drawCircle(
+            brush = Brush.radialGradient(
+                listOf(Emerald.copy(alpha = 0.12f), Color.Transparent),
+                center = orb1Center,
+                radius = size.minDimension * 0.45f
+            ),
+            center = orb1Center,
+            radius = size.minDimension * 0.45f
+        )
+
+        val orb2Center = Offset(
+            x = size.width * 0.82f + cos(drift2) * size.width * 0.04f,
+            y = size.height * 0.7f + sin(drift2) * size.height * 0.06f
+        )
+        drawCircle(
+            brush = Brush.radialGradient(
+                listOf(Emerald.copy(alpha = 0.08f), Color.Transparent),
+                center = orb2Center,
+                radius = size.minDimension * 0.5f
+            ),
+            center = orb2Center,
+            radius = size.minDimension * 0.5f
+        )
+
+        val orb3Center = Offset(
+            x = size.width * 0.5f + sin(drift3) * size.width * 0.06f,
+            y = size.height * 0.1f + cos(drift3) * size.height * 0.04f
+        )
+        drawCircle(
+            brush = Brush.radialGradient(
+                listOf(Color(0xFF69F0AE).copy(alpha = 0.06f), Color.Transparent),
+                center = orb3Center,
+                radius = size.minDimension * 0.35f
+            ),
+            center = orb3Center,
+            radius = size.minDimension * 0.35f
         )
     }
 }
@@ -109,28 +147,35 @@ fun FocusPanel(
     content: @Composable () -> Unit
 ) {
     var focused by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(if (focused) 1.025f else 1f, label = "panelScale")
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            focused -> MaterialTheme.colorScheme.primary
-            selected -> MaterialTheme.colorScheme.secondary
-            else -> MaterialTheme.colorScheme.surfaceVariant
-        },
-        label = "panelBorder"
+    val scale by animateFloatAsState(if (focused) 1.025f else 1f, tween(220), label = "glassScale")
+    val glowAlpha by animateFloatAsState(
+        if (focused) 0.18f else 0f, tween(300), label = "glowAlpha"
     )
-    val background = if (selected) {
-        Brush.linearGradient(
+
+    val glassBg = when {
+        selected -> Brush.linearGradient(
             listOf(
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.82f),
-                MaterialTheme.colorScheme.surface.copy(alpha = 0.94f)
+                Emerald.copy(alpha = 0.12f),
+                GlassWhite.copy(alpha = 0.04f)
             )
         )
-    } else {
-        Brush.linearGradient(
+        else -> Brush.linearGradient(
             listOf(
-                MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.56f)
+                GlassWhite.copy(alpha = 0.07f),
+                GlassWhite.copy(alpha = 0.03f)
             )
+        )
+    }
+
+    val borderBrush = when {
+        focused -> Brush.linearGradient(
+            listOf(Emerald.copy(alpha = 0.6f), Emerald.copy(alpha = 0.15f))
+        )
+        selected -> Brush.linearGradient(
+            listOf(Emerald.copy(alpha = 0.3f), GlassWhite.copy(alpha = 0.08f))
+        )
+        else -> Brush.linearGradient(
+            listOf(GlassWhite.copy(alpha = 0.12f), GlassWhite.copy(alpha = 0.04f))
         )
     }
 
@@ -140,19 +185,21 @@ fun FocusPanel(
                 scaleX = scale
                 scaleY = scale
             }
-            .clip(PanelShape)
-            .background(background)
-            .border(
-                width = if (focused || selected) 1.5.dp else 1.dp,
-                color = borderColor.copy(alpha = if (focused || selected) 0.95f else 0.36f),
-                shape = PanelShape
-            )
-            .then(
-                if (onClick != null) {
-                    Modifier.clickable(onClick = onClick)
-                } else {
-                    Modifier
+            .drawBehind {
+                if (glowAlpha > 0f) {
+                    drawRoundRect(
+                        color = Emerald.copy(alpha = glowAlpha),
+                        cornerRadius = CornerRadius(18.dp.toPx()),
+                        size = Size(size.width + 6.dp.toPx(), size.height + 6.dp.toPx()),
+                        topLeft = Offset(-3.dp.toPx(), -3.dp.toPx())
+                    )
                 }
+            }
+            .clip(GlassShape)
+            .background(glassBg)
+            .border(width = 0.5.dp, brush = borderBrush, shape = GlassShape)
+            .then(
+                if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
             )
             .onFocusChanged { focused = it.isFocused || it.hasFocus }
             .focusable()
@@ -163,7 +210,7 @@ fun FocusPanel(
 }
 
 @Composable
-fun NexusScreenHeader(
+fun ArgusScreenHeader(
     title: String,
     subtitle: String,
     modifier: Modifier = Modifier,
@@ -182,7 +229,7 @@ fun NexusScreenHeader(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyMedium,
@@ -205,7 +252,8 @@ fun MetricTile(
     modifier: Modifier = Modifier,
     accent: Color = MaterialTheme.colorScheme.primary
 ) {
-    FocusPanel(modifier = modifier.height(128.dp)) {
+    val dims = tvDimensions()
+    FocusPanel(modifier = modifier.height(dims.statTileHeight)) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center
@@ -217,7 +265,7 @@ fun MetricTile(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge,
@@ -238,26 +286,23 @@ fun SegmentedControl(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         options.forEach { (key, label) ->
+            val isSelected = key == selectedKey
             FocusPanel(
                 modifier = Modifier
-                    .width(128.dp)
-                    .height(46.dp),
-                selected = key == selectedKey,
+                    .width(120.dp)
+                    .height(40.dp),
+                selected = isSelected,
                 onClick = { onSelected(key) },
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
             ) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
                         text = label,
                         style = MaterialTheme.typography.labelLarge,
-                        color = if (key == selectedKey) {
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        },
+                        color = if (isSelected) Emerald else MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -275,7 +320,7 @@ fun StatusDot(color: Color, modifier: Modifier = Modifier) {
             .clip(RoundedCornerShape(5.dp))
             .background(color)
             .drawBehind {
-                drawCircle(color.copy(alpha = 0.2f), radius = size.minDimension * 1.8f)
+                drawCircle(color.copy(alpha = 0.25f), radius = size.minDimension * 2.2f)
             }
     )
 }
@@ -287,7 +332,7 @@ fun AnimatedStateText(
 ) {
     AnimatedContent(
         targetState = text,
-        transitionSpec = { fadeIn(tween(180)) togetherWith fadeOut(tween(120)) },
+        transitionSpec = { fadeIn(tween(280)) togetherWith fadeOut(tween(150)) },
         label = "stateText",
         modifier = modifier
     ) { value ->
@@ -301,53 +346,69 @@ fun AnimatedStateText(
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun NexusNavigationRail(
+fun ArgusNavigationRail(
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
+    val dims = tvDimensions()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val items = listOf(
-        RailItem(Screen.Dashboard, R.drawable.ic_nav_dashboard),
-        RailItem(Screen.Blocklists, R.drawable.ic_nav_blocklists),
-        RailItem(Screen.CustomRules, R.drawable.ic_nav_rules),
-        RailItem(Screen.Firewall, R.drawable.ic_nav_firewall),
-        RailItem(Screen.Logs, R.drawable.ic_nav_logs),
+        RailItem(Screen.Home, R.drawable.ic_nav_dashboard),
+        RailItem(Screen.Activity, R.drawable.ic_nav_logs),
         RailItem(Screen.Settings, R.drawable.ic_nav_settings)
     )
 
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .width(172.dp)
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.88f))
-            .padding(horizontal = 14.dp, vertical = 20.dp),
+            .width(dims.navRailWidth)
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        GlassWhite.copy(alpha = 0.05f),
+                        GlassWhite.copy(alpha = 0.02f)
+                    )
+                )
+            )
+            .border(
+                width = 0.5.dp,
+                brush = Brush.verticalGradient(
+                    listOf(GlassWhite.copy(alpha = 0.1f), Color.Transparent)
+                ),
+                shape = RoundedCornerShape(0.dp)
+            )
+            .padding(horizontal = 12.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_logo_nexus),
-            contentDescription = "NexusBlock",
+            painter = painterResource(R.drawable.ic_logo_argus),
+            contentDescription = "ArgusBlock",
             tint = Color.Unspecified,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(40.dp)
         )
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = "NexusBlock",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            text = "TV Shield",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.secondary
-        )
-        Spacer(modifier = Modifier.height(22.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+        if (dims.navRailWidth > 80.dp) {
+            Text(
+                text = "ArgusBlock",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = "TV Shield",
+                style = MaterialTheme.typography.labelSmall,
+                color = Emerald.copy(alpha = 0.7f)
+            )
+        }
+        Spacer(modifier = Modifier.height(28.dp))
 
         items.forEach { item ->
             NavRailItem(
                 title = item.screen.title,
                 icon = item.icon,
                 selected = currentRoute == item.screen.route,
+                showLabel = dims.navRailWidth > 80.dp,
                 onClick = {
                     navController.navigate(item.screen.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
@@ -358,7 +419,7 @@ fun NexusNavigationRail(
                     }
                 }
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
         }
     }
 }
@@ -368,34 +429,38 @@ private fun NavRailItem(
     title: String,
     @DrawableRes icon: Int,
     selected: Boolean,
+    showLabel: Boolean = true,
     onClick: () -> Unit
 ) {
     FocusPanel(
         modifier = Modifier
             .fillMaxWidth()
-            .height(52.dp),
+            .height(48.dp),
         selected = selected,
         onClick = onClick,
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = if (showLabel) Arrangement.Start else Arrangement.Center
         ) {
             Icon(
                 painter = painterResource(icon),
                 contentDescription = title,
-                tint = if (selected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(22.dp)
+                tint = if (selected) Emerald else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
             )
-            Spacer(modifier = Modifier.width(10.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            if (showLabel) {
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
