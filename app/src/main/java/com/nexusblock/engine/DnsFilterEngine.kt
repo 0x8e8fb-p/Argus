@@ -53,6 +53,7 @@ class DnsFilterEngine @Inject constructor(
         private const val TAG = "NexusBlock/DNS"
         private const val DNS_PORT = 53
         private const val BUFFER_SIZE = 4096
+        private const val NEGATIVE_CACHE_TTL_MS = 60_000L
 
         /**
          * Upstream resolver domains that must NEVER be blocked, otherwise
@@ -91,8 +92,14 @@ class DnsFilterEngine @Inject constructor(
     private var startJob: Job? = null
     private var customRulesJob: Job? = null
 
-    private val dnsCache = object : LinkedHashMap<String, Message>(1024, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Message>?): Boolean = size > 1000
+    private val dnsCache = object : LinkedHashMap<String, Message>(4096, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Message>?): Boolean = size > 4000
+    }
+
+    // Negative cache: NXDOMAIN/SERVFAIL responses cached for 60s to prevent
+    // repeated upstream queries for blocked/failed domains (apps retry 3-5x).
+    private val negativeDnsCache = object : LinkedHashMap<String, Long>(1024, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Long>?): Boolean = size > 1000
     }
 
     private val blockedIpCache = object : LinkedHashMap<String, Long>(512, 0.75f, true) {
@@ -149,6 +156,7 @@ class DnsFilterEngine @Inject constructor(
 
     fun clearCache() {
         synchronized(dnsCache) { dnsCache.clear() }
+        synchronized(negativeDnsCache) { negativeDnsCache.clear() }
         Log.d(TAG, "DNS cache cleared")
     }
 
@@ -203,6 +211,15 @@ class DnsFilterEngine @Inject constructor(
             }
         }
 
+        // 1b. Negative cache — instant SERVFAIL for domains that recently
+        // failed upstream. Prevents app retry storms (3-5 retries × 200ms+).
+        synchronized(negativeDnsCache) {
+            val ts = negativeDnsCache[cacheKey]
+            if (ts != null && System.currentTimeMillis() - ts < NEGATIVE_CACHE_TTL_MS) {
+                return buildServFail(query)
+            }
+        }
+
         // 2. Critical allows — bypass ALL blocking (local + upstream) and use
         //    plain unfiltered DNS so video playback isn't broken by AdGuard.
         //    Only EXACT matches and non-blocked subdomains are allowed through.
@@ -229,7 +246,13 @@ class DnsFilterEngine @Inject constructor(
 
         // 4. Everything else → upstream filtered resolver (AdGuard, etc.)
         val upstreamResponse = upstreamResolve(queryPayload)
-            ?: return buildServFail(query)
+        if (upstreamResponse == null) {
+            // Cache the failure so retries are instant
+            synchronized(negativeDnsCache) {
+                negativeDnsCache[cacheKey] = System.currentTimeMillis()
+            }
+            return buildServFail(query)
+        }
 
         // Check CNAME chain for local blocks
         val blockedAlias = findBlockedAnswer(upstreamResponse, host)
@@ -383,15 +406,22 @@ class DnsFilterEngine @Inject constructor(
             "api.us-east-1.aiv-delivery.net",
             "api.us-west-2.aiv-delivery.net",
             "manifest.aiv-delivery.net",
-            // Google Play Services core
+            // Google Play Services core (exact subdomains only — NOT blanket *.googleapis.com)
             "play.googleapis.com",
             "android.googleapis.com",
+            "youtubei.googleapis.com",
+            "firebaseinstallations.googleapis.com",
+            "firebaseremoteconfig.googleapis.com",
+            "fcmregistrations.googleapis.com",
+            "www.googleapis.com",
+            "oauth2.googleapis.com",
+            "people-pa.googleapis.com",
+            "content-autofill.googleapis.com",
             // Netflix content delivery
             "nflxvideo.net",
             "nflxso.net",
-            // YouTube content delivery (not ads) — ad patterns intercepted above
+            // YouTube content delivery (not ads) — ad patterns intercepted by rules
             "youtube.com",
-            "youtubei.googleapis.com",
             "www.youtube.com",
             "m.youtube.com",
             "i.ytimg.com",
@@ -410,12 +440,13 @@ class DnsFilterEngine @Inject constructor(
             "api.zee5.com"
         )
         // Subdomain-matching critical allows — these need *.domain matching
-        // for content CDN subdomains (NOT used for domains with ad subdomains)
+        // for content CDN subdomains.
+        // IMPORTANT: Do NOT add broad domains like "googleapis.com" here — that
+        // would whitelist ad-serving subdomains (imasdk.googleapis.com, etc.)
+        // and let YouTube/app ads through unfiltered.
         val criticalSubdomains = listOf(
             "nflxvideo.net",
-            "nflxso.net",
-            "aiv-delivery.net",
-            "googleapis.com"
+            "nflxso.net"
         )
         val newCriticalAllowSet = HashSet<String>()
         newCriticalAllowSet.addAll(criticalAllows)

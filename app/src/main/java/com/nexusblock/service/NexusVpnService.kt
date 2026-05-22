@@ -291,6 +291,15 @@ class NexusVpnService : VpnService() {
                 val previous = activeUnderlyingNetwork
                 activeUnderlyingNetwork = network
 
+                // Tell Android to route the VPN's own protected sockets through
+                // this physical network. Without this, the OS may misroute our
+                // upstream DNS sockets, causing latency or failures.
+                try {
+                    setUnderlyingNetworks(arrayOf(network))
+                } catch (e: Exception) {
+                    Log.w(TAG, "setUnderlyingNetworks failed", e)
+                }
+
                 if (previous == null) {
                     Log.i(TAG, "Initial underlying network: $network")
                     return
@@ -306,6 +315,8 @@ class NexusVpnService : VpnService() {
                 Log.w(TAG, "Network lost: $network")
                 if (activeUnderlyingNetwork == network) {
                     activeUnderlyingNetwork = null
+                    // Clear underlying networks so Android doesn't hold a stale ref
+                    try { setUnderlyingNetworks(null) } catch (_: Exception) {}
                 }
             }
         }
@@ -316,11 +327,12 @@ class NexusVpnService : VpnService() {
     private fun restartVpnDebounced() {
         reconnectJob?.cancel()
         reconnectJob = serviceScope.launch {
-            delay(1500)
+            // Short delay to coalesce rapid network changes (e.g. wifi → mobile)
+            delay(500)
             if (isRunning) {
                 Log.i(TAG, "Restarting VPN due to real network change")
                 stopVpnInternal(updateDesiredState = false)
-                delay(750)
+                delay(200)
                 startVpn()
             }
         }

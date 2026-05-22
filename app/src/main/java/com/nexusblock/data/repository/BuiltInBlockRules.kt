@@ -135,8 +135,15 @@ object BuiltInBlockRules {
         "imasdk.googleapis.com",
         "jnn-pa.googleapis.com",
 
-        // YouTube additional ad endpoints
+        // YouTube additional ad endpoints — critical for Android TV ad blocking.
+        // The IMA SDK (imasdk.googleapis.com) is the main ad loader; blocking it
+        // prevents the ad player from initializing on most Google-served ads.
         "yt-adtechcenter.googleapis.com",
+        "pagead-googlehosted.l.googleapis.com",
+        "ads.googleapis.com",
+        "adservice.googleapis.com",
+        "admob-app-id-fetcher.googleapis.com",
+        "play-fe.googleapis.com",
         "innovid.com",
         "survey.g.doubleclick.net",
         "stats.g.doubleclick.net",
@@ -144,6 +151,28 @@ object BuiltInBlockRules {
         "cm.doubleclick.net",
         "googleads.g.doubleclick.net",
         "adservice.google.com",
+        // YouTube tracking & measurement (blocking reduces ad targeting accuracy)
+        "s.youtube.com",
+        "r1---sn-ads.googlevideo.com",
+        "ggpht.com",
+        "play.google.com",
+        "app-measurement.com",
+        "firebaselogging-pa.googleapis.com",
+        "firebaselogging.googleapis.com",
+        // YouTube Shorts / Discovery ad infra
+        "youtubei.googleapis.com/youtubei/v1/get_ad_breaks",
+        // Additional ad exchanges used by YouTube on CTV
+        "s0.2mdn.net",
+        "z2.2mdn.net",
+        "csi.gstatic.com",
+        "metric.gstatic.com",
+        "beacons.gcp.gvt2.com",
+        "beacons2.gcp.gvt2.com",
+        "beacons3.gcp.gvt2.com",
+        "beacons4.gcp.gvt2.com",
+        "beacons5.gcp.gvt2.com",
+        "connectivitycheck.gstatic.com",
+        "lh3.googleusercontent.com",
 
         // Indian OTT ad and telemetry endpoints.
         "ads.hotstar.com",
@@ -489,6 +518,20 @@ object BuiltInBlockRules {
         "forester.a2z.com",
         "mobileanalytics.us-east-1.amazonaws.com",
         "federatedanalytics.amazon.com",
+        // Prime Video SSAI ad decision / manifest injection endpoints (2024-2026)
+        "cf.videorolls.row.aiv-cdn.net",
+        "aiv-cdn.net",
+        "d3gqasl9vmjfd8.cloudfront.net",
+        "d1v5w5eed7sjkx.cloudfront.net",
+        "d2lkq7nlcrdi7q.cloudfront.net",
+        "btf-gateway-us-east-1.amazon.com",
+        "btf-gateway-eu-west-1.amazon.com",
+        "atv-ps.amazon.com",
+        "atv-ext.amazon.com",
+        "atv-ps-fe.amazon.com",
+        "ott-gateway.devices.amazon.com",
+        "fling-gateway.devices.amazon.com",
+        "admarvel.s3.amazonaws.com",
         "mas-sdk.amazon.com",
         "d3p8zr0ffa9t17.cloudfront.net",
         "sponsored-ads.amazon.com",

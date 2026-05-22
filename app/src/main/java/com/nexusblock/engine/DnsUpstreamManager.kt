@@ -43,16 +43,15 @@ class DnsUpstreamManager(
 ) {
     companion object {
         private const val TAG = "NexusBlock/DnsUpstream"
-        private const val PLAIN_DNS_TIMEOUT_MS = 2500
+        private const val PLAIN_DNS_TIMEOUT_MS = 1500
         private const val DOH_TIMEOUT_MS = 3000L
         private const val DOT_TIMEOUT_MS = 3000
-        /** Overall budget for a single DNS resolution. After this we give up
-         *  so the calling app doesn't block — it will retry. */
-        private const val OVERALL_TIMEOUT_MS = 3500L
-        private const val FALLBACK_TIMEOUT_MS = 2500L
+        /** Budget for encrypted protocols (DoH/DoT) after plain fails. */
+        private const val ENCRYPTED_TIMEOUT_MS = 3000L
+        private const val FALLBACK_TIMEOUT_MS = 2000L
         // Cap concurrent upstream resolutions so a burst of packets from the
         // TUN can't fork unbounded coroutines and exhaust the IO thread pool.
-        private const val MAX_INFLIGHT = 32
+        private const val MAX_INFLIGHT = 48
 
         /** Absolute fallback — these are queried only when the active profile fails. */
         val FALLBACK_SERVERS = listOf("8.8.8.8", "1.1.1.1", "9.9.9.9")
@@ -72,24 +71,42 @@ class DnsUpstreamManager(
 
     suspend fun resolve(queryBytes: ByteArray): ByteArray? = inflight.withPermit {
         val profile = profileManager.activeProfile()
-        val protocols = profile.resolutionOrder()
 
-        // Race all available protocols in parallel — first non-null response wins.
-        // Sequential fallback used to add up to ~11s of latency on flaky networks
-        // because each protocol had to time out before the next was tried. Apps
-        // would then time out their own DNS resolution and lose internet.
+        // Strategy: Plain UDP resolves in ~5-15ms (single UDP round-trip) while
+        // DoH needs TCP+TLS+HTTP (200-500ms). Try plain FIRST — if it answers
+        // quickly, skip the expensive encrypted path entirely. This makes every
+        // DNS query (and therefore every new connection) dramatically faster.
+        // The upstream AdGuard/Quad9 plain server still performs ad-blocking at
+        // the resolver level, so filtering quality is NOT reduced.
+        val plainResult = if (profile.plainIpv4.isNotEmpty()) {
+            withTimeoutOrNull(PLAIN_DNS_TIMEOUT_MS.toLong()) {
+                withContext(Dispatchers.IO) { resolvePlain(profile, queryBytes) }
+            }
+        } else null
+
+        if (plainResult != null) return@withPermit plainResult
+
+        // Plain failed (network blocks UDP/53, or profile has no plain servers).
+        // Fall back to encrypted protocols.
+        val protocols = profile.resolutionOrder().filter { it != Protocol.PLAIN }
+        if (protocols.isEmpty()) {
+            return@withPermit withTimeoutOrNull(FALLBACK_TIMEOUT_MS) {
+                resolvePlainFallback(queryBytes)
+            }
+        }
+
         val winner = coroutineScope {
             val deferreds = protocols.map { proto ->
-                async {
+                async(Dispatchers.IO) {
                     when (proto) {
                         Protocol.DOH -> resolveDoh(profile, queryBytes)
                         Protocol.DOT -> resolveDot(profile, queryBytes)
-                        Protocol.PLAIN -> resolvePlain(profile, queryBytes)
+                        Protocol.PLAIN -> null
                     }
                 }
             }
             try {
-                withTimeoutOrNull(OVERALL_TIMEOUT_MS) {
+                withTimeoutOrNull(ENCRYPTED_TIMEOUT_MS) {
                     selectFirstNonNull(deferreds)
                 }
             } finally {
@@ -98,9 +115,8 @@ class DnsUpstreamManager(
         }
         if (winner != null) return@withPermit winner
 
-        // All profile protocols failed — try generic fallbacks so the user
-        // doesn't lose internet entirely.
-        Log.w(TAG, "All profile protocols failed for ${profile.name}, using generic fallbacks")
+        // All profile protocols failed — generic fallbacks
+        Log.w(TAG, "All protocols failed for ${profile.name}, using fallbacks")
         withTimeoutOrNull(FALLBACK_TIMEOUT_MS) { resolvePlainFallback(queryBytes) }
     }
 

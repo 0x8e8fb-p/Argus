@@ -250,32 +250,43 @@ private fun ProtectionButton(
  * Shield hero — a single soft halo + one slow rotating dashed ring when
  * active. Designed to be GPU-cheap so the whole-system frame budget on
  * mid-range Android TVs is preserved.
+ *
+ * IMPORTANT: The infinite transition only runs when VPN is active. When
+ * inactive, no animations tick — zero GPU cost in idle state.
  */
 @Composable
 private fun ShieldHero(
     active: Boolean,
     shieldSize: androidx.compose.ui.unit.Dp
 ) {
-    val transition = rememberInfiniteTransition(label = "shieldHero")
-
-    val rotationSlow by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            tween(24000, easing = LinearEasing),
-            RepeatMode.Restart
-        ),
-        label = "rotSlow"
-    )
-    val pulse by transition.animateFloat(
-        initialValue = 0.20f,
-        targetValue = 0.45f,
-        animationSpec = infiniteRepeatable(
-            tween(2600, easing = EaseInOutCubic),
-            RepeatMode.Reverse
-        ),
-        label = "pulse"
-    )
+    // Only animate when VPN is active. When inactive, these values are static
+    // (0f / 0.20f) and no infinite transition is allocated, saving GPU frames.
+    val rotationSlow: Float
+    val pulse: Float
+    if (active) {
+        val transition = rememberInfiniteTransition(label = "shieldHero")
+        rotationSlow = transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                tween(24000, easing = LinearEasing),
+                RepeatMode.Restart
+            ),
+            label = "rotSlow"
+        ).value
+        pulse = transition.animateFloat(
+            initialValue = 0.20f,
+            targetValue = 0.45f,
+            animationSpec = infiniteRepeatable(
+                tween(2600, easing = EaseInOutCubic),
+                RepeatMode.Reverse
+            ),
+            label = "pulse"
+        ).value
+    } else {
+        rotationSlow = 0f
+        pulse = 0.20f
+    }
 
     val scale by animateFloatAsState(
         if (active) 1.0f else 0.98f,

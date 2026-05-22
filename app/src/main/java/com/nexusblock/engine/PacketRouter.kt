@@ -24,7 +24,6 @@ class PacketRouter @Inject constructor(
     companion object {
         private const val TAG = "NexusBlock/Router"
         private const val BUFFER_SIZE = 32768
-
         private const val PROTO_ICMP = 1
         private const val PROTO_TCP = 6
         private const val PROTO_UDP = 17
@@ -86,24 +85,26 @@ class PacketRouter @Inject constructor(
         }
 
         routerJob = scope.launch {
-            val input = FileInputStream(tunFd.fileDescriptor).channel
+            val inputStream = FileInputStream(tunFd.fileDescriptor)
             val output = FileOutputStream(tunFd.fileDescriptor).channel
-            val buffer = ByteBuffer.allocateDirect(BUFFER_SIZE)
+            val rawBuffer = ByteArray(BUFFER_SIZE)
 
+            // Use blocking FileInputStream.read() on this dedicated coroutine.
+            // Unlike FileChannel.read(ByteBuffer) which returns 0 immediately on
+            // an empty TUN (forcing a delay(5) polling loop that burns CPU at
+            // ~200 wakeups/sec), FileInputStream.read() blocks in the kernel until
+            // a packet arrives — zero CPU cost while idle. This is the single
+            // biggest performance improvement for low-end Android TV hardware.
             while (isActive && isRunning) {
                 try {
-                    buffer.clear()
-                    val read = input.read(buffer)
-                    if (read <= 0) {
-                        delay(5)
-                        continue
-                    }
+                    val read = inputStream.read(rawBuffer)
+                    if (read <= 0) continue
                     packetsProcessed++
                     bytesTotal += read
-                    buffer.flip()
+                    val buffer = ByteBuffer.wrap(rawBuffer, 0, read)
                     processPacket(buffer, output, vpnService)
                 } catch (e: Exception) {
-                    if (isActive) Log.w(TAG, "Packet routing error", e)
+                    if (isActive && isRunning) Log.w(TAG, "Packet routing error", e)
                 }
             }
         }

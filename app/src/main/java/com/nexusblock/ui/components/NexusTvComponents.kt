@@ -69,8 +69,6 @@ import androidx.tv.material3.Text
 import com.nexusblock.R
 import com.nexusblock.ui.Screen
 import com.nexusblock.ui.theme.tvDimensions
-import kotlin.math.cos
-import kotlin.math.sin
 
 private val GlassShape = RoundedCornerShape(16.dp)
 private val GlassWhite = Color.White
@@ -179,25 +177,12 @@ fun FocusPanel(
             }
             .drawBehind {
                 if (glowAlpha > 0f) {
-                    // Soft outer halo (3 layers for depth)
-                    val cr = CornerRadius(20.dp.toPx())
+                    // Single-layer glow — lighter than 3 layers for TV GPU budget
                     drawRoundRect(
-                        color = Emerald.copy(alpha = glowAlpha * 0.30f),
-                        cornerRadius = CornerRadius(26.dp.toPx()),
-                        size = Size(size.width + 18.dp.toPx(), size.height + 18.dp.toPx()),
-                        topLeft = Offset(-9.dp.toPx(), -9.dp.toPx())
-                    )
-                    drawRoundRect(
-                        color = Emerald.copy(alpha = glowAlpha * 0.55f),
+                        color = Emerald.copy(alpha = glowAlpha * 0.6f),
                         cornerRadius = CornerRadius(22.dp.toPx()),
-                        size = Size(size.width + 10.dp.toPx(), size.height + 10.dp.toPx()),
-                        topLeft = Offset(-5.dp.toPx(), -5.dp.toPx())
-                    )
-                    drawRoundRect(
-                        color = Emerald.copy(alpha = glowAlpha),
-                        cornerRadius = cr,
-                        size = Size(size.width + 4.dp.toPx(), size.height + 4.dp.toPx()),
-                        topLeft = Offset(-2.dp.toPx(), -2.dp.toPx())
+                        size = Size(size.width + 8.dp.toPx(), size.height + 8.dp.toPx()),
+                        topLeft = Offset(-4.dp.toPx(), -4.dp.toPx())
                     )
                 }
             }

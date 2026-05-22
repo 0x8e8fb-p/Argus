@@ -191,6 +191,12 @@ class RuleEngine {
      * Check if a hostname matches known ad-serving CDN patterns.
      * Covers googlevideo.com (YouTube), aiv-cdn.net (Amazon Prime), and
      * akamaized.net (Hotstar/OTT) ad delivery domains.
+     *
+     * NOTE: YouTube in 2025-2026 serves most ad video from the SAME CDN nodes
+     * as content (indistinguishable hostnames). DNS-level blocking therefore
+     * focuses on the ad DECISION infrastructure (IMA SDK, doubleclick, etc.)
+     * rather than the video stream itself. The patterns below only catch the
+     * minority of ad-dedicated CDN nodes that have identifying hostnames.
      */
     fun isAdVideoServer(hostname: String): Boolean {
         val lower = hostname.lowercase()
@@ -212,24 +218,6 @@ class RuleEngine {
                    lower.contains("doubleclick") ||
                    lower.contains("-ptracking") ||
                    lower.contains("-initplayback") ||
-                   // Regex-like patterns for known ad CDN node identifiers
-                   lower.contains("-sn-4g5edn7y.") ||
-                   lower.contains("-sn-ni5eln7l.") ||
-                   lower.contains("-sn-5hnedn7l.") ||
-                   lower.contains("-sn-a5meknzk.") ||
-                   lower.contains("-sn-5ualdn7y.") ||
-                   lower.contains("-sn-4g5ednsy.") ||
-                   lower.contains("-sn-4g5ednsz.") ||
-                   lower.contains("-sn-4g5ednsk.") ||
-                   lower.contains("-sn-4g5ednsl.") ||
-                   lower.contains("-sn-4g5edns7.") ||
-                   lower.contains("-sn-4g5ednse.") ||
-                   lower.contains("-sn-4g5ednsd.") ||
-                   lower.contains("-sn-a5mekn7k.") ||
-                   lower.contains("-sn-a5mekn7l.") ||
-                   lower.contains("-sn-a5mekn7z.") ||
-                   lower.contains("-sn-a5mekney.") ||
-                   lower.contains("-sn-a5meknez.") ||
                    // Ad payload marker patterns in URL-encoded paths
                    lower.contains("ctier=l") ||
                    lower.contains("oad=") ||
@@ -241,7 +229,8 @@ class RuleEngine {
         if (lower.endsWith("aiv-cdn.net")) {
             return lower.contains("videorolls") ||
                    lower.contains("interstitial") ||
-                   lower.contains("ad-creative")
+                   lower.contains("ad-creative") ||
+                   lower.contains("cf.videorolls")
         }
 
         // Akamai CDN ad-serving subdomains
@@ -261,6 +250,13 @@ class RuleEngine {
                    lower.startsWith("freewheel") ||
                    lower.startsWith("inmobisdk") ||
                    lower.startsWith("113vod-adaptive")
+        }
+
+        // CloudFront ad delivery (Amazon uses these for Prime Video ads)
+        if (lower.endsWith("cloudfront.net")) {
+            return lower.startsWith("d3gqasl9vmjfd8") ||
+                   lower.startsWith("d1v5w5eed7sjkx") ||
+                   lower.startsWith("d2lkq7nlcrdi7q")
         }
 
         return false
