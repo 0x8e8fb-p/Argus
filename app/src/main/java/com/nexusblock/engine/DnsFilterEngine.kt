@@ -2,6 +2,7 @@ package com.nexusblock.engine
 
 import android.content.Context
 import android.util.Log
+import com.nexusblock.data.model.BlockedEvent
 import com.nexusblock.data.model.BlockedDomain
 import com.nexusblock.data.db.CustomRuleDao
 import com.nexusblock.data.repository.BlocklistRepository
@@ -10,11 +11,13 @@ import com.nexusblock.data.repository.StatsRepository
 import com.nexusblock.engine.dns.DnsProfileManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import okhttp3.OkHttpClient
 import org.xbill.DNS.*
 import java.net.InetAddress
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -56,6 +59,9 @@ class DnsFilterEngine @Inject constructor(
         private const val BUFFER_SIZE = 4096
         private const val NEGATIVE_CACHE_TTL_MS = 60_000L
         private const val CLOUDFRONT_IP_TTL_MS = 600_000L // 10 min
+        private const val LOG_CHANNEL_CAPACITY = 1024
+        private const val LOG_BATCH_MAX = 100
+        private const val LOG_BATCH_INTERVAL_MS = 5_000L
 
         /**
          * Upstream resolver domains that must NEVER be blocked, otherwise
@@ -119,7 +125,8 @@ class DnsFilterEngine @Inject constructor(
     // ad creative CDNs (Prime Video SSAI defeat).
     private val contentCdnDistributions = java.util.Collections.synchronizedSet(HashSet<String>())
 
-    private val pendingLogs = mutableListOf<com.nexusblock.data.model.BlockedEvent>()
+    private val logChannel = Channel<BlockedEvent>(capacity = LOG_CHANNEL_CAPACITY)
+    private val droppedLogCount = AtomicLong(0L)
     private var logJob: Job? = null
 
     private var queriesProcessed = 0L
@@ -170,6 +177,9 @@ class DnsFilterEngine @Inject constructor(
     fun clearCache() {
         synchronized(dnsCache) { dnsCache.clear() }
         synchronized(negativeDnsCache) { negativeDnsCache.clear() }
+        synchronized(blockedIpCache) { blockedIpCache.clear() }
+        cloudFrontIpCache.clear()
+        contentCdnDistributions.clear()
         Log.d(TAG, "DNS cache cleared")
     }
 
@@ -662,39 +672,40 @@ class DnsFilterEngine @Inject constructor(
     }
 
     private fun queueLog(host: String, type: String, appPackage: String? = null) {
-        synchronized(pendingLogs) {
-            pendingLogs.add(com.nexusblock.data.model.BlockedEvent(
-                host = host, type = type, appPackage = appPackage
-            ))
-        }
-        if (pendingLogs.size > 1000) {
-            scope.launch(Dispatchers.IO) {
-                val batch = synchronized(pendingLogs) {
-                    val copy = pendingLogs.toList()
-                    pendingLogs.clear()
-                    copy
-                }
-                try { statsRepo.logBlockedBatch(batch) } catch (_: Exception) {}
-            }
+        val event = BlockedEvent(host = host, type = type, appPackage = appPackage)
+        if (logChannel.trySend(event).isFailure) {
+            droppedLogCount.incrementAndGet()
         }
     }
 
     private fun startLogBatcher() {
+        if (logJob?.isActive == true) return
         logJob = scope.launch {
+            val batch = ArrayList<BlockedEvent>(LOG_BATCH_MAX)
             while (isActive) {
-                delay(5000)
-                val batch = synchronized(pendingLogs) {
-                    if (pendingLogs.isEmpty()) null
-                    else {
-                        val copy = pendingLogs.toList()
-                        pendingLogs.clear()
-                        copy
-                    }
+                val firstEvent = withTimeoutOrNull(LOG_BATCH_INTERVAL_MS) { logChannel.receive() }
+                if (firstEvent == null) {
+                    logDroppedCountIfNeeded()
+                    continue
                 }
-                if (batch != null) {
-                    try { statsRepo.logBlockedBatch(batch) } catch (_: Exception) {}
+
+                batch.add(firstEvent)
+                while (batch.size < LOG_BATCH_MAX) {
+                    val nextEvent = logChannel.tryReceive().getOrNull() ?: break
+                    batch.add(nextEvent)
                 }
+
+                try { statsRepo.logBlockedBatch(batch.toList()) } catch (_: Exception) {}
+                batch.clear()
+                logDroppedCountIfNeeded()
             }
+        }
+    }
+
+    private fun logDroppedCountIfNeeded() {
+        val dropped = droppedLogCount.getAndSet(0L)
+        if (dropped > 0) {
+            Log.w(TAG, "Dropped $dropped DNS blocked log events due to logging backpressure")
         }
     }
 

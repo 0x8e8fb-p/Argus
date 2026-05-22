@@ -31,9 +31,12 @@ class TcpRelayEngine @Inject constructor(
 ) {
     companion object {
         private const val TAG = "NexusBlock/TcpRelay"
-        private const val MAX_SESSIONS = 1000
+        private const val MAX_SESSIONS = 512
+        private const val MAX_PENDING_BYTES_PER_SESSION = 64 * 1024
         private const val SESSION_TIMEOUT_MS = 60_000L
         private const val CONNECT_TIMEOUT_MS = 10_000L
+        private const val WRITE_TIMEOUT_MS = 5_000L
+        private const val MAX_ZERO_WRITES = 64
         private const val BUFFER_SIZE = 16384
 
         private const val TCP_FIN = 0x01
@@ -45,7 +48,7 @@ class TcpRelayEngine @Inject constructor(
         private const val TCP_FIN_ACK = 0x11
     }
 
-    private val sessions = ConcurrentHashMap<Int, TcpSession>(256)
+    private val sessions = ConcurrentHashMap<IpFlowKey, TcpSession>(256)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var readerJob: Job? = null
     private var cleanupJob: Job? = null
@@ -154,10 +157,7 @@ class TcpRelayEngine @Inject constructor(
         val payloadOffset = tcpOffset + dataOffset
         val payloadLen = totalLen - ipHeaderLen - dataOffset
         val seqNum = buffer.getInt(tcpOffset + 4).toLong() and 0xFFFFFFFFL
-        val ackNum = buffer.getInt(tcpOffset + 8).toLong() and 0xFFFFFFFFL
-
-        // Session key: use source port (unique per app connection)
-        val sessionKey = srcPort
+        val sessionKey = IpFlowKey.from(srcIp, srcPort, dstIp, dstPort, IpFlowKey.PROTOCOL_TCP)
 
         when {
             // SYN — new connection
@@ -199,14 +199,15 @@ class TcpRelayEngine @Inject constructor(
     }
 
     private fun handleSyn(
-        sessionKey: Int,
+        sessionKey: IpFlowKey,
         srcIp: ByteArray,
         dstIp: ByteArray,
         srcPort: Int,
         dstPort: Int,
         seqNum: Long
     ): Boolean {
-        if (sessions.size >= MAX_SESSIONS) {
+        sessions.remove(sessionKey)?.let { closeSession(it) }
+        if (sessions.size >= MAX_SESSIONS && !evictOldestSession()) {
             Log.w(TAG, "Session limit reached, dropping SYN")
             return false
         }
@@ -227,7 +228,8 @@ class TcpRelayEngine @Inject constructor(
             appSeqNum = seqNum + 1, // After SYN, next expected from app
             ourSeqNum = System.nanoTime() and 0xFFFFFFFFL, // Random ISN
             state = SessionState.SYN_RECEIVED,
-            lastActivity = System.currentTimeMillis()
+            lastActivity = System.currentTimeMillis(),
+            pendingData = PendingByteQueue(MAX_PENDING_BYTES_PER_SESSION)
         )
 
         sessions[sessionKey] = session
@@ -260,9 +262,8 @@ class TcpRelayEngine @Inject constructor(
                 // Flush any buffered data that arrived before connect completed
                 val pending = session.drainPendingData()
                 if (pending != null) {
-                    val buf = ByteBuffer.wrap(pending)
-                    while (buf.hasRemaining()) {
-                        channel.write(buf)
+                    if (!writeToServer(channel, pending)) {
+                        throw Exception("Server write timeout")
                     }
                 }
             } catch (e: Exception) {
@@ -311,9 +312,8 @@ class TcpRelayEngine @Inject constructor(
         val channel = session.serverChannel
         if (channel != null && channel.isConnected) {
             try {
-                val buf = ByteBuffer.wrap(payload)
-                while (buf.hasRemaining()) {
-                    channel.write(buf)
+                if (!writeToServer(channel, payload)) {
+                    throw Exception("Server write timeout")
                 }
             } catch (e: Exception) {
                 sendRstToApp(session)
@@ -321,10 +321,43 @@ class TcpRelayEngine @Inject constructor(
             }
         } else {
             // Connection not ready yet, buffer the data
-            session.bufferPendingData(payload)
+            if (!session.bufferPendingData(payload)) {
+                Log.d(TAG, "Pending data cap exceeded for ${session.dstPort}, closing session")
+                sendRstToApp(session)
+                closeSession(session)
+                session.state = SessionState.CLOSED
+                blockedCallback?.invoke("${session.dstPort}", "tcp-buffer-overflow")
+            }
         }
 
         return true
+    }
+
+    private fun writeToServer(channel: SocketChannel, payload: ByteArray): Boolean {
+        val buffer = ByteBuffer.wrap(payload)
+        val deadline = System.currentTimeMillis() + WRITE_TIMEOUT_MS
+        var zeroWrites = 0
+
+        while (buffer.hasRemaining()) {
+            val written = channel.write(buffer)
+            if (written > 0) {
+                zeroWrites = 0
+                continue
+            }
+
+            zeroWrites++
+            if (written < 0 || zeroWrites > MAX_ZERO_WRITES || System.currentTimeMillis() > deadline) {
+                return false
+            }
+            Thread.yield()
+        }
+        return true
+    }
+
+    private fun evictOldestSession(): Boolean {
+        val oldestEntry = sessions.entries.minByOrNull { it.value.lastActivity } ?: return false
+        closeSession(oldestEntry.value)
+        return sessions.remove(oldestEntry.key, oldestEntry.value)
     }
 
     private fun handleFin(session: TcpSession, seqNum: Long): Boolean {
@@ -590,19 +623,12 @@ class TcpRelayEngine @Inject constructor(
         var serverChannel: SocketChannel? = null,
         var sniChecked: Boolean = false,
         var sni: String? = null,
-        private var pendingData: ByteArray? = null
+        private val pendingData: PendingByteQueue
     ) {
         @Synchronized
-        fun bufferPendingData(data: ByteArray) {
-            val existing = pendingData
-            pendingData = if (existing != null) existing + data else data
-        }
+        fun bufferPendingData(data: ByteArray): Boolean = pendingData.offer(data)
 
         @Synchronized
-        fun drainPendingData(): ByteArray? {
-            val data = pendingData
-            pendingData = null
-            return data
-        }
+        fun drainPendingData(): ByteArray? = pendingData.drain()
     }
 }

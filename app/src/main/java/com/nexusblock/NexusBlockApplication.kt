@@ -9,10 +9,11 @@ import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.nexusblock.data.worker.BlocklistUpdateWorker
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
-import java.security.Security
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -21,6 +22,8 @@ class NexusBlockApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     override fun onCreate() {
         super.onCreate()
         // BouncyCastle provider removed — no proxy/MitM layer needs it anymore.
@@ -28,9 +31,14 @@ class NexusBlockApplication : Application(), Configuration.Provider {
         initializeWorkManager()
 
         // Offload blocklist scheduling to background to reduce main-thread jank at cold start
-        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+        applicationScope.launch {
             schedulePeriodicBlocklistUpdate()
         }
+    }
+
+    override fun onTerminate() {
+        applicationScope.cancel()
+        super.onTerminate()
     }
 
     private fun initializeWorkManager() {

@@ -68,6 +68,10 @@ class PacketRouter @Inject constructor(
         dnsEngine.start(dnsAddress)
 
         val outputChannel = FileOutputStream(tunFd.fileDescriptor).channel
+        tcpRelay.blockedCallback = { target, type ->
+            packetsBlocked++
+            blockedLogChannel.trySend(target to type)
+        }
         tcpRelay.start(vpnService, outputChannel)
         udpRelay.start(vpnService, outputChannel)
 
@@ -125,6 +129,7 @@ class PacketRouter @Inject constructor(
         techniquesJob = null
         blockedLogJob?.cancel()
         blockedLogJob = null
+        tcpRelay.blockedCallback = null
         tcpRelay.stop()
         udpRelay.stop()
         dnsEngine.stop()

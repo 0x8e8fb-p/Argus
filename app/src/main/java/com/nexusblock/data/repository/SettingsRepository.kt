@@ -31,6 +31,17 @@ data class BlockingTechniques(
     val appFirewall: Boolean = false
 )
 
+enum class VpnRoutingMode(val storageKey: String) {
+    DNS_ONLY("dns_only"),
+    FULL_ROUTE_SAFE("full_route_safe"),
+    FULL_ROUTE_AGGRESSIVE("full_route_aggressive");
+
+    companion object {
+        fun fromStorageKey(value: String?): VpnRoutingMode = entries.firstOrNull { it.storageKey == value }
+            ?: FULL_ROUTE_AGGRESSIVE
+    }
+}
+
 @Singleton
 class SettingsRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>,
@@ -42,6 +53,7 @@ class SettingsRepository @Inject constructor(
     private val KEY_AUTO_START = booleanPreferencesKey("auto_start")
     private val KEY_BATTERY_OPT = booleanPreferencesKey("battery_opt")
     private val KEY_VPN_ACTIVE = booleanPreferencesKey("vpn_active")
+    private val KEY_VPN_ROUTING_MODE = stringPreferencesKey("vpn_routing_mode")
     private val KEY_DNS_PROFILE = stringPreferencesKey("dns_profile")
     private val KEY_TECH_DNS = booleanPreferencesKey("tech_dns")
     private val KEY_TECH_HEADER = booleanPreferencesKey("tech_header")
@@ -66,6 +78,10 @@ class SettingsRepository @Inject constructor(
     private val dnsProfileFlow = dataStore.data
         .map { it[KEY_DNS_PROFILE] ?: "adguard_standard" }
         .stateIn(scope, SharingStarted.Eagerly, "adguard_standard")
+
+    private val vpnRoutingModeFlow = dataStore.data
+        .map { VpnRoutingMode.fromStorageKey(it[KEY_VPN_ROUTING_MODE]) }
+        .stateIn(scope, SharingStarted.Eagerly, VpnRoutingMode.FULL_ROUTE_AGGRESSIVE)
 
     private val techniquesFlow = dataStore.data
         .map { prefs ->
@@ -105,6 +121,10 @@ class SettingsRepository @Inject constructor(
     var dnsProfile: String
         get() = dnsProfileFlow.value
         set(value) { scope.launch { dataStore.edit { it[KEY_DNS_PROFILE] = value } } }
+
+    var vpnRoutingMode: VpnRoutingMode
+        get() = vpnRoutingModeFlow.value
+        set(value) { scope.launch { dataStore.edit { it[KEY_VPN_ROUTING_MODE] = value.storageKey } } }
 
     var techniques: BlockingTechniques
         get() = techniquesFlow.value
@@ -157,6 +177,7 @@ class SettingsRepository @Inject constructor(
     fun observeVpnActive(): Flow<Boolean> = vpnActiveFlow
     fun observeTechniques(): StateFlow<BlockingTechniques> = techniquesFlow
     fun observeDnsProfile(): Flow<String> = dnsProfileFlow
+    fun observeVpnRoutingMode(): StateFlow<VpnRoutingMode> = vpnRoutingModeFlow
 
     // ─────────────────────────────────────────────────────────────
     // Serialization helpers

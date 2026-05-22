@@ -15,6 +15,7 @@ import androidx.core.app.NotificationCompat
 import com.nexusblock.Constants
 import com.nexusblock.R
 import com.nexusblock.data.repository.SettingsRepository
+import com.nexusblock.data.repository.VpnRoutingMode
 import com.nexusblock.engine.DnsFilterEngine
 import com.nexusblock.engine.PacketRouter
 import com.nexusblock.ui.MainActivity
@@ -118,9 +119,14 @@ class NexusVpnService : VpnService() {
                 .addAddress(Constants.VPN_ADDRESS, 24)
                 .addDnsServer(Constants.VPN_DNS)
 
-            // Routing mode: Full-route VPN. Captures ALL IPv4 traffic through
-            // the TUN so that PacketRouter can relay TCP/UDP and inspect SNI.
-            builder.addRoute("0.0.0.0", 0)
+            val routingMode = settingsRepo.vpnRoutingMode
+            if (routingMode != VpnRoutingMode.DNS_ONLY) {
+                // Full-route VPN captures all IPv4 traffic through the TUN so
+                // PacketRouter can relay TCP/UDP and inspect SNI.
+                builder.addRoute("0.0.0.0", 0)
+            } else {
+                Log.i(TAG, "Starting in DNS-only routing mode")
+            }
 
             // IPv6: minimal local address for IPv6 DNS capture.
             // Do NOT block all IPv6 (2000::/3) — that breaks dual-stack apps
@@ -166,7 +172,7 @@ class NexusVpnService : VpnService() {
             registerNetworkCallback()
             VpnWatchdogService.start(this)
 
-            Log.i(TAG, "VPN started successfully with IPv6 null-routing")
+            Log.i(TAG, "VPN started successfully with routing mode $routingMode")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start VPN", e)
             settingsRepo.vpnActive = false

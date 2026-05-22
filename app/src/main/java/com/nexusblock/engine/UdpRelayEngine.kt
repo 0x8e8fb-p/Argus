@@ -22,11 +22,11 @@ class UdpRelayEngine @Inject constructor() {
 
     companion object {
         private const val TAG = "NexusBlock/UdpRelay"
-        private const val MAX_SESSIONS = 500
+        private const val MAX_SESSIONS = 256
         private const val SESSION_TIMEOUT_MS = 30_000L
     }
 
-    private val sessions = ConcurrentHashMap<Long, UdpSession>(128)
+    private val sessions = ConcurrentHashMap<IpFlowKey, UdpSession>(128)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var readerJob: Job? = null
     private var cleanupJob: Job? = null
@@ -76,7 +76,7 @@ class UdpRelayEngine @Inject constructor() {
                     now - s.lastActivity > SESSION_TIMEOUT_MS
                 }
                 for ((key, session) in stale) {
-                    try { session.channel?.close() } catch (_: Exception) {}
+                    closeSession(session)
                     sessions.remove(key)
                 }
             }
@@ -89,7 +89,7 @@ class UdpRelayEngine @Inject constructor() {
         readerJob?.cancel()
         cleanupJob?.cancel()
         for ((_, session) in sessions) {
-            try { session.channel?.close() } catch (_: Exception) {}
+            closeSession(session)
         }
         sessions.clear()
         vpnService = null
@@ -108,38 +108,72 @@ class UdpRelayEngine @Inject constructor() {
         dstPort: Int,
         payload: ByteArray
     ): Boolean {
-        val sessionKey = (srcPort.toLong() shl 32) or
-            ((dstIp[0].toLong() and 0xFF) shl 24) or
-            ((dstIp[1].toLong() and 0xFF) shl 16) or
-            ((dstIp[2].toLong() and 0xFF) shl 8) or
-            (dstIp[3].toLong() and 0xFF)
+        val sessionKey = IpFlowKey.from(srcIp, srcPort, dstIp, dstPort, IpFlowKey.PROTOCOL_UDP)
 
-        val session = sessions.getOrPut(sessionKey) {
-            if (sessions.size >= MAX_SESSIONS) return false
-            val channel = DatagramChannel.open()
-            channel.configureBlocking(false)
-            vpnService?.protect(channel.socket())
-            channel.connect(InetSocketAddress(InetAddress.getByAddress(dstIp), dstPort))
-            UdpSession(
-                srcIp = srcIp.copyOf(),
-                dstIp = dstIp.copyOf(),
-                srcPort = srcPort,
-                dstPort = dstPort,
-                channel = channel,
-                lastActivity = System.currentTimeMillis()
-            )
-        }
+        val session = sessions[sessionKey] ?: createSession(sessionKey, srcIp, dstIp, srcPort, dstPort)
+            ?: return false
 
         // Send to real destination
         try {
             session.channel?.write(ByteBuffer.wrap(payload))
             session.lastActivity = System.currentTimeMillis()
         } catch (e: Exception) {
-            sessions.remove(sessionKey)
+            sessions.remove(sessionKey, session)
+            closeSession(session)
             return false
         }
 
         return true
+    }
+
+    private fun createSession(
+        sessionKey: IpFlowKey,
+        srcIp: ByteArray,
+        dstIp: ByteArray,
+        srcPort: Int,
+        dstPort: Int
+    ): UdpSession? {
+        if (sessions.size >= MAX_SESSIONS && !evictOldestSession()) return null
+
+        val channel = try {
+            DatagramChannel.open().apply {
+                configureBlocking(false)
+                vpnService?.protect(socket())
+                connect(InetSocketAddress(InetAddress.getByAddress(dstIp), dstPort))
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "Failed to open UDP relay session: ${e.message}")
+            return null
+        }
+
+        val newSession = UdpSession(
+            srcIp = srcIp.copyOf(),
+            dstIp = dstIp.copyOf(),
+            srcPort = srcPort,
+            dstPort = dstPort,
+            channel = channel,
+            lastActivity = System.currentTimeMillis()
+        )
+
+        val existingSession = sessions.putIfAbsent(sessionKey, newSession)
+        if (existingSession != null) {
+            closeSession(newSession)
+            return existingSession
+        }
+
+        return newSession
+    }
+
+    private fun evictOldestSession(): Boolean {
+        val oldestEntry = sessions.entries.minByOrNull { it.value.lastActivity } ?: return false
+        closeSession(oldestEntry.value)
+        return sessions.remove(oldestEntry.key, oldestEntry.value)
+    }
+
+    private fun closeSession(session: UdpSession) {
+        try {
+            session.channel?.close()
+        } catch (_: Exception) {}
     }
 
     private fun sendUdpToApp(session: UdpSession, data: ByteArray) {
