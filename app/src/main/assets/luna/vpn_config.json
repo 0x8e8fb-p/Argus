@@ -1,0 +1,16 @@
+{
+  "server": "vpn.adbl0ck.com",
+  "remoteIdentifier": "vpn.adbl0ck.com",
+  "username": "087f8e1fc5ff-ikev2",
+  "password": "44c4c2c5",
+  "dns": "10.16.0.1",
+  "ikeEncryption": "AES_CBC_256",
+  "ikeIntegrity": "HMAC_SHA256_128",
+  "ikeDhGroup": 14,
+  "childEncryption": "AES_CBC_256",
+  "childIntegrity": "HMAC_SHA256_128",
+  "childDhGroup": 14,
+  "lifeTimeMinutes": 1440,
+  "disableMobike": true,
+  "enablePfs": true
+}

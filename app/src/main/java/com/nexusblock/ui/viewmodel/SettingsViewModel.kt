@@ -9,7 +9,9 @@ import android.provider.Settings
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.nexusblock.data.repository.SettingsRepository
+import com.nexusblock.data.repository.VpnMode
 import com.nexusblock.data.repository.VpnRoutingMode
+import com.nexusblock.engine.VpnFailoverController
 import com.nexusblock.service.NexusVpnService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -18,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     application: Application,
-    private val settingsRepo: SettingsRepository
+    private val settingsRepo: SettingsRepository,
+    private val failoverController: VpnFailoverController
 ) : AndroidViewModel(application) {
 
     private val context = application.applicationContext
@@ -31,6 +34,9 @@ class SettingsViewModel @Inject constructor(
 
     val vpnRoutingMode: StateFlow<VpnRoutingMode> = settingsRepo.observeVpnRoutingMode()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), VpnRoutingMode.FULL_ROUTE_AGGRESSIVE)
+
+    val vpnMode: StateFlow<VpnMode> = settingsRepo.observeVpnMode()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), VpnMode.LUNA_PRIMARY)
 
     private val _isBatteryOptimized = MutableStateFlow(false)
     val isBatteryOptimized: StateFlow<Boolean> = _isBatteryOptimized.asStateFlow()
@@ -59,6 +65,18 @@ class SettingsViewModel @Inject constructor(
                 context.startService(intent)
             }
         }
+    }
+
+    fun setVpnMode(mode: VpnMode) {
+        settingsRepo.vpnMode = mode
+        // Restart failover controller with new mode
+        failoverController.stop()
+        failoverController.start()
+    }
+
+    fun installLunaCert() {
+        val intent = com.nexusblock.cert.LunaCertInstaller.createInstallIntent(context)
+        context.startActivity(intent)
     }
 
     fun requestBatteryOptimization(): Boolean {

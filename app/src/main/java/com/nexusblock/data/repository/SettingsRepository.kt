@@ -42,6 +42,17 @@ enum class VpnRoutingMode(val storageKey: String) {
     }
 }
 
+enum class VpnMode(val storageKey: String) {
+    LUNA_PRIMARY("luna_primary"),
+    LOCAL_ONLY("local_only"),
+    LUNA_ONLY("luna_only");
+
+    companion object {
+        fun fromStorageKey(value: String?): VpnMode = entries.firstOrNull { it.storageKey == value }
+            ?: LUNA_PRIMARY
+    }
+}
+
 @Singleton
 class SettingsRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>,
@@ -61,6 +72,7 @@ class SettingsRepository @Inject constructor(
     private val KEY_TECH_STEALTH = booleanPreferencesKey("tech_stealth")
     private val KEY_TECH_FIREWALL = booleanPreferencesKey("tech_firewall_v2")
     private val KEY_FIREWALL_MODES = stringPreferencesKey("firewall_modes_json")
+    private val KEY_VPN_MODE = stringPreferencesKey("vpn_mode")
 
     // Hot StateFlows for reactive + synchronous access
     private val autoStartFlow = dataStore.data
@@ -102,6 +114,10 @@ class SettingsRepository @Inject constructor(
         }
         .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
+    private val vpnModeFlow = dataStore.data
+        .map { VpnMode.fromStorageKey(it[KEY_VPN_MODE]) }
+        .stateIn(scope, SharingStarted.Eagerly, VpnMode.LUNA_PRIMARY)
+
     // ─────────────────────────────────────────────────────────────
     // Synchronous accessors (for Service/Engine code paths)
     // ─────────────────────────────────────────────────────────────
@@ -125,6 +141,10 @@ class SettingsRepository @Inject constructor(
     var vpnRoutingMode: VpnRoutingMode
         get() = vpnRoutingModeFlow.value
         set(value) { scope.launch { dataStore.edit { it[KEY_VPN_ROUTING_MODE] = value.storageKey } } }
+
+    var vpnMode: VpnMode
+        get() = vpnModeFlow.value
+        set(value) { scope.launch { dataStore.edit { it[KEY_VPN_MODE] = value.storageKey } } }
 
     var techniques: BlockingTechniques
         get() = techniquesFlow.value
@@ -178,6 +198,7 @@ class SettingsRepository @Inject constructor(
     fun observeTechniques(): StateFlow<BlockingTechniques> = techniquesFlow
     fun observeDnsProfile(): Flow<String> = dnsProfileFlow
     fun observeVpnRoutingMode(): StateFlow<VpnRoutingMode> = vpnRoutingModeFlow
+    fun observeVpnMode(): StateFlow<VpnMode> = vpnModeFlow
 
     // ─────────────────────────────────────────────────────────────
     // Serialization helpers

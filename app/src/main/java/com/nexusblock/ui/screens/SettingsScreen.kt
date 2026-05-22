@@ -28,6 +28,7 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import com.nexusblock.data.repository.VpnMode
 import com.nexusblock.data.repository.VpnRoutingMode
 import com.nexusblock.ui.components.ArgusScreenHeader
 import com.nexusblock.ui.components.FocusPanel
@@ -43,6 +44,7 @@ fun SettingsScreen(
     val isBatteryOptimized by viewModel.isBatteryOptimized.collectAsState()
     val dnsProfile by viewModel.dnsProfile.collectAsState()
     val vpnRoutingMode by viewModel.vpnRoutingMode.collectAsState()
+    val vpnMode by viewModel.vpnMode.collectAsState()
     var showAdvanced by remember { mutableStateOf(false) }
 
     if (showAdvanced) {
@@ -135,6 +137,49 @@ fun SettingsScreen(
                     )
                 }
             }
+        }
+
+        item {
+            FocusPanel(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = "Ad-Block Mode",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Current: ${formatVpnMode(vpnMode)}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    SegmentedControl(
+                        options = listOf(
+                            VpnMode.LUNA_PRIMARY.storageKey to "Luna + Failover",
+                            VpnMode.LUNA_ONLY.storageKey to "Luna Only",
+                            VpnMode.LOCAL_ONLY.storageKey to "Local Only"
+                        ),
+                        selectedKey = vpnMode.storageKey,
+                        onSelected = { selected ->
+                            viewModel.setVpnMode(VpnMode.fromStorageKey(selected))
+                        }
+                    )
+                }
+            }
+        }
+
+        item {
+            SettingActionRow(
+                title = "Luna CA Certificate",
+                subtitle = "Install for HTTPS ad-blocking (optional)",
+                buttonText = "Install",
+                enabled = true,
+                onClick = { viewModel.installLunaCert() }
+            )
         }
 
         item {
@@ -287,4 +332,10 @@ private fun formatVpnRoutingMode(mode: VpnRoutingMode): String = when (mode) {
     VpnRoutingMode.DNS_ONLY -> "DNS Only"
     VpnRoutingMode.FULL_ROUTE_SAFE -> "Full Route Safe"
     VpnRoutingMode.FULL_ROUTE_AGGRESSIVE -> "Full Route Aggressive"
+}
+
+private fun formatVpnMode(mode: VpnMode): String = when (mode) {
+    VpnMode.LUNA_PRIMARY -> "Luna + Local Failover"
+    VpnMode.LUNA_ONLY -> "Luna Only"
+    VpnMode.LOCAL_ONLY -> "Local Only"
 }
