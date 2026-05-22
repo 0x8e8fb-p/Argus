@@ -264,24 +264,12 @@ class RuleEngine {
                    lower.contains("dclk_video_ads")
         }
 
-        // Amazon Prime Video ad rolls CDN — block ALL known ad-serving patterns
-        // on aiv-cdn.net. Content segments use distinct subdomains that don't
-        // match these patterns.
-        if (lower.endsWith("aiv-cdn.net")) {
-            return lower.contains("videorolls") ||
-                   lower.contains("interstitial") ||
-                   lower.contains("ad-creative") ||
-                   lower.contains("cf.videorolls") ||
-                   lower.contains("ad-") ||
-                   lower.contains("-ad.") ||
-                   lower.contains("creative") ||
-                   lower.contains("preroll") ||
-                   lower.contains("midroll") ||
-                   lower.contains("postroll") ||
-                   lower.contains("bumper") ||
-                   lower.contains("slate") ||
-                   lower.contains("sponsor")
-        }
+        // Amazon Prime Video CDN — block ALL *.aiv-cdn.net subdomains.
+        // With SSAI (Server-Side Ad Insertion), ad segments and content segments
+        // are served from the same CDN. Blocking the CDN entirely forces the
+        // Prime Video app to fallback to CloudFront where our SNI-level
+        // default-deny can distinguish content from ad distributions.
+        if (lower.endsWith("aiv-cdn.net")) return true
 
         // Akamai CDN ad-serving subdomains
         if (lower.endsWith("akamaized.net")) {

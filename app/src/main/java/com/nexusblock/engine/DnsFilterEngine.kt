@@ -113,6 +113,12 @@ class DnsFilterEngine @Inject constructor(
     // that TLS SNI inspection can catch ad-serving CloudFront distributions.
     private val cloudFrontIpCache = ConcurrentHashMap<String, Long>(256)
 
+    // Content CDN whitelist: CloudFront distribution IDs discovered from
+    // CNAME chains of critical-allow DNS responses. Only these distributions
+    // are permitted at the SNI level — all others are blocked as suspected
+    // ad creative CDNs (Prime Video SSAI defeat).
+    private val contentCdnDistributions = java.util.Collections.synchronizedSet(HashSet<String>())
+
     private val pendingLogs = mutableListOf<com.nexusblock.data.model.BlockedEvent>()
     private var logJob: Job? = null
 
@@ -195,11 +201,24 @@ class DnsFilterEngine @Inject constructor(
 
         queriesProcessed++
 
-        // Block HTTPS/SVCB records for ad domains to prevent QUIC/H3 discovery
-        if ((type == 65 || type == 64) && !isUpstreamDomain(host) && ruleEngine.isBlocked(host)) {
-            queriesBlocked++
-            queueLog(host, "dns-svcb")
-            return buildSinkholeResponse(query, type).toWire()
+        // Block HTTPS/SVCB records to prevent QUIC/H3 discovery
+        if ((type == 65 || type == 64) && !isUpstreamDomain(host)) {
+            // Block SVCB for all ad domains
+            if (ruleEngine.isBlocked(host)) {
+                queriesBlocked++
+                queueLog(host, "dns-svcb")
+                return buildSinkholeResponse(query, type).toWire()
+            }
+            // Also block SVCB for ALL streaming CDN domains — prevents HTTP/3
+            // negotiation so traffic stays on TCP where SNI inspection works.
+            // Critical for Prime Video SSAI defeat.
+            if (host.endsWith(".cloudfront.net") ||
+                host.endsWith(".aiv-cdn.net") ||
+                host.endsWith(".aiv-delivery.net")) {
+                queriesBlocked++
+                queueLog(host, "dns-svcb-cdn")
+                return buildSinkholeResponse(query, type).toWire()
+            }
         }
 
         // 1. Check cache
@@ -341,6 +360,11 @@ class DnsFilterEngine @Inject constructor(
      * *.cloudfront.net. These IPs are cached so that PacketRouter can force
      * QUIC→TCP downgrade, giving us SNI visibility on ad-serving CloudFront
      * distributions.
+     *
+     * Also populates [contentCdnDistributions] — when a critical-allow domain
+     * CNAMEs to a CloudFront distribution, that distribution is whitelisted
+     * as a content CDN. PacketRouter's SNI handler uses this to default-deny
+     * unknown CloudFront distributions (suspected Prime Video ad creatives).
      */
     private fun trackCloudFrontIps(responseBytes: ByteArray) {
         try {
@@ -351,6 +375,12 @@ class DnsFilterEngine @Inject constructor(
                     val target = record.target.toString(true).lowercase().trimEnd('.')
                     if (target.endsWith(".cloudfront.net")) {
                         hasCloudFrontCname = true
+                        // Whitelist this distribution as content CDN
+                        val distId = target.substringBefore(".cloudfront.net")
+                        if (distId.isNotEmpty()) {
+                            contentCdnDistributions.add(distId)
+                            Log.d(TAG, "Content CDN discovered: $distId.cloudfront.net")
+                        }
                     }
                 }
             }
@@ -391,6 +421,24 @@ class DnsFilterEngine @Inject constructor(
             return false
         }
         return true
+    }
+
+    /**
+     * Returns true if [sni] is a CloudFront distribution that has NOT been
+     * observed via CNAME from a critical-allow domain (i.e. it's not a known
+     * content CDN). Used by PacketRouter to default-deny unknown CloudFront
+     * distributions — these are suspected Prime Video SSAI ad creatives.
+     *
+     * Returns false (allow) if the whitelist is still empty (learning phase)
+     * or if the distribution is known.
+     */
+    fun isUnknownCloudFrontDistribution(sni: String): Boolean {
+        if (!sni.endsWith(".cloudfront.net")) return false
+        // During learning phase (no content distributions discovered yet),
+        // don't block — would break all CloudFront traffic.
+        if (contentCdnDistributions.isEmpty()) return false
+        val distId = sni.removeSuffix(".cloudfront.net")
+        return !contentCdnDistributions.contains(distId)
     }
 
     private fun findBlockedAnswer(responseBytes: ByteArray, originalHost: String): String? {

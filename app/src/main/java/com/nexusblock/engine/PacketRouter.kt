@@ -258,6 +258,16 @@ class PacketRouter @Inject constructor(
                             blockedLogChannel.trySend(sni to "sni")
                             return
                         }
+                        // CloudFront default-deny: block distributions NOT seen
+                        // from content CNAME chains. This catches Prime Video
+                        // SSAI ad creatives served from unknown distributions.
+                        if (sni != null && dnsEngine.isUnknownCloudFrontDistribution(sni)) {
+                            sendRst(output, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort)
+                            packetsBlocked++
+                            dnsBlocks++
+                            blockedLogChannel.trySend(sni to "sni-cf-deny")
+                            return
+                        }
                     }
                 }
 
