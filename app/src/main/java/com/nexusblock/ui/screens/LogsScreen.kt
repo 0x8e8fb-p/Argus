@@ -98,6 +98,7 @@ private fun LogItem(
     host: String,
     type: String
 ) {
+    val dims = com.nexusblock.ui.theme.tvDimensions()
     FocusPanel(
         modifier = Modifier
             .fillMaxWidth()
@@ -112,7 +113,7 @@ private fun LogItem(
                 text = time,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.width(92.dp),
+                modifier = Modifier.width(if (dims.navRailWidth < 80.dp) 70.dp else 96.dp),
                 maxLines = 1
             )
             Text(

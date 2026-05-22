@@ -9,9 +9,13 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.EaseInOutCubic
+import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
@@ -33,6 +37,7 @@ import com.nexusblock.service.NexusVpnService
 import com.nexusblock.service.VpnWatchdogService
 import com.nexusblock.ui.components.ArgusBackground
 import com.nexusblock.ui.components.ArgusNavigationRail
+import com.nexusblock.ui.components.ArgusVignette
 import com.nexusblock.ui.screens.*
 import com.nexusblock.ui.theme.ArgusBlockTheme
 import com.nexusblock.ui.theme.LocalTvDimensions
@@ -135,22 +140,43 @@ fun ArgusBlockApp(
         CompositionLocalProvider(LocalTvDimensions provides dims) {
             Box(modifier = Modifier.fillMaxSize()) {
                 ArgusBackground()
+                ArgusVignette()
                 Row(modifier = Modifier.fillMaxSize()) {
                     ArgusNavigationRail(navController = navController)
                     NavHost(
                         navController = navController,
                         startDestination = Screen.Home.route,
+                        // Container-transform style: gentle fade + scale +
+                        // slight horizontal travel for a premium TV feel.
                         enterTransition = {
-                            fadeIn(tween(300)) + slideInHorizontally(tween(300)) { it / 12 }
+                            fadeIn(tween(380, easing = EaseOutCubic)) +
+                                scaleIn(
+                                    initialScale = 0.96f,
+                                    animationSpec = tween(380, easing = EaseOutCubic)
+                                ) +
+                                slideInHorizontally(tween(380, easing = EaseOutCubic)) { it / 24 }
                         },
                         exitTransition = {
-                            fadeOut(tween(200)) + slideOutHorizontally(tween(200)) { -it / 12 }
+                            fadeOut(tween(240, easing = EaseInOutCubic)) +
+                                scaleOut(
+                                    targetScale = 1.02f,
+                                    animationSpec = tween(240, easing = EaseInOutCubic)
+                                )
                         },
                         popEnterTransition = {
-                            fadeIn(tween(300)) + slideInHorizontally(tween(300)) { -it / 12 }
+                            fadeIn(tween(380, easing = EaseOutCubic)) +
+                                scaleIn(
+                                    initialScale = 0.96f,
+                                    animationSpec = tween(380, easing = EaseOutCubic)
+                                ) +
+                                slideInHorizontally(tween(380, easing = EaseOutCubic)) { -it / 24 }
                         },
                         popExitTransition = {
-                            fadeOut(tween(200)) + slideOutHorizontally(tween(200)) { it / 12 }
+                            fadeOut(tween(240, easing = EaseInOutCubic)) +
+                                scaleOut(
+                                    targetScale = 1.02f,
+                                    animationSpec = tween(240, easing = EaseInOutCubic)
+                                )
                         },
                         modifier = Modifier
                             .fillMaxSize()

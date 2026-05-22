@@ -5,12 +5,16 @@ package com.nexusblock.ui.components
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -30,6 +34,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -44,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -147,57 +153,80 @@ fun FocusPanel(
     content: @Composable () -> Unit
 ) {
     var focused by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(if (focused) 1.025f else 1f, tween(220), label = "glassScale")
+    val focusSpring = spring<Float>(
+        dampingRatio = Spring.DampingRatioMediumBouncy,
+        stiffness = Spring.StiffnessMediumLow
+    )
+    val scale by animateFloatAsState(if (focused) 1.035f else 1f, focusSpring, label = "glassScale")
     val glowAlpha by animateFloatAsState(
-        if (focused) 0.18f else 0f, tween(300), label = "glowAlpha"
+        if (focused) 0.32f else if (selected) 0.12f else 0f,
+        tween(durationMillis = 280, easing = EaseOutCubic),
+        label = "glowAlpha"
+    )
+    val liftY by animateFloatAsState(
+        if (focused) -2f else 0f, focusSpring, label = "glassLift"
+    )
+    val borderAlpha by animateFloatAsState(
+        if (focused) 0.85f else if (selected) 0.45f else 0.18f,
+        tween(220), label = "borderAlpha"
     )
 
     val glassBg = when {
         selected -> Brush.linearGradient(
             listOf(
-                Emerald.copy(alpha = 0.12f),
-                GlassWhite.copy(alpha = 0.04f)
+                Emerald.copy(alpha = 0.16f),
+                GlassWhite.copy(alpha = 0.05f)
             )
         )
         else -> Brush.linearGradient(
             listOf(
-                GlassWhite.copy(alpha = 0.07f),
+                GlassWhite.copy(alpha = 0.08f),
                 GlassWhite.copy(alpha = 0.03f)
             )
         )
     }
 
-    val borderBrush = when {
-        focused -> Brush.linearGradient(
-            listOf(Emerald.copy(alpha = 0.6f), Emerald.copy(alpha = 0.15f))
+    val borderBrush = Brush.linearGradient(
+        listOf(
+            Emerald.copy(alpha = borderAlpha),
+            Emerald.copy(alpha = borderAlpha * 0.25f)
         )
-        selected -> Brush.linearGradient(
-            listOf(Emerald.copy(alpha = 0.3f), GlassWhite.copy(alpha = 0.08f))
-        )
-        else -> Brush.linearGradient(
-            listOf(GlassWhite.copy(alpha = 0.12f), GlassWhite.copy(alpha = 0.04f))
-        )
-    }
+    )
 
     Box(
         modifier = modifier
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
+                translationY = liftY
             }
             .drawBehind {
                 if (glowAlpha > 0f) {
+                    // Soft outer halo (3 layers for depth)
+                    val cr = CornerRadius(20.dp.toPx())
+                    drawRoundRect(
+                        color = Emerald.copy(alpha = glowAlpha * 0.30f),
+                        cornerRadius = CornerRadius(26.dp.toPx()),
+                        size = Size(size.width + 18.dp.toPx(), size.height + 18.dp.toPx()),
+                        topLeft = Offset(-9.dp.toPx(), -9.dp.toPx())
+                    )
+                    drawRoundRect(
+                        color = Emerald.copy(alpha = glowAlpha * 0.55f),
+                        cornerRadius = CornerRadius(22.dp.toPx()),
+                        size = Size(size.width + 10.dp.toPx(), size.height + 10.dp.toPx()),
+                        topLeft = Offset(-5.dp.toPx(), -5.dp.toPx())
+                    )
                     drawRoundRect(
                         color = Emerald.copy(alpha = glowAlpha),
-                        cornerRadius = CornerRadius(18.dp.toPx()),
-                        size = Size(size.width + 6.dp.toPx(), size.height + 6.dp.toPx()),
-                        topLeft = Offset(-3.dp.toPx(), -3.dp.toPx())
+                        cornerRadius = cr,
+                        size = Size(size.width + 4.dp.toPx(), size.height + 4.dp.toPx()),
+                        topLeft = Offset(-2.dp.toPx(), -2.dp.toPx())
                     )
                 }
             }
             .clip(GlassShape)
             .background(glassBg)
-            .border(width = 0.5.dp, brush = borderBrush, shape = GlassShape)
+            .border(width = 1.dp, brush = borderBrush, shape = GlassShape)
             .then(
                 if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
             )
@@ -253,18 +282,29 @@ fun MetricTile(
     accent: Color = MaterialTheme.colorScheme.primary
 ) {
     val dims = tvDimensions()
+    // Parse pure numbers for count-up animation; preserves units (KB/MB/GB) as suffix.
+    val (numeric, suffix) = remember(value) { parseMetric(value) }
+
     FocusPanel(modifier = modifier.height(dims.statTileHeight)) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineMedium,
-                color = accent,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            if (numeric != null) {
+                AnimatedCounter(
+                    value = numeric,
+                    color = accent,
+                    suffix = suffix
+                )
+            } else {
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = accent,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = label,
@@ -275,6 +315,28 @@ fun MetricTile(
             )
         }
     }
+}
+
+/**
+ * Splits a display string like "12.4 MB" into (12, " MB") for numeric
+ * count-up animation. Fractional units are floored to keep the animation
+ * monotonic; the unit suffix is preserved.
+ */
+private fun parseMetric(value: String): Pair<Long?, String> {
+    val trimmed = value.trim()
+    if (trimmed.isEmpty()) return null to ""
+    val firstNonNum = trimmed.indexOfFirst { !it.isDigit() && it != '.' && it != '-' }
+    val numPart: String
+    val rest: String
+    if (firstNonNum < 0) {
+        numPart = trimmed
+        rest = ""
+    } else {
+        numPart = trimmed.substring(0, firstNonNum)
+        rest = trimmed.substring(firstNonNum)
+    }
+    val asLong = numPart.toDoubleOrNull()?.toLong() ?: return null to value
+    return asLong to rest
 }
 
 @Composable
@@ -358,6 +420,18 @@ fun ArgusNavigationRail(
         RailItem(Screen.Activity, R.drawable.ic_nav_logs),
         RailItem(Screen.Settings, R.drawable.ic_nav_settings)
     )
+    val selectedIndex = items.indexOfFirst { it.screen.route == currentRoute }
+        .coerceAtLeast(0)
+    val itemHeight = 52.dp
+    val itemSpacing = 8.dp
+    val pillOffset by animateDpAsState(
+        targetValue = (itemHeight + itemSpacing) * selectedIndex,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "navPill"
+    )
 
     Column(
         modifier = modifier
@@ -366,18 +440,29 @@ fun ArgusNavigationRail(
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        GlassWhite.copy(alpha = 0.05f),
-                        GlassWhite.copy(alpha = 0.02f)
+                        GlassWhite.copy(alpha = 0.06f),
+                        GlassWhite.copy(alpha = 0.02f),
+                        Color.Transparent
                     )
                 )
             )
-            .border(
-                width = 0.5.dp,
-                brush = Brush.verticalGradient(
-                    listOf(GlassWhite.copy(alpha = 0.1f), Color.Transparent)
-                ),
-                shape = RoundedCornerShape(0.dp)
-            )
+            .drawWithCache {
+                // Right-edge accent line — subtle separator from content
+                onDrawBehind {
+                    drawRect(
+                        brush = Brush.verticalGradient(
+                            listOf(
+                                Color.Transparent,
+                                Emerald.copy(alpha = 0.18f),
+                                Emerald.copy(alpha = 0.08f),
+                                Color.Transparent
+                            )
+                        ),
+                        topLeft = Offset(size.width - 1f, 0f),
+                        size = Size(1f, size.height)
+                    )
+                }
+            }
             .padding(horizontal = 12.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -387,7 +472,7 @@ fun ArgusNavigationRail(
             tint = Color.Unspecified,
             modifier = Modifier.size(40.dp)
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         if (dims.navRailWidth > 80.dp) {
             Text(
                 text = "ArgusBlock",
@@ -401,25 +486,60 @@ fun ArgusNavigationRail(
                 color = Emerald.copy(alpha = 0.7f)
             )
         }
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        items.forEach { item ->
-            NavRailItem(
-                title = item.screen.title,
-                icon = item.icon,
-                selected = currentRoute == item.screen.route,
-                showLabel = dims.navRailWidth > 80.dp,
-                onClick = {
-                    navController.navigate(item.screen.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+        // Container that hosts the sliding pill underneath the items.
+        Box(modifier = Modifier.fillMaxWidth()) {
+            // Sliding selection pill
+            Box(
+                modifier = Modifier
+                    .offset(y = pillOffset)
+                    .fillMaxWidth()
+                    .height(itemHeight)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                Emerald.copy(alpha = 0.22f),
+                                Emerald.copy(alpha = 0.06f)
+                            )
+                        )
+                    )
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.horizontalGradient(
+                            listOf(
+                                Emerald.copy(alpha = 0.55f),
+                                Emerald.copy(alpha = 0.10f)
+                            )
+                        ),
+                        shape = RoundedCornerShape(14.dp)
+                    )
+            )
+
+            Column(modifier = Modifier.fillMaxWidth()) {
+                items.forEachIndexed { index, item ->
+                    NavRailItem(
+                        title = item.screen.title,
+                        icon = item.icon,
+                        selected = index == selectedIndex,
+                        showLabel = dims.navRailWidth > 80.dp,
+                        itemHeight = itemHeight,
+                        onClick = {
+                            navController.navigate(item.screen.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
-                        launchSingleTop = true
-                        restoreState = true
+                    )
+                    if (index < items.lastIndex) {
+                        Spacer(modifier = Modifier.height(itemSpacing))
                     }
                 }
-            )
-            Spacer(modifier = Modifier.height(6.dp))
+            }
         }
     }
 }
@@ -430,15 +550,40 @@ private fun NavRailItem(
     @DrawableRes icon: Int,
     selected: Boolean,
     showLabel: Boolean = true,
+    itemHeight: androidx.compose.ui.unit.Dp = 52.dp,
     onClick: () -> Unit
 ) {
-    FocusPanel(
+    var focused by remember { mutableStateOf(false) }
+    val iconTint by animateColorAsState(
+        if (selected) Emerald
+        else if (focused) MaterialTheme.colorScheme.onSurface
+        else MaterialTheme.colorScheme.onSurfaceVariant,
+        tween(220), label = "navIconTint"
+    )
+    val textColor by animateColorAsState(
+        if (selected || focused) MaterialTheme.colorScheme.onSurface
+        else MaterialTheme.colorScheme.onSurfaceVariant,
+        tween(220), label = "navTextColor"
+    )
+    val focusScale by animateFloatAsState(
+        if (focused && !selected) 1.04f else 1f,
+        spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow),
+        label = "navItemScale"
+    )
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp),
-        selected = selected,
-        onClick = onClick,
-        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)
+            .height(itemHeight)
+            .graphicsLayer {
+                scaleX = focusScale
+                scaleY = focusScale
+            }
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
+            .onFocusChanged { focused = it.isFocused || it.hasFocus }
+            .focusable()
+            .padding(horizontal = 12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -448,15 +593,15 @@ private fun NavRailItem(
             Icon(
                 painter = painterResource(icon),
                 contentDescription = title,
-                tint = if (selected) Emerald else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
+                tint = iconTint,
+                modifier = Modifier.size(22.dp)
             )
             if (showLabel) {
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = title,
                     style = MaterialTheme.typography.labelLarge,
-                    color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = textColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
