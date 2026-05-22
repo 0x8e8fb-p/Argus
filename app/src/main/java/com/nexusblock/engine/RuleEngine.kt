@@ -57,6 +57,10 @@ class RuleEngine {
             "d2v02itv0y9u9t",
             "d3lhz43t5kkr4j"
         )
+
+        // Max domains to load locally. Beyond this, rely on filtered upstream DNS.
+        // 200K domains ≈ 30-40MB heap, safe for 256MB Android TV devices.
+        private const val MAX_DOMAIN_RULES = 200_000
     }
 
     // Exact domain matches for O(1) lookup
@@ -94,10 +98,21 @@ class RuleEngine {
     /**
      * Append rules without clearing existing state. Used to load sources
      * incrementally to avoid OOM from accumulating all domains in memory.
+     *
+     * Enforces a hard cap of [MAX_DOMAIN_RULES] to prevent OOM on low-memory
+     * Android TV devices (256MB heap). Since we use a filtered upstream DNS
+     * (AdGuard), local rules only need to cover custom rules + emergency
+     * blocklist domains that the upstream might miss.
      */
     @Synchronized
     fun addRules(domains: List<BlockedDomain>) {
         for (domain in domains) {
+            // Hard cap: prevent OOM from loading millions of domains
+            if (exactBlocks.size >= MAX_DOMAIN_RULES) {
+                Log.w(TAG, "Rule cap reached (${MAX_DOMAIN_RULES}), skipping remaining ${domains.size} domains from this source")
+                return
+            }
+
             if (!domain.enabled) continue
             val host = domain.host.trim()
             if (host.isEmpty() || host.startsWith("#")) continue

@@ -188,10 +188,12 @@ class PacketRouter @Inject constructor(
                         return
                     }
 
-                    // QUIC downgrade: block UDP/443 to CloudFront IPs so the app
-                    // falls back to TCP/443 where TLS SNI inspection can identify
-                    // and block ad-serving CloudFront distributions.
-                    if (dstPort == 443 && techniques.dnsFiltering && dnsEngine.shouldForceDowngradeQuic(dstIpStr)) {
+                    // QUIC downgrade: block UDP/443 to ALL CloudFront IPs (both
+                    // CIDR-matched and DNS-observed) so apps fall back to TCP/443
+                    // where TLS SNI inspection gives us visibility to block
+                    // ad-serving CloudFront distributions.
+                    if (dstPort == 443 && techniques.dnsFiltering &&
+                        (dnsEngine.shouldForceDowngradeQuic(dstIpStr) || CloudFrontCidr.isCloudFrontIp(dstIpStr))) {
                         packetsBlocked++
                         blockedLogChannel.trySend("$dstIpStr:443" to "quic-downgrade")
                         return
