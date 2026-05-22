@@ -19,7 +19,9 @@ import javax.inject.Singleton
 class PacketRouter @Inject constructor(
     private val dnsEngine: DnsFilterEngine,
     private val statsRepo: StatsRepository,
-    private val settingsRepo: com.nexusblock.data.repository.SettingsRepository
+    private val settingsRepo: com.nexusblock.data.repository.SettingsRepository,
+    private val tcpRelay: TcpRelayEngine,
+    private val udpRelay: UdpRelayEngine
 ) {
     companion object {
         private const val TAG = "NexusBlock/Router"
@@ -65,6 +67,10 @@ class PacketRouter @Inject constructor(
 
         dnsEngine.start(dnsAddress)
 
+        val outputChannel = FileOutputStream(tunFd.fileDescriptor).channel
+        tcpRelay.start(vpnService, outputChannel)
+        udpRelay.start(vpnService, outputChannel)
+
         techniquesJob?.cancel()
         techniquesJob = scope.launch {
             settingsRepo.observeTechniques().collect {
@@ -86,7 +92,7 @@ class PacketRouter @Inject constructor(
 
         routerJob = scope.launch {
             val inputStream = FileInputStream(tunFd.fileDescriptor)
-            val output = FileOutputStream(tunFd.fileDescriptor).channel
+            val output = outputChannel
             val rawBuffer = ByteArray(BUFFER_SIZE)
 
             // Use blocking FileInputStream.read() on this dedicated coroutine.
@@ -119,6 +125,8 @@ class PacketRouter @Inject constructor(
         techniquesJob = null
         blockedLogJob?.cancel()
         blockedLogJob = null
+        tcpRelay.stop()
+        udpRelay.stop()
         dnsEngine.stop()
         Log.i(TAG, "Packet router stopped")
     }
@@ -223,16 +231,24 @@ class PacketRouter @Inject constructor(
                             return // drop original, async response will be sent
                         }
                     }
+
+                    // Non-DNS UDP: relay through protected socket
+                    val udpLen = (buffer.getShort(udpOffset + 4).toInt() and 0xFFFF)
+                    val payloadLen = udpLen - 8
+                    if (payloadLen > 0 && buffer.remaining() >= udpOffset + 8 + payloadLen) {
+                        val payload = ByteArray(payloadLen)
+                        val mark = buffer.position()
+                        buffer.position(udpOffset + 8)
+                        buffer.get(payload)
+                        buffer.position(mark)
+                        udpRelay.handlePacket(srcIp, dstIp, srcPort, dstPort, payload)
+                    }
                 }
-                writePacket(output, buffer.duplicate())
             }
             PROTO_TCP -> {
                 val tcpOffset = pos + ipHeaderLen
                 if (buffer.remaining() < tcpOffset + 20) return
 
-                val dataOffset = ((buffer.get(tcpOffset + 12).toInt() shr 4) and 0x0F) * 4
-                val tcpPayloadOffset = tcpOffset + dataOffset
-                val tcpPayloadLen = totalLen - ipHeaderLen - dataOffset
                 val srcPort = buffer.getShort(tcpOffset).toInt() and 0xFFFF
                 val dstPort = buffer.getShort(tcpOffset + 2).toInt() and 0xFFFF
 
@@ -243,37 +259,11 @@ class PacketRouter @Inject constructor(
                     return
                 }
 
-                // SNI-based blocking: inspect TLS ClientHello for ad domains
-                if (dstPort == 443 && tcpPayloadLen > 0 && techniques.dnsFiltering) {
-                    if (buffer.remaining() >= tcpPayloadOffset + tcpPayloadLen) {
-                        val tcpPayloadBytes = ByteArray(tcpPayloadLen)
-                        val mark = buffer.position()
-                        buffer.position(tcpPayloadOffset)
-                        buffer.get(tcpPayloadBytes)
-                        buffer.position(mark)
-
-                        val sni = SniExtractor.extractSni(tcpPayloadBytes, 0, tcpPayloadLen)
-                        if (sni != null && dnsEngine.isDomainBlocked(sni)) {
-                            sendRst(output, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort)
-                            packetsBlocked++
-                            dnsBlocks++
-                            blockedLogChannel.trySend(sni to "sni")
-                            return
-                        }
-                        // CloudFront default-deny: block distributions NOT seen
-                        // from content CNAME chains. This catches Prime Video
-                        // SSAI ad creatives served from unknown distributions.
-                        if (sni != null && dnsEngine.isUnknownCloudFrontDistribution(sni)) {
-                            sendRst(output, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort)
-                            packetsBlocked++
-                            dnsBlocks++
-                            blockedLogChannel.trySend(sni to "sni-cf-deny")
-                            return
-                        }
-                    }
-                }
-
-                writePacket(output, buffer.duplicate())
+                // Delegate ALL TCP to the relay engine (handles SNI blocking internally)
+                tcpRelay.handlePacket(
+                    buffer, pos, ipHeaderLen, srcIp, dstIp,
+                    srcPort, dstPort, tcpOffset, totalLen
+                )
             }
             else -> writePacket(output, buffer.duplicate())
         }

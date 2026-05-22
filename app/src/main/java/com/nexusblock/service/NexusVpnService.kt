@@ -118,10 +118,9 @@ class NexusVpnService : VpnService() {
                 .addAddress(Constants.VPN_ADDRESS, 24)
                 .addDnsServer(Constants.VPN_DNS)
 
-            // Routing mode: DNS capture + DNS bypass routes.
-            // All DNS queries enter TUN for filtering. TCP/UDP to known DNS servers
-            // on alternate ports (DoH/DoT) also captured to prevent bypass.
-            builder.addRoute(Constants.VPN_DNS, 32)
+            // Routing mode: Full-route VPN. Captures ALL IPv4 traffic through
+            // the TUN so that PacketRouter can relay TCP/UDP and inspect SNI.
+            builder.addRoute("0.0.0.0", 0)
 
             // IPv6: minimal local address for IPv6 DNS capture.
             // Do NOT block all IPv6 (2000::/3) — that breaks dual-stack apps
