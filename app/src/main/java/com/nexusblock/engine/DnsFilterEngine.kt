@@ -256,7 +256,7 @@ class DnsFilterEngine @Inject constructor(
             if (plainResponse != null) {
                 Log.d(TAG, "DNS critical-allow bypass: $host")
                 cacheAllowedResponse(cacheKey, plainResponse)
-                trackCloudFrontIps(plainResponse)
+                trackCloudFrontIps(plainResponse, whitelistDistribution = true)
                 queriesAllowed++
                 return plainResponse
             }
@@ -290,7 +290,7 @@ class DnsFilterEngine @Inject constructor(
         }
 
         cacheAllowedResponse(cacheKey, upstreamResponse)
-        trackCloudFrontIps(upstreamResponse)
+        trackCloudFrontIps(upstreamResponse, whitelistDistribution = false)
         queriesAllowed++
         return upstreamResponse
     }
@@ -361,12 +361,13 @@ class DnsFilterEngine @Inject constructor(
      * QUIC→TCP downgrade, giving us SNI visibility on ad-serving CloudFront
      * distributions.
      *
-     * Also populates [contentCdnDistributions] — when a critical-allow domain
-     * CNAMEs to a CloudFront distribution, that distribution is whitelisted
-     * as a content CDN. PacketRouter's SNI handler uses this to default-deny
-     * unknown CloudFront distributions (suspected Prime Video ad creatives).
+     * When [whitelistDistribution] is true (critical-allow path only), also
+     * populates [contentCdnDistributions] — whitelisting the distribution so
+     * PacketRouter's SNI handler allows it through. When false (upstream path),
+     * IPs are tracked for QUIC downgrade but the distribution is NOT whitelisted
+     * — this prevents ad domain CNAME chains from self-whitelisting.
      */
-    private fun trackCloudFrontIps(responseBytes: ByteArray) {
+    private fun trackCloudFrontIps(responseBytes: ByteArray, whitelistDistribution: Boolean) {
         try {
             val response = Message(responseBytes)
             var hasCloudFrontCname = false
@@ -375,11 +376,13 @@ class DnsFilterEngine @Inject constructor(
                     val target = record.target.toString(true).lowercase().trimEnd('.')
                     if (target.endsWith(".cloudfront.net")) {
                         hasCloudFrontCname = true
-                        // Whitelist this distribution as content CDN
-                        val distId = target.substringBefore(".cloudfront.net")
-                        if (distId.isNotEmpty()) {
-                            contentCdnDistributions.add(distId)
-                            Log.d(TAG, "Content CDN discovered: $distId.cloudfront.net")
+                        // Only whitelist from critical-allow path (content domains)
+                        if (whitelistDistribution) {
+                            val distId = target.substringBefore(".cloudfront.net")
+                            if (distId.isNotEmpty()) {
+                                contentCdnDistributions.add(distId)
+                                Log.d(TAG, "Content CDN discovered: $distId.cloudfront.net")
+                            }
                         }
                     }
                 }
@@ -569,18 +572,23 @@ class DnsFilterEngine @Inject constructor(
         newSubdomainSet.addAll(criticalSubdomains)
         criticalSubdomainSet = newSubdomainSet
 
-        // 3. Downloaded blocklists from database (builtin + remote sources)
+        // 3. Downloaded blocklists from database (builtin + remote sources).
+        // Load incrementally per source to avoid OOM from accumulating all
+        // domains in a single list (can exceed 256MB heap on Android TV).
+        val newRuleEngine = RuleEngine()
+        newRuleEngine.loadRules(allRules)  // custom rules first
+
         val enabledSources = blocklistRepo.observeSourceStates().first()
             .filter { it.enabled }
+        var blocklistCount = 0
         for (source in enabledSources) {
             val domains = blocklistRepo.getDomainsBySource(source.source)
-            allRules.addAll(domains)
+            newRuleEngine.addRules(domains)
+            blocklistCount += domains.size
         }
 
-        Log.i(TAG, "Loaded ${customRules.size} custom rules + ${criticalAllows.size} critical allows + ${allRules.size - customRules.size} blocklist domains from ${enabledSources.size} sources")
+        Log.i(TAG, "Loaded ${customRules.size} custom rules + ${criticalAllows.size} critical allows + $blocklistCount blocklist domains from ${enabledSources.size} sources")
 
-        val newRuleEngine = RuleEngine()
-        newRuleEngine.loadRules(allRules)
         ruleEngine = newRuleEngine
         clearCache()
     }

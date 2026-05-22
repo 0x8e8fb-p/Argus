@@ -87,7 +87,16 @@ class RuleEngine {
     @Synchronized
     fun loadRules(domains: List<BlockedDomain>) {
         clearAll()
+        addRules(domains)
+        Log.i(TAG, "Loaded ${exactBlocks.size} domains, ${exactIpBlocks.size} IPs, ${cidrBlocks.size} CIDRs. Patterns: ${blockRegexes.size} regex, ${prefixBlocks.size} prefix")
+    }
 
+    /**
+     * Append rules without clearing existing state. Used to load sources
+     * incrementally to avoid OOM from accumulating all domains in memory.
+     */
+    @Synchronized
+    fun addRules(domains: List<BlockedDomain>) {
         for (domain in domains) {
             if (!domain.enabled) continue
             val host = domain.host.trim()
@@ -148,8 +157,6 @@ class RuleEngine {
                 Log.w(TAG, "Failed to parse rule: ${domain.host}", e)
             }
         }
-
-        Log.i(TAG, "Loaded ${exactBlocks.size} domains, ${exactIpBlocks.size} IPs, ${cidrBlocks.size} CIDRs. Patterns: ${blockRegexes.size} regex, ${prefixBlocks.size} prefix")
     }
 
     @Synchronized
@@ -264,12 +271,31 @@ class RuleEngine {
                    lower.contains("dclk_video_ads")
         }
 
-        // Amazon Prime Video CDN — block ALL *.aiv-cdn.net subdomains.
-        // With SSAI (Server-Side Ad Insertion), ad segments and content segments
-        // are served from the same CDN. Blocking the CDN entirely forces the
-        // Prime Video app to fallback to CloudFront where our SNI-level
-        // default-deny can distinguish content from ad distributions.
-        if (lower.endsWith("aiv-cdn.net")) return true
+        // Amazon Prime Video CDN — block ad-serving patterns on aiv-cdn.net.
+        // Content segments also use this CDN so we CANNOT block unconditionally.
+        // Instead we match known ad-related subdomains/patterns.
+        if (lower.endsWith("aiv-cdn.net")) {
+            return lower.contains("videorolls") ||
+                   lower.contains("interstitial") ||
+                   lower.contains("ad-creative") ||
+                   lower.contains("cf.videorolls") ||
+                   lower.contains("ad-") ||
+                   lower.contains("-ad.") ||
+                   lower.contains("creative") ||
+                   lower.contains("preroll") ||
+                   lower.contains("midroll") ||
+                   lower.contains("postroll") ||
+                   lower.contains("bumper") ||
+                   lower.contains("slate") ||
+                   lower.contains("sponsor") ||
+                   lower.contains("tracking") ||
+                   lower.contains("beacon") ||
+                   lower.contains("impression") ||
+                   lower.contains("vast") ||
+                   lower.contains("vpaid") ||
+                   lower.contains("adserver") ||
+                   lower.contains("adsystem")
+        }
 
         // Akamai CDN ad-serving subdomains
         if (lower.endsWith("akamaized.net")) {
