@@ -113,7 +113,7 @@ private fun LogItem(
                 text = time,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.width(if (dims.navRailWidth < 80.dp) 70.dp else 96.dp),
+                modifier = Modifier.width(if (dims.navRailWidth < 100.dp) 70.dp else 96.dp),
                 maxLines = 1
             )
             Text(

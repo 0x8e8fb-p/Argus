@@ -4,6 +4,7 @@ import android.util.Log
 import com.nexusblock.engine.dns.DnsProviderProfile
 import com.nexusblock.engine.dns.DnsProfileManager
 import kotlinx.coroutines.*
+import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import okhttp3.MediaType.Companion.toMediaType
@@ -45,6 +46,10 @@ class DnsUpstreamManager(
         private const val PLAIN_DNS_TIMEOUT_MS = 2500
         private const val DOH_TIMEOUT_MS = 3000L
         private const val DOT_TIMEOUT_MS = 3000
+        /** Overall budget for a single DNS resolution. After this we give up
+         *  so the calling app doesn't block — it will retry. */
+        private const val OVERALL_TIMEOUT_MS = 3500L
+        private const val FALLBACK_TIMEOUT_MS = 2500L
         // Cap concurrent upstream resolutions so a burst of packets from the
         // TUN can't fork unbounded coroutines and exhaust the IO thread pool.
         private const val MAX_INFLIGHT = 32
@@ -69,19 +74,54 @@ class DnsUpstreamManager(
         val profile = profileManager.activeProfile()
         val protocols = profile.resolutionOrder()
 
-        for (proto in protocols) {
-            val result = when (proto) {
-                Protocol.DOH -> resolveDoh(profile, queryBytes)
-                Protocol.DOT -> resolveDot(profile, queryBytes)
-                Protocol.PLAIN -> resolvePlain(profile, queryBytes)
+        // Race all available protocols in parallel — first non-null response wins.
+        // Sequential fallback used to add up to ~11s of latency on flaky networks
+        // because each protocol had to time out before the next was tried. Apps
+        // would then time out their own DNS resolution and lose internet.
+        val winner = coroutineScope {
+            val deferreds = protocols.map { proto ->
+                async {
+                    when (proto) {
+                        Protocol.DOH -> resolveDoh(profile, queryBytes)
+                        Protocol.DOT -> resolveDot(profile, queryBytes)
+                        Protocol.PLAIN -> resolvePlain(profile, queryBytes)
+                    }
+                }
             }
-            if (result != null) return@withPermit result
+            try {
+                withTimeoutOrNull(OVERALL_TIMEOUT_MS) {
+                    selectFirstNonNull(deferreds)
+                }
+            } finally {
+                deferreds.forEach { it.cancel() }
+            }
         }
+        if (winner != null) return@withPermit winner
 
         // All profile protocols failed — try generic fallbacks so the user
         // doesn't lose internet entirely.
         Log.w(TAG, "All profile protocols failed for ${profile.name}, using generic fallbacks")
-        resolvePlainFallback(queryBytes)
+        withTimeoutOrNull(FALLBACK_TIMEOUT_MS) { resolvePlainFallback(queryBytes) }
+    }
+
+    /**
+     * Await the first deferred that completes with a non-null result.
+     * Returns null only if all deferreds completed with null.
+     */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private suspend fun <T : Any> selectFirstNonNull(
+        deferreds: List<Deferred<T?>>
+    ): T? {
+        val remaining = deferreds.toMutableList()
+        while (remaining.isNotEmpty()) {
+            val done = select<Deferred<T?>> {
+                remaining.forEach { d -> d.onAwait { d } }
+            }
+            remaining.remove(done)
+            val value = done.getCompleted()
+            if (value != null) return value
+        }
+        return null
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -179,6 +219,16 @@ class DnsUpstreamManager(
     private suspend fun resolvePlainFallback(queryBytes: ByteArray): ByteArray? =
         withContext(Dispatchers.IO) {
             resolveWithServers(FALLBACK_SERVERS, queryBytes)
+        }
+
+    /**
+     * Public hook used by [DnsFilterEngine] for critical-allow domains that
+     * must not be sent through the filtered upstream. Uses VPN-protected
+     * sockets so the query does not loop back through the TUN.
+     */
+    suspend fun resolvePlainFallbackProtected(queryBytes: ByteArray): ByteArray? =
+        inflight.withPermit {
+            withTimeoutOrNull(FALLBACK_TIMEOUT_MS) { resolvePlainFallback(queryBytes) }
         }
 
     private fun resolveWithServers(servers: List<String>, queryBytes: ByteArray): ByteArray? {

@@ -6,7 +6,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 data class TvDimensions(
-    val navRailWidth: Dp = 132.dp,
+    val navRailWidth: Dp = 168.dp,
     val shieldSize: Dp = 120.dp,
     val typeScale: Float = 1f,
     val contentPadding: Dp = 28.dp,
@@ -21,7 +21,7 @@ data class TvDimensions(
 )
 
 val CompactTvDimensions = TvDimensions(
-    navRailWidth = 72.dp,
+    navRailWidth = 84.dp,
     shieldSize = 72.dp,
     typeScale = 0.85f,
     contentPadding = 16.dp,
@@ -36,7 +36,7 @@ val CompactTvDimensions = TvDimensions(
 )
 
 val MediumTvDimensions = TvDimensions(
-    navRailWidth = 110.dp,
+    navRailWidth = 144.dp,
     shieldSize = 96.dp,
     typeScale = 0.92f,
     contentPadding = 22.dp,

@@ -247,9 +247,9 @@ private fun ProtectionButton(
 }
 
 /**
- * Cinematic shield — multi-ring rotating system with arc sweep, soft halo
- * and breathing pulse. Frame-budget friendly: all motion driven by a single
- * infinite transition + 60 fps Canvas with cached brushes.
+ * Shield hero — a single soft halo + one slow rotating dashed ring when
+ * active. Designed to be GPU-cheap so the whole-system frame budget on
+ * mid-range Android TVs is preserved.
  */
 @Composable
 private fun ShieldHero(
@@ -258,15 +258,6 @@ private fun ShieldHero(
 ) {
     val transition = rememberInfiniteTransition(label = "shieldHero")
 
-    val breathScale by transition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.025f,
-        animationSpec = infiniteRepeatable(
-            tween(3200, easing = EaseInOutCubic),
-            RepeatMode.Reverse
-        ),
-        label = "breath"
-    )
     val rotationSlow by transition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
@@ -276,27 +267,18 @@ private fun ShieldHero(
         ),
         label = "rotSlow"
     )
-    val rotationFast by transition.animateFloat(
-        initialValue = 360f,
-        targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            tween(14000, easing = LinearEasing),
-            RepeatMode.Restart
-        ),
-        label = "rotFast"
-    )
     val pulse by transition.animateFloat(
-        initialValue = 0.15f,
-        targetValue = 0.55f,
+        initialValue = 0.20f,
+        targetValue = 0.45f,
         animationSpec = infiniteRepeatable(
-            tween(2200, easing = EaseInOutCubic),
+            tween(2600, easing = EaseInOutCubic),
             RepeatMode.Reverse
         ),
         label = "pulse"
     )
 
     val scale by animateFloatAsState(
-        if (active) breathScale else 0.98f,
+        if (active) 1.0f else 0.98f,
         spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
         label = "heroScale"
     )
@@ -307,7 +289,7 @@ private fun ShieldHero(
     )
     val ringIntensity by animateFloatAsState(
         if (active) 1f else 0f,
-        tween(700, easing = EaseOutCubic),
+        tween(500, easing = EaseOutCubic),
         label = "ringIntensity"
     )
 
@@ -317,19 +299,18 @@ private fun ShieldHero(
         contentAlignment = Alignment.Center,
         modifier = Modifier.size(canvasSize)
     ) {
-        // Layered rings + sweep, driven entirely by Canvas for perf.
         androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
             if (ringIntensity <= 0.01f) return@Canvas
             val cx = size.width / 2f
             val cy = size.height / 2f
             val minDim = size.minDimension
 
-            // Soft halo
+            // Soft halo (pulsing)
             drawCircle(
                 brush = Brush.radialGradient(
                     listOf(
                         EmeraldGreen.copy(alpha = pulse * 0.30f * ringIntensity),
-                        EmeraldGreen.copy(alpha = pulse * 0.10f * ringIntensity),
+                        EmeraldGreen.copy(alpha = pulse * 0.08f * ringIntensity),
                         Color.Transparent
                     ),
                     center = Offset(cx, cy),
@@ -339,19 +320,16 @@ private fun ShieldHero(
                 radius = minDim * 0.55f
             )
 
-            // Outer dashed ring (slow rotation)
+            // Single rotating dashed ring
             val outerRadius = minDim * 0.48f
             rotate(rotationSlow, pivot = Offset(cx, cy)) {
-                val dashOn = 14f
-                val dashOff = 10f
-                val circumferenceSteps = 28
-                val anglePerStep = 360f / circumferenceSteps
-                for (i in 0 until circumferenceSteps) {
-                    val start = i * anglePerStep
+                val steps = 24
+                val sweepArc = 360f / steps * 0.55f
+                for (i in 0 until steps) {
                     drawArc(
                         color = EmeraldGreen.copy(alpha = 0.55f * ringIntensity),
-                        startAngle = start,
-                        sweepAngle = anglePerStep * (dashOn / (dashOn + dashOff)),
+                        startAngle = i * (360f / steps),
+                        sweepAngle = sweepArc,
                         useCenter = false,
                         topLeft = Offset(cx - outerRadius, cy - outerRadius),
                         size = Size(outerRadius * 2, outerRadius * 2),
@@ -360,57 +338,13 @@ private fun ShieldHero(
                 }
             }
 
-            // Middle solid ring (fast counter-rotation)
-            val midRadius = minDim * 0.40f
-            rotate(rotationFast, pivot = Offset(cx, cy)) {
-                drawArc(
-                    color = EmeraldGreen.copy(alpha = 0.50f * ringIntensity),
-                    startAngle = -45f,
-                    sweepAngle = 90f,
-                    useCenter = false,
-                    topLeft = Offset(cx - midRadius, cy - midRadius),
-                    size = Size(midRadius * 2, midRadius * 2),
-                    style = Stroke(width = 2.dp.toPx())
-                )
-                drawArc(
-                    color = EmeraldGlow.copy(alpha = 0.35f * ringIntensity),
-                    startAngle = 135f,
-                    sweepAngle = 90f,
-                    useCenter = false,
-                    topLeft = Offset(cx - midRadius, cy - midRadius),
-                    size = Size(midRadius * 2, midRadius * 2),
-                    style = Stroke(width = 2.dp.toPx())
-                )
-            }
-
-            // Inner glow ring (static, breathes via pulse)
-            val innerRadius = minDim * 0.32f
+            // Static inner ring
             drawCircle(
-                color = EmeraldDark.copy(alpha = (0.20f + pulse * 0.25f) * ringIntensity),
-                radius = innerRadius,
+                color = EmeraldDark.copy(alpha = (0.20f + pulse * 0.20f) * ringIntensity),
+                radius = minDim * 0.32f,
                 center = Offset(cx, cy),
                 style = Stroke(width = 1.dp.toPx())
             )
-
-            // Sweep highlight — single bright arc rotating
-            rotate(rotationSlow * 2, pivot = Offset(cx, cy)) {
-                drawArc(
-                    brush = Brush.sweepGradient(
-                        listOf(
-                            Color.Transparent,
-                            EmeraldGreen.copy(alpha = 0.7f * ringIntensity),
-                            Color.Transparent
-                        ),
-                        center = Offset(cx, cy)
-                    ),
-                    startAngle = 0f,
-                    sweepAngle = 60f,
-                    useCenter = false,
-                    topLeft = Offset(cx - outerRadius, cy - outerRadius),
-                    size = Size(outerRadius * 2, outerRadius * 2),
-                    style = Stroke(width = 2.5.dp.toPx())
-                )
-            }
         }
 
         Icon(

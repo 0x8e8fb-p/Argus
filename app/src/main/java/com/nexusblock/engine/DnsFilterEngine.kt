@@ -157,11 +157,16 @@ class DnsFilterEngine @Inject constructor(
      * unless the domain matches a local custom rule or emergency block.
      */
     suspend fun resolveDns(queryPayload: ByteArray): ByteArray? {
-        startJob?.join()
+        // Bound the wait for engine startup — never block an app's DNS query
+        // for more than ~750ms. If the engine is still warming up we just
+        // skip local rule evaluation and pass through to upstream.
+        if (startJob?.isActive == true) {
+            withTimeoutOrNull(750) { startJob?.join() }
+        }
 
         val query = try { Message(queryPayload) } catch (e: Exception) {
             Log.w(TAG, "Failed to parse DNS query", e)
-            return upstreamResolve(queryPayload)
+            return upstreamResolve(queryPayload) ?: buildServFailFromBytes(queryPayload)
         }
 
         if (query.header.opcode != Opcode.QUERY) {
@@ -223,7 +228,8 @@ class DnsFilterEngine @Inject constructor(
         }
 
         // 4. Everything else → upstream filtered resolver (AdGuard, etc.)
-        val upstreamResponse = upstreamResolve(queryPayload) ?: return null
+        val upstreamResponse = upstreamResolve(queryPayload)
+            ?: return buildServFail(query)
 
         // Check CNAME chain for local blocks
         val blockedAlias = findBlockedAnswer(upstreamResponse, host)
@@ -238,6 +244,27 @@ class DnsFilterEngine @Inject constructor(
         return upstreamResponse
     }
 
+    /**
+     * Build a SERVFAIL response so the caller fails fast instead of hanging.
+     * Returning null from resolveDns causes the original DNS packet to be
+     * dropped silently — apps then wait the full 5 s socket timeout, making
+     * the system feel frozen. SERVFAIL prompts immediate retry / fallback.
+     */
+    private fun buildServFail(query: Message): ByteArray {
+        val response = Message(query.header.id)
+        response.header.setFlag(Flags.QR.toInt())
+        response.header.setFlag(Flags.RA.toInt())
+        response.header.rcode = Rcode.SERVFAIL
+        query.question?.let { response.addRecord(it, Section.QUESTION) }
+        return response.toWire()
+    }
+
+    private fun buildServFailFromBytes(queryPayload: ByteArray): ByteArray? = try {
+        buildServFail(Message(queryPayload))
+    } catch (_: Exception) {
+        null
+    }
+
     private suspend fun upstreamResolve(queryPayload: ByteArray): ByteArray? {
         return try {
             withContext(Dispatchers.IO) {
@@ -250,18 +277,18 @@ class DnsFilterEngine @Inject constructor(
     }
 
     /**
-     * Fallback plain-DNS resolver to Google (8.8.8.8) for critical-allowed
-     * domains that AdGuard or other filtered upstreams may block.
+     * Fallback plain-DNS resolver for critical-allowed domains that the
+     * configured filtered upstream (AdGuard, etc.) may block.
+     *
+     * IMPORTANT: We delegate to [DnsUpstreamManager.resolveWithPlainFallback]
+     * which uses VPN-protected sockets. A naive `SimpleResolver("8.8.8.8")`
+     * would open an unprotected `DatagramSocket`, and because 8.8.8.8 is in
+     * our DNS bypass capture routes the packet would loop back into the TUN
+     * → recursive resolution → all apps lose internet.
      */
     private suspend fun plainDnsResolve(queryPayload: ByteArray): ByteArray? {
         return try {
-            withContext(Dispatchers.IO) {
-                val resolver = SimpleResolver("8.8.8.8")
-                resolver.setTimeout(5)
-                val query = Message(queryPayload)
-                val response = resolver.send(query)
-                response.toWire()
-            }
+            upstreamManager?.resolvePlainFallbackProtected(queryPayload)
         } catch (e: Exception) {
             Log.w(TAG, "Plain DNS resolution error", e)
             null

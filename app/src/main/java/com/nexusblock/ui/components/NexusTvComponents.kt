@@ -79,34 +79,17 @@ private val Emerald = Color(0xFF00E676)
 @Composable
 fun ArgusBackground(modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
-    val transition = rememberInfiniteTransition(label = "ambientBg")
-
-    val drift1 by transition.animateFloat(
-        initialValue = 0f, targetValue = 6.2832f,
-        animationSpec = infiniteRepeatable(tween(18000, easing = LinearEasing), RepeatMode.Restart),
-        label = "drift1"
-    )
-    val drift2 by transition.animateFloat(
-        initialValue = 0f, targetValue = 6.2832f,
-        animationSpec = infiniteRepeatable(tween(24000, easing = LinearEasing), RepeatMode.Restart),
-        label = "drift2"
-    )
-    val drift3 by transition.animateFloat(
-        initialValue = 0f, targetValue = 6.2832f,
-        animationSpec = infiniteRepeatable(tween(14000, easing = LinearEasing), RepeatMode.Restart),
-        label = "drift3"
-    )
-
+    // Static composition — three radial orbs baked into a single Canvas
+    // pass. Previously this used three infinite transitions driving full
+    // screen redraws every frame; on low-end Android TV GPUs that pegged
+    // the render thread and made the whole system feel laggy.
     Canvas(modifier = modifier.fillMaxSize()) {
         drawRect(colors.background)
 
-        val orb1Center = Offset(
-            x = size.width * 0.15f + cos(drift1) * size.width * 0.05f,
-            y = size.height * 0.25f + sin(drift1) * size.height * 0.08f
-        )
+        val orb1Center = Offset(size.width * 0.15f, size.height * 0.25f)
         drawCircle(
             brush = Brush.radialGradient(
-                listOf(Emerald.copy(alpha = 0.12f), Color.Transparent),
+                listOf(Emerald.copy(alpha = 0.10f), Color.Transparent),
                 center = orb1Center,
                 radius = size.minDimension * 0.45f
             ),
@@ -114,13 +97,10 @@ fun ArgusBackground(modifier: Modifier = Modifier) {
             radius = size.minDimension * 0.45f
         )
 
-        val orb2Center = Offset(
-            x = size.width * 0.82f + cos(drift2) * size.width * 0.04f,
-            y = size.height * 0.7f + sin(drift2) * size.height * 0.06f
-        )
+        val orb2Center = Offset(size.width * 0.82f, size.height * 0.7f)
         drawCircle(
             brush = Brush.radialGradient(
-                listOf(Emerald.copy(alpha = 0.08f), Color.Transparent),
+                listOf(Emerald.copy(alpha = 0.07f), Color.Transparent),
                 center = orb2Center,
                 radius = size.minDimension * 0.5f
             ),
@@ -128,13 +108,10 @@ fun ArgusBackground(modifier: Modifier = Modifier) {
             radius = size.minDimension * 0.5f
         )
 
-        val orb3Center = Offset(
-            x = size.width * 0.5f + sin(drift3) * size.width * 0.06f,
-            y = size.height * 0.1f + cos(drift3) * size.height * 0.04f
-        )
+        val orb3Center = Offset(size.width * 0.5f, size.height * 0.1f)
         drawCircle(
             brush = Brush.radialGradient(
-                listOf(Color(0xFF69F0AE).copy(alpha = 0.06f), Color.Transparent),
+                listOf(Color(0xFF69F0AE).copy(alpha = 0.05f), Color.Transparent),
                 center = orb3Center,
                 radius = size.minDimension * 0.35f
             ),
@@ -463,7 +440,7 @@ fun ArgusNavigationRail(
                     )
                 }
             }
-            .padding(horizontal = 12.dp, vertical = 20.dp),
+            .padding(horizontal = 8.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
@@ -473,7 +450,7 @@ fun ArgusNavigationRail(
             modifier = Modifier.size(40.dp)
         )
         Spacer(modifier = Modifier.height(10.dp))
-        if (dims.navRailWidth > 80.dp) {
+        if (dims.navRailWidth > 100.dp) {
             Text(
                 text = "ArgusBlock",
                 style = MaterialTheme.typography.titleMedium,
@@ -523,7 +500,7 @@ fun ArgusNavigationRail(
                         title = item.screen.title,
                         icon = item.icon,
                         selected = index == selectedIndex,
-                        showLabel = dims.navRailWidth > 80.dp,
+                        showLabel = dims.navRailWidth > 100.dp,
                         itemHeight = itemHeight,
                         onClick = {
                             navController.navigate(item.screen.route) {
@@ -583,7 +560,7 @@ private fun NavRailItem(
             .clickable(onClick = onClick)
             .onFocusChanged { focused = it.isFocused || it.hasFocus }
             .focusable()
-            .padding(horizontal = 12.dp)
+            .padding(horizontal = 10.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -597,7 +574,7 @@ private fun NavRailItem(
                 modifier = Modifier.size(22.dp)
             )
             if (showLabel) {
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = title,
                     style = MaterialTheme.typography.labelLarge,

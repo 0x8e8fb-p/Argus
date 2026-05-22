@@ -6,6 +6,7 @@ import android.util.Log
 import com.nexusblock.Constants
 import com.nexusblock.data.repository.StatsRepository
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.InetAddress
@@ -34,6 +35,13 @@ class PacketRouter @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var routerJob: Job? = null
     private var techniquesJob: Job? = null
+    private var blockedLogJob: Job? = null
+    // Bounded channel for blocked-event logging. Dropping the oldest entry
+    // under burst is fine — diagnostics should never throttle the data path.
+    private val blockedLogChannel = Channel<Pair<String, String>>(
+        capacity = 256,
+        onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
+    )
     private var techniques = com.nexusblock.data.repository.BlockingTechniques()
     private val outputLock = Any()
 
@@ -63,6 +71,17 @@ class PacketRouter @Inject constructor(
             settingsRepo.observeTechniques().collect {
                 techniques = it
                 Log.d(TAG, "Techniques updated: $techniques")
+            }
+        }
+
+        // Single consumer drains the blocked-log channel and forwards to
+        // StatsRepository. This replaces a `scope.launch { ... }` per blocked
+        // packet which was hammering the IO dispatcher under load.
+        blockedLogJob?.cancel()
+        blockedLogJob = scope.launch {
+            for ((target, type) in blockedLogChannel) {
+                try { statsRepo.logBlocked(target, type = type) }
+                catch (e: Exception) { Log.w(TAG, "logBlocked failed", e) }
             }
         }
 
@@ -97,6 +116,8 @@ class PacketRouter @Inject constructor(
         routerJob = null
         techniquesJob?.cancel()
         techniquesJob = null
+        blockedLogJob?.cancel()
+        blockedLogJob = null
         dnsEngine.stop()
         Log.i(TAG, "Packet router stopped")
     }
@@ -162,9 +183,7 @@ class PacketRouter @Inject constructor(
                 if (buffer.remaining() >= udpOffset + 8) {
                     if (isDnsBypassIp(dstIpStr) && dstPort != 53 && isDnsBypassPort(dstPort)) {
                         packetsBlocked++
-                        scope.launch {
-                            statsRepo.logBlocked("$dstIpStr:$dstPort", type = "dns-bypass")
-                        }
+                        blockedLogChannel.trySend("$dstIpStr:$dstPort" to "dns-bypass")
                         return
                     }
 
@@ -208,9 +227,7 @@ class PacketRouter @Inject constructor(
                 if (isDnsBypassIp(dstIpStr) && isDnsBypassPort(dstPort)) {
                     sendRst(output, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort)
                     packetsBlocked++
-                    scope.launch {
-                        statsRepo.logBlocked("$dstIpStr:$dstPort", type = "dns-bypass")
-                    }
+                    blockedLogChannel.trySend("$dstIpStr:$dstPort" to "dns-bypass")
                     return
                 }
 
@@ -228,9 +245,7 @@ class PacketRouter @Inject constructor(
                             sendRst(output, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort)
                             packetsBlocked++
                             dnsBlocks++
-                            scope.launch {
-                                statsRepo.logBlocked(sni, type = "sni")
-                            }
+                            blockedLogChannel.trySend(sni to "sni")
                             return
                         }
                     }
