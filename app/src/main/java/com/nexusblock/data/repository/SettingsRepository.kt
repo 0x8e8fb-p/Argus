@@ -3,7 +3,6 @@ package com.nexusblock.data.repository
 import android.content.SharedPreferences
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
-import com.nexusblock.Constants
 import com.nexusblock.data.model.FirewallMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,10 +17,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Active blocking techniques. All removed/dead fields cleaned:
- * - sniInspection, mitmProxy, fullTunnel, albaniaMode → removed (dead code)
- * - youtubeRecommendations → removed (AdGuard DNS handles this upstream)
- * + dnsProfile → new: selected DNS provider ID (adguard_standard, cloudflare_family, etc.)
+ * Active blocking techniques.
+ * + dnsProfile → selected DNS provider ID (adguard_standard, cloudflare_family, etc.)
  */
 data class BlockingTechniques(
     val dnsFiltering: Boolean = true,
@@ -45,7 +42,8 @@ enum class VpnRoutingMode(val storageKey: String) {
 enum class VpnMode(val storageKey: String) {
     LUNA_PRIMARY("luna_primary"),
     LOCAL_ONLY("local_only"),
-    LUNA_ONLY("luna_only");
+    LUNA_ONLY("luna_only"),
+    PRIVATE_DNS("private_dns");
 
     companion object {
         fun fromStorageKey(value: String?): VpnMode = entries.firstOrNull { it.storageKey == value }
@@ -62,7 +60,6 @@ class SettingsRepository @Inject constructor(
 
     // Preference keys
     private val KEY_AUTO_START = booleanPreferencesKey("auto_start")
-    private val KEY_BATTERY_OPT = booleanPreferencesKey("battery_opt")
     private val KEY_VPN_ACTIVE = booleanPreferencesKey("vpn_active")
     private val KEY_VPN_ROUTING_MODE = stringPreferencesKey("vpn_routing_mode")
     private val KEY_DNS_PROFILE = stringPreferencesKey("dns_profile")
@@ -78,10 +75,6 @@ class SettingsRepository @Inject constructor(
     private val autoStartFlow = dataStore.data
         .map { it[KEY_AUTO_START] ?: true }
         .stateIn(scope, SharingStarted.Eagerly, true)
-
-    private val batteryOptFlow = dataStore.data
-        .map { it[KEY_BATTERY_OPT] ?: false }
-        .stateIn(scope, SharingStarted.Eagerly, false)
 
     private val vpnActiveFlow = dataStore.data
         .map { it[KEY_VPN_ACTIVE] ?: false }
@@ -126,10 +119,6 @@ class SettingsRepository @Inject constructor(
         get() = autoStartFlow.value
         set(value) { scope.launch { dataStore.edit { it[KEY_AUTO_START] = value } } }
 
-    var batteryOptIgnored: Boolean
-        get() = batteryOptFlow.value
-        set(value) { scope.launch { dataStore.edit { it[KEY_BATTERY_OPT] = value } } }
-
     var vpnActive: Boolean
         get() = vpnActiveFlow.value
         set(value) { scope.launch { dataStore.edit { it[KEY_VPN_ACTIVE] = value } } }
@@ -160,13 +149,6 @@ class SettingsRepository @Inject constructor(
             }
         }
 
-    var dnsMode: String
-        get() = "PLAIN"
-        set(_) { /* deprecated — dnsProfile replaces this */ }
-
-    // Legacy property for backward compatibility during migration
-    var youtubeRecommendationsEnabled: Boolean = true
-
     // ─────────────────────────────────────────────────────────────
     // Firewall modes (per-app ALLOW / BLOCK / DEFAULT)
     // ─────────────────────────────────────────────────────────────
@@ -182,12 +164,6 @@ class SettingsRepository @Inject constructor(
         }
 
     fun observeFirewallModes(): StateFlow<Map<String, FirewallMode>> = firewallModesFlow
-
-    fun getBlockedPackages(): Set<String> {
-        return firewallModesFlow.value
-            .filter { it.value == FirewallMode.BLOCK }
-            .keys
-    }
 
     // ─────────────────────────────────────────────────────────────
     // Observable flows

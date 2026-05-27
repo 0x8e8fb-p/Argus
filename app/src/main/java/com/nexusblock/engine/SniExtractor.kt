@@ -1,7 +1,5 @@
 package com.nexusblock.engine
 
-import java.nio.ByteBuffer
-
 object SniExtractor {
 
     fun extractSni(tcpPayload: ByteArray, offset: Int, length: Int): String? {

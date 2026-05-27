@@ -31,6 +31,7 @@ import androidx.tv.material3.Text
 import com.nexusblock.data.repository.VpnMode
 import com.nexusblock.data.repository.VpnRoutingMode
 import com.nexusblock.ui.components.ArgusScreenHeader
+import com.nexusblock.ui.components.CertInstallWizard
 import com.nexusblock.ui.components.FocusPanel
 import com.nexusblock.ui.components.SegmentedControl
 import com.nexusblock.ui.viewmodel.SettingsViewModel
@@ -45,7 +46,22 @@ fun SettingsScreen(
     val dnsProfile by viewModel.dnsProfile.collectAsState()
     val vpnRoutingMode by viewModel.vpnRoutingMode.collectAsState()
     val vpnMode by viewModel.vpnMode.collectAsState()
+    val lunaCertInstalled by viewModel.lunaCertInstalled.collectAsState()
+    val privateDnsActive by viewModel.privateDnsActive.collectAsState()
+    val privateDnsPermission by viewModel.privateDnsPermission.collectAsState()
+    val showCertWizard by viewModel.showCertWizard.collectAsState()
     var showAdvanced by remember { mutableStateOf(false) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    if (showCertWizard) {
+        CertInstallWizard(
+            onDismiss = { viewModel.dismissCertWizard() },
+            onOpenSettings = {
+                viewModel.dismissCertWizard()
+                com.nexusblock.cert.CertInstallOrchestrator.openSecuritySettings(context)
+            }
+        )
+    }
 
     if (showAdvanced) {
         AdvancedSettingsScreen()
@@ -161,7 +177,8 @@ fun SettingsScreen(
                         options = listOf(
                             VpnMode.LUNA_PRIMARY.storageKey to "Luna + Failover",
                             VpnMode.LUNA_ONLY.storageKey to "Luna Only",
-                            VpnMode.LOCAL_ONLY.storageKey to "Local Only"
+                            VpnMode.LOCAL_ONLY.storageKey to "Local Only",
+                            VpnMode.PRIVATE_DNS.storageKey to "System DNS"
                         ),
                         selectedKey = vpnMode.storageKey,
                         onSelected = { selected ->
@@ -172,12 +189,73 @@ fun SettingsScreen(
             }
         }
 
+        // Private DNS provider selection (shown when PRIVATE_DNS mode is active)
+        if (vpnMode == VpnMode.PRIVATE_DNS) {
+            item {
+                FocusPanel(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(16.dp)
+                ) {
+                    Column {
+                        Text(
+                            text = "Private DNS Provider",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = if (privateDnsPermission) {
+                                if (privateDnsActive) "Active — zero battery drain" else "Ready to activate"
+                            } else {
+                                "⚠ Permission needed: run ADB command below"
+                            },
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (privateDnsPermission) MaterialTheme.colorScheme.onSurfaceVariant
+                                    else MaterialTheme.colorScheme.error
+                        )
+                        if (!privateDnsPermission) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "adb shell pm grant com.nexusblock android.permission.WRITE_SECURE_SETTINGS",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = { viewModel.refreshPrivateDnsPermission() }) {
+                                Text("Check Permission")
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            SegmentedControl(
+                                options = listOf(
+                                    "dns.adguard-dns.com" to "AdGuard",
+                                    "family.adguard-dns.com" to "Family",
+                                    "x-1hosts-lite.freedns.controld.com" to "1Hosts",
+                                    "dns.quad9.net" to "Quad9"
+                                ),
+                                selectedKey = "dns.adguard-dns.com",
+                                onSelected = { hostname ->
+                                    viewModel.setPrivateDnsProvider(hostname)
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         item {
             SettingActionRow(
                 title = "Luna CA Certificate",
-                subtitle = "Install for HTTPS ad-blocking (optional)",
-                buttonText = "Install",
-                enabled = true,
+                subtitle = when {
+                    lunaCertInstalled -> "Installed — Luna HTTPS filtering active"
+                    else -> "Install for Luna HTTPS ad-blocking (optional, most TVs cannot)"
+                },
+                buttonText = when {
+                    lunaCertInstalled -> "Installed"
+                    else -> "Install"
+                },
+                enabled = !lunaCertInstalled,
                 onClick = { viewModel.installLunaCert() }
             )
         }
@@ -338,4 +416,5 @@ private fun formatVpnMode(mode: VpnMode): String = when (mode) {
     VpnMode.LUNA_PRIMARY -> "Luna + Local Failover"
     VpnMode.LUNA_ONLY -> "Luna Only"
     VpnMode.LOCAL_ONLY -> "Local Only"
+    VpnMode.PRIVATE_DNS -> "System Private DNS"
 }

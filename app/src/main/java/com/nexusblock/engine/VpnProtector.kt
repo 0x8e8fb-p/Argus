@@ -1,6 +1,5 @@
 package com.nexusblock.engine
 
-import android.net.VpnService
 import com.nexusblock.service.NexusVpnService
 import java.net.DatagramSocket
 import java.net.Socket

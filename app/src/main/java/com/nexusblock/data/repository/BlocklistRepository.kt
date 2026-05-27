@@ -13,15 +13,9 @@ import javax.inject.Singleton
 class BlocklistRepository @Inject constructor(
     private val domainDao: BlockedDomainDao
 ) {
-    fun observeEnabledDomains(): Flow<List<BlockedDomain>> = domainDao.observeEnabled()
-
     fun observeDomainCount(): Flow<Int> = domainDao.observeCount()
 
     fun observeSourceStates(): Flow<List<BlocklistSourceState>> = domainDao.observeSourceStates()
-
-    suspend fun getEnabledDomains(): List<BlockedDomain> = withContext(Dispatchers.IO) {
-        domainDao.getEnabled()
-    }
 
     suspend fun isSourceEnabled(source: String, defaultEnabled: Boolean): Boolean = withContext(Dispatchers.IO) {
         val hasExistingState = domainDao.countBySource(source) > 0
@@ -65,9 +59,5 @@ class BlocklistRepository @Inject constructor(
 
     suspend fun getDomainsBySource(source: String): List<BlockedDomain> = withContext(Dispatchers.IO) {
         domainDao.getBySource(source)
-    }
-
-    suspend fun clearAll() = withContext(Dispatchers.IO) {
-        domainDao.clearAll()
     }
 }

@@ -16,20 +16,15 @@ class LogsViewModel @Inject constructor(
     private val statsRepo: StatsRepository
 ) : ViewModel() {
 
-    val events: StateFlow<List<BlockedEvent>> = statsRepo.observeRecentEvents(500)
+    private val events: StateFlow<List<BlockedEvent>> = statsRepo.observeRecentEvents(500)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _filter = MutableStateFlow("")
-    val filter: StateFlow<String> = _filter.asStateFlow()
 
-    val filteredEvents: StateFlow<List<BlockedEvent>> = combine(events, filter) { list, query ->
+    val filteredEvents: StateFlow<List<BlockedEvent>> = combine(events, _filter) { list, query ->
         if (query.isBlank()) list
         else list.filter { it.host.contains(query, ignoreCase = true) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    fun setFilter(query: String) {
-        _filter.value = query
-    }
 
     fun clearLogs() {
         viewModelScope.launch {

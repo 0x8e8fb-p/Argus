@@ -17,23 +17,15 @@ class CustomRulesViewModel @Inject constructor(
     val rules: StateFlow<List<CustomRule>> = customRuleRepo.observeAllRules()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    private val _isAdding = MutableStateFlow(false)
-    val isAdding: StateFlow<Boolean> = _isAdding.asStateFlow()
-
     fun addRule(ruleText: String, isAllow: Boolean, description: String?) {
         viewModelScope.launch {
-            _isAdding.value = true
-            try {
-                customRuleRepo.addRule(
-                    CustomRule(
-                        rule = ruleText.trim(),
-                        isAllow = isAllow,
-                        description = description?.trim()
-                    )
+            customRuleRepo.addRule(
+                CustomRule(
+                    rule = ruleText.trim(),
+                    isAllow = isAllow,
+                    description = description?.trim()
                 )
-            } finally {
-                _isAdding.value = false
-            }
+            )
         }
     }
 

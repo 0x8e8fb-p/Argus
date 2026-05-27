@@ -2,9 +2,6 @@ package com.nexusblock.engine
 
 import java.nio.ByteBuffer
 
-internal fun bytesToIp(b: ByteArray): String =
-    "${b[0].toInt() and 0xFF}.${b[1].toInt() and 0xFF}.${b[2].toInt() and 0xFF}.${b[3].toInt() and 0xFF}"
-
 internal fun calculateChecksum(buffer: ByteBuffer, offset: Int, length: Int): Int {
     var sum = 0
     var i = offset

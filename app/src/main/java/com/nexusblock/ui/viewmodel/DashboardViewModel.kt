@@ -28,8 +28,6 @@ import javax.inject.Inject
  */
 data class DashboardUiState(
     val vpnActive: Boolean = false,
-    val vpnDesired: Boolean = false,
-    val statusText: String = "Ad blocking is disabled",
     val blockedCountText: String = "0",
     val dataSavedText: String = "0 KB",
     val domainCountText: String = "0",
@@ -58,16 +56,10 @@ class DashboardViewModel @Inject constructor(
         statsRepo.observeTotalBlocked(),
         blocklistRepo.observeDomainCount(),
         settingsRepo.observeTechniques()
-    ) { desiredActive, running, blocked, domains, techs ->
+    ) { _, running, blocked, domains, techs ->
         val kb = blocked * 150
         DashboardUiState(
             vpnActive = running,
-            vpnDesired = desiredActive,
-            statusText = when {
-                running -> "ArgusBlock is protecting your device"
-                desiredActive -> "VPN permission or service restart is needed"
-                else -> "Ad blocking is disabled"
-            },
             blockedCountText = blocked.toString(),
             dataSavedText = when {
                 kb > 1_000_000 -> String.format("%.1f GB", kb / 1_000_000.0)

@@ -9,11 +9,14 @@ import android.net.NetworkRequest
 import android.net.VpnManager
 import android.os.Build
 import android.util.Log
+import java.net.InetAddress
 import androidx.annotation.RequiresApi
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.json.JSONObject
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -110,6 +113,22 @@ class LunaVpnManager @Inject constructor(
         disconnectInternal()
     }
 
+    /**
+     * Quick health check: ping Luna's internal DNS (10.16.0.1) over ICMP.
+     * Returns true if the Luna VPN tunnel is actually carrying traffic.
+     */
+    fun isHealthy(): Boolean {
+        if (_state.value != LunaState.CONNECTED) return false
+        return try {
+            val reachable = InetAddress.getByName("10.16.0.1").isReachable(3000)
+            Log.d(TAG, "Luna health ping 10.16.0.1 reachable=$reachable")
+            reachable
+        } catch (e: Exception) {
+            Log.w(TAG, "Luna health ping failed", e)
+            false
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.R)
     private fun disconnectInternal() {
         try {
@@ -130,12 +149,35 @@ class LunaVpnManager @Inject constructor(
         val password = config.getString("password")
         val remoteId = config.optString("remoteIdentifier", server)
 
+        // Load Luna CA cert for IKE server validation (prevents MITM of the VPN tunnel itself)
+        val caCert = loadLunaCaCert()
+        if (caCert == null) {
+            Log.w(TAG, "Luna CA cert not found; using system trust store for server validation")
+        } else {
+            Log.i(TAG, "Luna CA cert loaded for IKE server validation")
+        }
+
         return Ikev2VpnProfile.Builder(server, remoteId)
-            .setAuthUsernamePassword(username, password, null)
+            .setAuthUsernamePassword(username, password, caCert)
             .setBypassable(false)
             .setMetered(false)
             .setMaxMtu(1400)
             .build()
+    }
+
+    /**
+     * Load the bundled Luna CA certificate from assets for IKEv2 server validation.
+     * This ensures we only connect to the real Luna server, not an impersonator.
+     */
+    private fun loadLunaCaCert(): X509Certificate? {
+        return try {
+            val pemBytes = context.assets.open("luna/ca_cert.pem").use { it.readBytes() }
+            val cf = CertificateFactory.getInstance("X.509")
+            cf.generateCertificate(pemBytes.inputStream()) as X509Certificate
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to load Luna CA cert from assets", e)
+            null
+        }
     }
 
     private fun loadConfig(): JSONObject {

@@ -11,7 +11,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.xbill.DNS.Message
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress

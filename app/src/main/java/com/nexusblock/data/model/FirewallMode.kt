@@ -21,12 +21,6 @@ enum class FirewallMode {
     BLOCK
 }
 
-fun FirewallMode.displayName(): String = when (this) {
-    FirewallMode.DEFAULT -> "VPN Only"
-    FirewallMode.ALLOW -> "Bypass VPN"
-    FirewallMode.BLOCK -> "DNS Block"
-}
-
 fun FirewallMode.description(): String = when (this) {
     FirewallMode.DEFAULT -> "Ad blocking enabled for this app"
     FirewallMode.ALLOW -> "No ad blocking; direct internet"

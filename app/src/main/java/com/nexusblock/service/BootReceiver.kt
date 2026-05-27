@@ -5,9 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
-import com.nexusblock.data.repository.SettingsRepository
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint(BroadcastReceiver::class)
 class BootReceiver : BroadcastReceiver() {
@@ -15,9 +13,6 @@ class BootReceiver : BroadcastReceiver() {
     companion object {
         private const val TAG = "NexusBlock/Boot"
     }
-
-    @Inject
-    lateinit var settingsRepo: SettingsRepository
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED ||

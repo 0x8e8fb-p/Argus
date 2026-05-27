@@ -17,7 +17,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
@@ -26,8 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -37,12 +34,10 @@ import com.nexusblock.service.NexusVpnService
 import com.nexusblock.service.VpnWatchdogService
 import com.nexusblock.ui.components.ArgusBackground
 import com.nexusblock.ui.components.ArgusNavigationRail
-import com.nexusblock.ui.components.ArgusVignette
 import com.nexusblock.ui.screens.*
 import com.nexusblock.ui.theme.ArgusBlockTheme
 import com.nexusblock.ui.theme.LocalTvDimensions
 import com.nexusblock.ui.theme.dimensionsForWidth
-import com.nexusblock.ui.theme.tvDimensions
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -140,7 +135,6 @@ fun ArgusBlockApp(
         CompositionLocalProvider(LocalTvDimensions provides dims) {
             Box(modifier = Modifier.fillMaxSize()) {
                 ArgusBackground()
-                ArgusVignette()
                 Row(modifier = Modifier.fillMaxSize()) {
                     ArgusNavigationRail(navController = navController)
                     NavHost(

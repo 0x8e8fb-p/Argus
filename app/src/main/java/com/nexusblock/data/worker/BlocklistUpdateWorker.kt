@@ -1,7 +1,7 @@
 package com.nexusblock.data.worker
 
 import android.content.Context
-import android.content.Intent
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.*
@@ -29,11 +29,13 @@ class BlocklistUpdateWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val blocklistRepo: BlocklistRepository,
     private val dnsEngine: DnsFilterEngine,
-    private val okHttpClient: OkHttpClient
+    private val okHttpClient: OkHttpClient,
+    private val sharedPreferences: SharedPreferences
 ) : CoroutineWorker(context, params) {
 
     companion object {
         private const val TAG = "NexusBlock/Updater"
+        private const val ETAG_PREFIX = "blocklist_etag_"
 
         fun schedule(context: Context) {
             val constraints = Constraints.Builder()
@@ -72,10 +74,6 @@ class BlocklistUpdateWorker @AssistedInject constructor(
                 request
             )
         }
-
-        fun cancel(context: Context) {
-            WorkManager.getInstance(context).cancelUniqueWork(Constants.WORK_TAG_BLOCKLIST)
-        }
     }
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
@@ -97,7 +95,10 @@ class BlocklistUpdateWorker @AssistedInject constructor(
                     url = url,
                     format = source.format
                 )
-                if (domains.isNotEmpty()) {
+                if (domains == null) {
+                    // 304 Not Modified — already up to date
+                    successCount++
+                } else if (domains.isNotEmpty()) {
                     blocklistRepo.replaceSource(source.id, domains, source.defaultEnabled)
                     Log.i(TAG, "Updated ${source.id} with ${domains.size} domains")
                     successCount++
@@ -145,16 +146,31 @@ class BlocklistUpdateWorker @AssistedInject constructor(
         sourceId: String,
         url: String,
         format: BlocklistFormat
-    ): List<BlockedDomain> = withContext(Dispatchers.IO) {
-        val request = Request.Builder()
+    ): List<BlockedDomain>? = withContext(Dispatchers.IO) {
+        val requestBuilder = Request.Builder()
             .url(url)
             .header("User-Agent", "NexusBlock/1.0")
-            .build()
 
-        okHttpClient.newCall(request).execute().use { response ->
+        // Add If-None-Match header if we have a cached ETag
+        val cachedEtag = sharedPreferences.getString(ETAG_PREFIX + sourceId, null)
+        if (cachedEtag != null) {
+            requestBuilder.header("If-None-Match", cachedEtag)
+        }
+
+        okHttpClient.newCall(requestBuilder.build()).execute().use { response ->
+            if (response.code == 304) {
+                Log.i(TAG, "$sourceId not modified (304), skipping")
+                return@withContext null
+            }
             if (!response.isSuccessful) {
                 throw IOException("HTTP ${response.code}")
             }
+
+            // Store ETag for future conditional requests
+            response.header("ETag")?.let { etag ->
+                sharedPreferences.edit().putString(ETAG_PREFIX + sourceId, etag).apply()
+            }
+
             val body = response.body?.string() ?: throw IOException("Empty body")
             val hosts = when (format) {
                 BlocklistFormat.HOSTS -> BlocklistParsers.parseHostFile(body)

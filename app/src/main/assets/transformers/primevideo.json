@@ -1,0 +1,52 @@
+{
+  "host_patterns": [
+    "*.primevideo.com",
+    "*.amazon.com",
+    "*.amazon.dev",
+    "*.a2z.com",
+    "atv-ps.amazon.com",
+    "atv-ext.amazon.com",
+    "atv-ps-fe.amazon.com",
+    "atv-ps-eu.amazon.com",
+    "atv-ext-eu.amazon.com",
+    "atv-ext-fe.amazon.com"
+  ],
+  "path_patterns": [
+    "/cdp/*",
+    "/api/*",
+    "/ dp/*",
+    "/playback/*",
+    "/manifest/*"
+  ],
+  "remove_fields": [
+    "adBreaks",
+    "adBreakList",
+    "adPods",
+    "adSlots",
+    "adPlacements",
+    "playerAds",
+    "trackingData",
+    "beaconEvents",
+    "impressionEvents",
+    "adInfo",
+    "adMetadata",
+    "adDecisionInfo",
+    "sponsoredContent",
+    "promotionalItems"
+  ],
+  "remove_objects_with_keys": [
+    "adRenderer",
+    "adInfo",
+    "trackingPixel",
+    "adBreakModel",
+    "adDecisionModel",
+    "sponsoredModel"
+  ],
+  "set_null_fields": [
+    "midroll",
+    "postroll",
+    "preroll",
+    "adCount",
+    "adDuration"
+  ]
+}

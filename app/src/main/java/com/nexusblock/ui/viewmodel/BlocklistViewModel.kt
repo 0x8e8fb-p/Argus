@@ -1,6 +1,5 @@
 package com.nexusblock.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nexusblock.data.repository.BlocklistSources
 import com.nexusblock.data.worker.BlocklistUpdateWorker

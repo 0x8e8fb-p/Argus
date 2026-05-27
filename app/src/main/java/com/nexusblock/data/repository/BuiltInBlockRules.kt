@@ -62,7 +62,8 @@ object BuiltInBlockRules {
 
     private val regexPatterns = listOf(
         "^r\\d+---sn-[a-z0-9]+-[a-z0-9]*ad[a-z0-9]*\\.googlevideo\\.com$",
-        ".*\\.cf\\.videorolls\\.row\\.aiv-cdn\\.net$",
+        // Prime Video SSAI: all regional videorolls CDN variants (row/cell/edge/flock)
+        ".*\\.cf\\.videorolls\\.(row|cell|edge|flock)\\.aiv-cdn\\.net$",
         "^aax-[a-z0-9-]+\\.amazon-adsystem\\.com$",
         "^fls-[a-z]+\\.amazon\\.",
         "^unagi[a-z0-9-]*\\.amazon\\.",
@@ -82,7 +83,23 @@ object BuiltInBlockRules {
         // Amazon OTT ad gateways
         "^(ott|fling)-gateway[a-z0-9.-]*\\.amazon\\.",
         // Amazon advertising API variants
-        "^advertising[a-z0-9-]*\\.amazon\\."
+        "^advertising[a-z0-9-]*\\.amazon\\.",
+        // Prime Video SSAI: dynamic ad-manifest CloudFront distributions
+        "^d[0-9a-z]{10,20}\\.cloudfront\\.net$",
+        // Amazon ad decision / VAST endpoints (regional dynamic subdomains)
+        "^video-ads[0-9-]*\\.a2z\\.com$",
+        "^ad-decision[0-9-]*\\.amazon\\.(com|dev)$",
+        "^dai[0-9-]*\\.amazon-adsystem\\.com$",
+        "^ssai[0-9-]*\\.amazon\\.(com|dev)$",
+        // Prime Video telemetry / beacon endpoints
+        "^telemetry[0-9-]*\\.prime-video\\.amazon\\.(dev|com)$",
+        "^beacon[0-9-]*\\.prime-video\\.amazon\\.(dev|com)$",
+        // Amazon Fire TV / AVOD ad serving subdomains
+        "^avod-ads[0-9-]*\\.amazon\\.(com|dev)$",
+        "^mads[0-9-]*\\.amazon\\.(com|dev)$",
+        // Conviva video analytics (Prime Video uses this for ad QoS tracking)
+        "^cws[0-9-]*\\.conviva\\.com$",
+        "^livepass[0-9-]*\\.conviva\\.com$"
     )
 
     private val domains = listOf(
@@ -428,6 +445,34 @@ object BuiltInBlockRules {
         "amplitude.com",
 
         // Amazon Prime Video ad domains.
+        // Dynamic ad roll CDN subdomains (SSAI — Server-Side Ad Insertion)
+        "videorolls.row.aiv-cdn.net",
+        "videorolls.cell.aiv-cdn.net",
+        "videorolls.edge.aiv-cdn.net",
+        "videorolls.flock.aiv-cdn.net",
+        "cf.videorolls.row.aiv-cdn.net",
+        "cf.videorolls.cell.aiv-cdn.net",
+        "cf.videorolls.edge.aiv-cdn.net",
+        "cf.videorolls.flock.aiv-cdn.net",
+        // Prime Video ad-decision and DAI endpoints
+        "ad-decision.amazon.com",
+        "ad-decision.prime-video.amazon.dev",
+        "dai.amazon.com",
+        "dai.prime-video.amazon.dev",
+        "ssai.amazon.com",
+        "ssai.prime-video.amazon.dev",
+        "video-ads.a2z.com",
+        "video-ads-eu.a2z.com",
+        "video-ads-fe.a2z.com",
+        "video-ads-na.a2z.com",
+        "avod-ads.amazon.com",
+        "avod-ads-eu.amazon.com",
+        "avod-ads-fe.amazon.com",
+        // Fire TV / AVOD ad serving
+        "mads.amazon.com",
+        "mads-eu.amazon.com",
+        "mads-fe.amazon.com",
+        "mads.amazon-adsystem.com",
         "fls-na.amazon.com",
         "fls-eu.amazon.com",
         "fls-fe.amazon.com",

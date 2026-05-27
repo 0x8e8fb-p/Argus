@@ -66,6 +66,7 @@ class VpnFailoverController @Inject constructor(
             VpnMode.LUNA_PRIMARY -> startWithLunaPrimary()
             VpnMode.LOCAL_ONLY -> startLocalOnly()
             VpnMode.LUNA_ONLY -> startLunaOnly()
+            VpnMode.PRIVATE_DNS -> { /* No VPN needed, handled by PrivateDnsManager */ }
         }
     }
 
@@ -184,6 +185,7 @@ class VpnFailoverController @Inject constructor(
                 scheduleLunaRetry()
             }
             VpnMode.LOCAL_ONLY -> { /* shouldn't happen */ }
+            VpnMode.PRIVATE_DNS -> { /* shouldn't happen */ }
         }
     }
 

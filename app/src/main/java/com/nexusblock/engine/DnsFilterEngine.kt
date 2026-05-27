@@ -12,9 +12,22 @@ import com.nexusblock.engine.dns.DnsProfileManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import okhttp3.OkHttpClient
-import org.xbill.DNS.*
+import org.xbill.DNS.ARecord
+import org.xbill.DNS.AAAARecord
+import org.xbill.DNS.CNAMERecord
+import org.xbill.DNS.DClass
+import org.xbill.DNS.Flags
+import org.xbill.DNS.Message
+import org.xbill.DNS.Opcode
+import org.xbill.DNS.Rcode
+import org.xbill.DNS.Section
+import org.xbill.DNS.Type
 import java.net.InetAddress
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
@@ -50,13 +63,10 @@ class DnsFilterEngine @Inject constructor(
     private val blocklistRepo: BlocklistRepository,
     private val settingsRepo: SettingsRepository,
     private val dnsProfileManager: DnsProfileManager,
-    private val okHttpClient: OkHttpClient,
-    private val connectionTracker: ConnectionTracker
+    private val okHttpClient: OkHttpClient
 ) {
     companion object {
         private const val TAG = "NexusBlock/DNS"
-        private const val DNS_PORT = 53
-        private const val BUFFER_SIZE = 4096
         private const val NEGATIVE_CACHE_TTL_MS = 60_000L
         private const val CLOUDFRONT_IP_TTL_MS = 600_000L // 10 min
         private const val LOG_CHANNEL_CAPACITY = 1024
@@ -146,7 +156,7 @@ class DnsFilterEngine @Inject constructor(
         }
     }
 
-    fun start(localAddress: InetAddress = InetAddress.getByName("127.0.0.1"), localPort: Int = DNS_PORT) {
+    fun start(dnsAddress: InetAddress) {
         if (_isRunning.value || startJob?.isActive == true) return
         startJob = scope.launch {
             upstreamManager = DnsUpstreamManager(okHttpClient, dnsProfileManager)

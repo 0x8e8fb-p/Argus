@@ -59,9 +59,7 @@ class PacketRouter @Inject constructor(
     // Diagnostics counters
     var packetsProcessed = 0L
     var packetsBlocked = 0L
-    var dnsBlocks = 0L
     var bytesTotal = 0L
-    private var lastStatsUpdate = 0L
 
     fun start(
         vpnService: VpnService,
@@ -157,7 +155,6 @@ class PacketRouter @Inject constructor(
     fun getRouterStats(): RouterStats = RouterStats(
         packetsProcessed = packetsProcessed,
         packetsBlocked = packetsBlocked,
-        dnsBlocks = dnsBlocks,
         bytesTotal = bytesTotal
     )
 
@@ -516,7 +513,6 @@ class PacketRouter @Inject constructor(
     data class RouterStats(
         val packetsProcessed: Long,
         val packetsBlocked: Long,
-        val dnsBlocks: Long,
         val bytesTotal: Long
     )
 }

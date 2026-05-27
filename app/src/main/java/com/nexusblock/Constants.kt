@@ -12,14 +12,9 @@ object Constants {
     const val VPN_DNS = "10.0.0.1"
     const val VPN_MTU = 1500
 
-    const val PROXY_HOST = "127.0.0.1"
-    const val PROXY_PORT = 8123
-
     const val PREFS_NAME = "nexusblock_prefs"
     const val PREF_AUTO_START = "auto_start"
-    const val PREF_BATTERY_OPT = "battery_ignored"
     const val PREF_VPN_ACTIVE = "vpn_active"
-    const val PREF_CA_INSTALLED = "ca_installed"
 
     const val BLOCKLIST_FIREBOG = "https://v.firebog.net/hosts/Prigent-Ads.txt"
     const val BLOCKLIST_OISD = "https://big.oisd.nl/"
@@ -35,6 +30,7 @@ object Constants {
     const val BLOCKLIST_HAGEZI_NATIVE_AMAZON = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/native.amazon.txt"
     const val BLOCKLIST_PERFLYST_FIRETV = "https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/AmazonFireTV.txt"
     const val BLOCKLIST_HAGEZI_TIF = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/tif.txt"
+    const val BLOCKLIST_1HOSTS_LITE = "https://raw.githubusercontent.com/badmojr/1Hosts/master/Lite/adblock.txt"
 
     val DNS_BYPASS_IPV4_ROUTES = listOf(
         "1.1.1.1",

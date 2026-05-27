@@ -100,6 +100,12 @@ object BlocklistSources {
             name = "HaGeZi Threat Intelligence",
             url = Constants.BLOCKLIST_HAGEZI_TIF,
             format = BlocklistFormat.ADGUARD
+        ),
+        BlocklistSourceDefinition(
+            id = "1hosts_lite",
+            name = "1Hosts Lite",
+            url = Constants.BLOCKLIST_1HOSTS_LITE,
+            format = BlocklistFormat.ADGUARD
         )
     )
 
