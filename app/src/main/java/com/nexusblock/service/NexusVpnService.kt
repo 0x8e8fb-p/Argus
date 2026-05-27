@@ -134,18 +134,18 @@ class NexusVpnService : VpnService() {
                 Log.i(TAG, "Starting in DNS-only routing mode")
             }
 
-            // IPv6: minimal local address for IPv6 DNS capture.
-            // Do NOT block all IPv6 (2000::/3) — that breaks dual-stack apps
-            // which wait for IPv6 connection timeouts before IPv4 fallback.
-            // Instead, we capture IPv6 DNS by routing known public IPv6 DNS
-            // servers through the TUN (they'll be handled like IPv4 DNS).
-            try {
-                builder.addAddress("fd00:1:fd00:1:fd00:1:fd00:1", 128)
-                Constants.DNS_BYPASS_IPV6_ROUTES.forEach { ip ->
-                    try { builder.addRoute(ip, 128) } catch (_: Exception) {}
+            // IPv6: only needed in full-route mode. In DNS-only mode we skip
+            // IPv6 TUN setup entirely to prevent dual-stack apps from
+            // blackholing on IPv6 traffic.
+            if (routingMode != VpnRoutingMode.DNS_ONLY) {
+                try {
+                    builder.addAddress("fd00:1:fd00:1:fd00:1:fd00:1", 128)
+                    Constants.DNS_BYPASS_IPV6_ROUTES.forEach { ip ->
+                        try { builder.addRoute(ip, 128) } catch (_: Exception) {}
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "IPv6 not supported on this device")
                 }
-            } catch (e: Exception) {
-                Log.w(TAG, "IPv6 not supported on this device")
             }
 
             applyDnsBypassRoutes(builder)
@@ -177,7 +177,6 @@ class NexusVpnService : VpnService() {
 
             // Register network monitoring for auto-reconnect
             registerNetworkCallback()
-            VpnWatchdogService.start(this)
 
             Log.i(TAG, "VPN started successfully with routing mode $routingMode")
         } catch (e: Exception) {
@@ -203,7 +202,6 @@ class NexusVpnService : VpnService() {
     private fun stopVpn() {
         explicitStop = true
         reconnectJob?.cancel()
-        VpnWatchdogService.stop(this)
         stopVpnInternal(updateDesiredState = true)
         stopSelf()
     }

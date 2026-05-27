@@ -37,9 +37,6 @@ class BootReceiver : BroadcastReceiver() {
                 } else {
                     context.startService(serviceIntent)
                 }
-
-                // Also start watchdog
-                VpnWatchdogService.start(context)
             }
         }
     }

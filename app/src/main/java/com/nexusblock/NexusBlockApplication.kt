@@ -7,13 +7,10 @@ import android.os.Build
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.WorkManager
-import com.nexusblock.data.worker.BlocklistUpdateWorker
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -22,7 +19,7 @@ class NexusBlockApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
-    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val applicationScope = CoroutineScope(SupervisorJob())
 
     override fun onCreate() {
         super.onCreate()
@@ -30,10 +27,9 @@ class NexusBlockApplication : Application(), Configuration.Provider {
         createNotificationChannels()
         initializeWorkManager()
 
-        // Offload blocklist scheduling to background to reduce main-thread jank at cold start
-        applicationScope.launch {
-            schedulePeriodicBlocklistUpdate()
-        }
+        // Blocklist updates are manual-only via Settings to avoid
+        // network hit and SQLite churn on every cold start.
+        // Built-in emergency rules are loaded synchronously on first VPN start.
     }
 
     override fun onTerminate() {
@@ -47,10 +43,6 @@ class NexusBlockApplication : Application(), Configuration.Provider {
         } catch (e: IllegalStateException) {
             WorkManager.initialize(this, workManagerConfiguration)
         }
-    }
-
-    private fun schedulePeriodicBlocklistUpdate() {
-        BlocklistUpdateWorker.runNow(this)
     }
 
     private fun createNotificationChannels() {

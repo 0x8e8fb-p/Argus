@@ -72,6 +72,9 @@ class DnsFilterEngine @Inject constructor(
         private const val LOG_CHANNEL_CAPACITY = 1024
         private const val LOG_BATCH_MAX = 100
         private const val LOG_BATCH_INTERVAL_MS = 5_000L
+        private const val SINKHOLE_TTL = 300L
+        private val SINKHOLE_IPV4: InetAddress = InetAddress.getByName("0.0.0.0")
+        private val SINKHOLE_IPV6: InetAddress = InetAddress.getByName("::")
 
         /**
          * Upstream resolver domains that must NEVER be blocked, otherwise
@@ -110,19 +113,13 @@ class DnsFilterEngine @Inject constructor(
     private var startJob: Job? = null
     private var customRulesJob: Job? = null
 
-    private val dnsCache = object : LinkedHashMap<String, Message>(4096, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Message>?): Boolean = size > 4000
-    }
+    private val dnsCache = ConcurrentHashMap<String, Message>(4096)
 
     // Negative cache: NXDOMAIN/SERVFAIL responses cached for 60s to prevent
     // repeated upstream queries for blocked/failed domains (apps retry 3-5x).
-    private val negativeDnsCache = object : LinkedHashMap<String, Long>(1024, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Long>?): Boolean = size > 1000
-    }
+    private val negativeDnsCache = ConcurrentHashMap<String, Long>(1024)
 
-    private val blockedIpCache = object : LinkedHashMap<String, Long>(512, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Long>?): Boolean = size > 500
-    }
+    private val blockedIpCache = ConcurrentHashMap<String, Long>(512)
 
     // CloudFront IP cache: IPs resolved from *.cloudfront.net are cached here.
     // PacketRouter uses this to force QUIC→TCP downgrade (block UDP/443) so
@@ -185,9 +182,9 @@ class DnsFilterEngine @Inject constructor(
     }
 
     fun clearCache() {
-        synchronized(dnsCache) { dnsCache.clear() }
-        synchronized(negativeDnsCache) { negativeDnsCache.clear() }
-        synchronized(blockedIpCache) { blockedIpCache.clear() }
+        dnsCache.clear()
+        negativeDnsCache.clear()
+        blockedIpCache.clear()
         cloudFrontIpCache.clear()
         contentCdnDistributions.clear()
         Log.d(TAG, "DNS cache cleared")
@@ -242,28 +239,24 @@ class DnsFilterEngine @Inject constructor(
         }
 
         // 1. Check cache
-        synchronized(dnsCache) {
-            val cached = dnsCache[cacheKey]
-            if (cached != null) {
-                val response = Message(query.header.id)
-                response.header.setFlag(Flags.QR.toInt())
-                response.header.setFlag(Flags.RA.toInt())
-                response.addRecord(question, Section.QUESTION)
-                for (record in cached.getSectionArray(Section.ANSWER)) {
-                    response.addRecord(record, Section.ANSWER)
-                }
-                queriesAllowed++
-                return response.toWire()
+        val cached = dnsCache[cacheKey]
+        if (cached != null) {
+            val response = Message(query.header.id)
+            response.header.setFlag(Flags.QR.toInt())
+            response.header.setFlag(Flags.RA.toInt())
+            response.addRecord(question, Section.QUESTION)
+            for (record in cached.getSectionArray(Section.ANSWER)) {
+                response.addRecord(record, Section.ANSWER)
             }
+            queriesAllowed++
+            return response.toWire()
         }
 
         // 1b. Negative cache — instant SERVFAIL for domains that recently
         // failed upstream. Prevents app retry storms (3-5 retries × 200ms+).
-        synchronized(negativeDnsCache) {
-            val ts = negativeDnsCache[cacheKey]
-            if (ts != null && System.currentTimeMillis() - ts < NEGATIVE_CACHE_TTL_MS) {
-                return buildServFail(query)
-            }
+        val negTs = negativeDnsCache[cacheKey]
+        if (negTs != null && System.currentTimeMillis() - negTs < NEGATIVE_CACHE_TTL_MS) {
+            return buildServFail(query)
         }
 
         // 2. Critical allows — bypass ALL blocking (local + upstream) and use
@@ -295,9 +288,7 @@ class DnsFilterEngine @Inject constructor(
         val upstreamResponse = upstreamResolve(queryPayload)
         if (upstreamResponse == null) {
             // Cache the failure so retries are instant
-            synchronized(negativeDnsCache) {
-                negativeDnsCache[cacheKey] = System.currentTimeMillis()
-            }
+            negativeDnsCache[cacheKey] = System.currentTimeMillis()
             return buildServFail(query)
         }
 
@@ -370,7 +361,7 @@ class DnsFilterEngine @Inject constructor(
         try {
             val response = Message(responseBytes)
             if (response.rcode == Rcode.NOERROR) {
-                synchronized(dnsCache) { dnsCache[cacheKey] = response }
+                dnsCache[cacheKey] = response
             }
         } catch (_: Exception) {}
     }
@@ -505,12 +496,12 @@ class DnsFilterEngine @Inject constructor(
             when (record) {
                 is ARecord -> {
                     record.address.hostAddress?.let { ip ->
-                        synchronized(blockedIpCache) { blockedIpCache[ip] = now }
+                        blockedIpCache[ip] = now
                     }
                 }
                 is AAAARecord -> {
                     record.address.hostAddress?.let { ip ->
-                        synchronized(blockedIpCache) { blockedIpCache[ip] = now }
+                        blockedIpCache[ip] = now
                     }
                 }
             }
@@ -622,10 +613,8 @@ class DnsFilterEngine @Inject constructor(
     fun isDomainBlocked(host: String): Boolean = ruleEngine.isBlocked(host)
     fun isIpBlocked(ip: String): Boolean {
         if (ruleEngine.isIpBlocked(ip)) return true
-        synchronized(blockedIpCache) {
-            val ts = blockedIpCache[ip]
-            if (ts != null && System.currentTimeMillis() - ts < 600_000) return true
-        }
+        val ts = blockedIpCache[ip]
+        if (ts != null && System.currentTimeMillis() - ts < 600_000) return true
         return false
     }
 
@@ -667,15 +656,12 @@ class DnsFilterEngine @Inject constructor(
         response.header.setFlag(Flags.RA.toInt())
         response.header.rcode = Rcode.NOERROR
         response.addRecord(query.question, Section.QUESTION)
-        val ttl = 300L
         when (queryType) {
             Type.A -> {
-                val sinkhole = InetAddress.getByName("0.0.0.0")
-                response.addRecord(ARecord(query.question.name, DClass.IN, ttl, sinkhole), Section.ANSWER)
+                response.addRecord(ARecord(query.question.name, DClass.IN, SINKHOLE_TTL, SINKHOLE_IPV4), Section.ANSWER)
             }
             Type.AAAA -> {
-                val sinkhole = InetAddress.getByName("::")
-                response.addRecord(AAAARecord(query.question.name, DClass.IN, ttl, sinkhole), Section.ANSWER)
+                response.addRecord(AAAARecord(query.question.name, DClass.IN, SINKHOLE_TTL, SINKHOLE_IPV6), Section.ANSWER)
             }
         }
         return response

@@ -35,4 +35,8 @@ class StatsRepository @Inject constructor(
     suspend fun clearLogs() = withContext(Dispatchers.IO) {
         eventDao.clearAll()
     }
+
+    suspend fun pruneLogs(maxRows: Int = 5000) = withContext(Dispatchers.IO) {
+        eventDao.pruneToMax(maxRows)
+    }
 }

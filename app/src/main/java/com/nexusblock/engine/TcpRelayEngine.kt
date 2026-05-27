@@ -38,8 +38,8 @@ class TcpRelayEngine @Inject constructor(
         private const val WRITE_TIMEOUT_MS = 5_000L
         private const val MAX_ZERO_WRITES = 64
         private const val BUFFER_SIZE = 16384
-        private const val IDLE_DELAY_NO_SESSIONS_MS = 25L
-        private const val IDLE_DELAY_ACTIVE_SESSIONS_MS = 5L
+        private const val IDLE_DELAY_NO_SESSIONS_MS = 100L
+        private const val IDLE_DELAY_ACTIVE_SESSIONS_MS = 25L
 
         private const val TCP_FIN = 0x01
         private const val TCP_SYN = 0x02
@@ -51,6 +51,7 @@ class TcpRelayEngine @Inject constructor(
     }
 
     private val sessions = ConcurrentHashMap<IpFlowKey, TcpSession>(256)
+    private val secureRandom = java.security.SecureRandom()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var readerJob: Job? = null
     private var cleanupJob: Job? = null
@@ -233,7 +234,7 @@ class TcpRelayEngine @Inject constructor(
             dstPort = dstPort,
             appInitSeq = seqNum,
             appSeqNum = seqNum + 1, // After SYN, next expected from app
-            ourSeqNum = System.nanoTime() and 0xFFFFFFFFL, // Random ISN
+            ourSeqNum = secureRandom.nextInt().toLong() and 0xFFFFFFFFL, // Secure random ISN
             state = SessionState.SYN_RECEIVED,
             lastActivity = System.currentTimeMillis(),
             pendingData = PendingByteQueue(MAX_PENDING_BYTES_PER_SESSION)

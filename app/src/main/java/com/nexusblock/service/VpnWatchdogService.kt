@@ -25,7 +25,7 @@ class VpnWatchdogService : Service() {
 
     companion object {
         private const val TAG = "NexusBlock/Watchdog"
-        private const val CHECK_INTERVAL_MS = 30_000L
+        private const val CHECK_INTERVAL_MS = 300_000L
 
         fun start(context: Context) {
             val intent = Intent(context, VpnWatchdogService::class.java)

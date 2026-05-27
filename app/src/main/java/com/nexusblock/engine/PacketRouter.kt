@@ -8,7 +8,6 @@ import com.nexusblock.data.repository.VpnRoutingMode
 import com.nexusblock.data.repository.StatsRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.sync.Semaphore
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.InetAddress
@@ -31,7 +30,6 @@ class PacketRouter @Inject constructor(
         private const val PROTO_ICMP = 1
         private const val PROTO_TCP = 6
         private const val PROTO_UDP = 17
-        private const val MAX_CONCURRENT_DNS_QUERIES = 64
 
         private const val TCP_RST = 0x04
     }
@@ -49,7 +47,6 @@ class PacketRouter @Inject constructor(
     )
     private var techniques = com.nexusblock.data.repository.BlockingTechniques()
     private var routingMode = VpnRoutingMode.DNS_ONLY
-    private val dnsQueryLimiter = Semaphore(MAX_CONCURRENT_DNS_QUERIES)
     private val outputLock = Any()
 
     @Volatile
@@ -77,8 +74,10 @@ class PacketRouter @Inject constructor(
             blockedLogChannel.trySend(target to type)
         }
         tcpRelay.blockUnknownCloudFrontDistributions = settingsRepo.vpnRoutingMode == VpnRoutingMode.FULL_ROUTE
-        tcpRelay.start(vpnService, outputChannel)
-        udpRelay.start(vpnService, outputChannel)
+        if (settingsRepo.vpnRoutingMode == VpnRoutingMode.FULL_ROUTE) {
+            tcpRelay.start(vpnService, outputChannel)
+            udpRelay.start(vpnService, outputChannel)
+        }
 
         techniquesJob?.cancel()
         techniquesJob = scope.launch {
@@ -102,9 +101,23 @@ class PacketRouter @Inject constructor(
         // packet which was hammering the IO dispatcher under load.
         blockedLogJob?.cancel()
         blockedLogJob = scope.launch {
-            for ((target, type) in blockedLogChannel) {
-                try { statsRepo.logBlocked(target, type = type) }
-                catch (e: Exception) { Log.w(TAG, "logBlocked failed", e) }
+            val batch = ArrayList<com.nexusblock.data.model.BlockedEvent>(100)
+            while (isActive) {
+                val first = withTimeoutOrNull(5000) { blockedLogChannel.receive() }
+                if (first == null) {
+                    if (batch.isNotEmpty()) {
+                        try { statsRepo.logBlockedBatch(batch.toList()) } catch (_: Exception) {}
+                        batch.clear()
+                    }
+                    continue
+                }
+                batch.add(com.nexusblock.data.model.BlockedEvent(host = first.first, type = first.second))
+                while (batch.size < 100) {
+                    val next = blockedLogChannel.tryReceive().getOrNull() ?: break
+                    batch.add(com.nexusblock.data.model.BlockedEvent(host = next.first, type = next.second))
+                }
+                try { statsRepo.logBlockedBatch(batch.toList()) } catch (_: Exception) {}
+                batch.clear()
             }
         }
 
@@ -239,29 +252,27 @@ class PacketRouter @Inject constructor(
                             buffer.get(queryPayload)
                             buffer.position(mark)
 
-                            if (!dnsQueryLimiter.tryAcquire()) {
-                                packetsBlocked++
-                                blockedLogChannel.trySend("$dstIpStr:53" to "dns-overload")
-                                return
+                            // Process DNS inline on the router thread to avoid
+                            // coroutine explosion under burst loads.
+                            val responsePayload = try {
+                                runBlocking(Dispatchers.IO) { dnsEngine.resolveDns(queryPayload) }
+                            } catch (e: Exception) {
+                                if (isRunning) Log.w(TAG, "DNS resolution error", e)
+                                null
                             }
-
-                            scope.launch {
-                                try {
-                                    val responsePayload = dnsEngine.resolveDns(queryPayload)
-                                    if (responsePayload != null) {
-                                        sendDnsResponse(output, srcIp, dstIp, srcPort, dstPort, responsePayload)
-                                    }
-                                } catch (e: Exception) {
-                                    if (isRunning) Log.w(TAG, "DNS resolution error", e)
-                                } finally {
-                                    dnsQueryLimiter.release()
-                                }
+                            if (responsePayload != null) {
+                                sendDnsResponse(output, srcIp, dstIp, srcPort, dstPort, responsePayload)
                             }
-                            return // drop original, async response will be sent
+                            return // drop original, response injected above
                         }
                     }
 
-                    // Non-DNS UDP: relay through protected socket
+                    if (routingMode == VpnRoutingMode.DNS_ONLY) {
+                        // In DNS-only mode, pass non-DNS UDP through untouched
+                        return
+                    }
+
+                    // Non-DNS UDP: relay through protected socket (full-route only)
                     val udpLen = (buffer.getShort(udpOffset + 4).toInt() and 0xFFFF)
                     val payloadLen = udpLen - 8
                     if (payloadLen > 0 && buffer.remaining() >= udpOffset + 8 + payloadLen) {
@@ -288,7 +299,13 @@ class PacketRouter @Inject constructor(
                     return
                 }
 
-                // Delegate ALL TCP to the relay engine (handles SNI blocking internally)
+                if (routingMode == VpnRoutingMode.DNS_ONLY) {
+                    // In DNS-only mode, pass all TCP traffic through untouched
+                    writePacket(output, buffer.duplicate())
+                    return
+                }
+
+                // Full-route: delegate to TCP relay engine
                 tcpRelay.handlePacket(
                     buffer, pos, ipHeaderLen, srcIp, dstIp,
                     srcPort, dstPort, tcpOffset, totalLen
@@ -321,7 +338,7 @@ class PacketRouter @Inject constructor(
                     buffer.position(udpOffset + 8)
                     buffer.get(queryPayload)
 
-                    // Extract IP/port before launching coroutine to avoid race on shared ByteBuffer
+                    // Extract IP/port for response construction
                     val srcIp = ByteArray(16)
                     val dstIp = ByteArray(16)
                     buffer.position(pos + 8)
@@ -329,30 +346,23 @@ class PacketRouter @Inject constructor(
                     buffer.get(dstIp)
                     val srcPort = buffer.getShort(udpOffset).toInt() and 0xFFFF
 
-                    if (!dnsQueryLimiter.tryAcquire()) {
-                        packetsBlocked++
-                        blockedLogChannel.trySend("ipv6-dns" to "dns-overload")
-                        return
+                    // Process DNS inline to avoid coroutine explosion
+                    val responsePayload = try {
+                        runBlocking(Dispatchers.IO) { dnsEngine.resolveDns(queryPayload) }
+                    } catch (e: Exception) {
+                        if (isRunning) Log.w(TAG, "IPv6 DNS resolution error", e)
+                        null
                     }
-
-                    scope.launch {
-                        try {
-                            val responsePayload = dnsEngine.resolveDns(queryPayload)
-                            if (responsePayload != null) {
-                                sendDnsResponseV6(output, srcIp, dstIp, srcPort, dstPort, responsePayload)
-                            }
-                        } catch (e: Exception) {
-                            if (isRunning) Log.w(TAG, "IPv6 DNS resolution error", e)
-                        } finally {
-                            dnsQueryLimiter.release()
-                        }
+                    if (responsePayload != null) {
+                        sendDnsResponseV6(output, srcIp, dstIp, srcPort, dstPort, responsePayload)
                     }
-                    return // DNS handled asynchronously; don't count as blocked
+                    return // DNS handled; don't count as blocked
                 }
             }
         }
-        // Silently drop all non-DNS IPv6 traffic to prevent leaks outside the tunnel
-        packetsBlocked++
+        // In DNS-only mode IPv6 shouldn't be routed into TUN at all.
+        // If it appears here (edge case), pass through to avoid stalls.
+        writePacket(output, buffer.duplicate())
     }
 
     private fun readIpv4(buffer: ByteBuffer, offset: Int): ByteArray {

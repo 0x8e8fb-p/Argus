@@ -7,9 +7,7 @@ import androidx.room.PrimaryKey
 @Entity(
     tableName = "blocked_events",
     indices = [
-        Index(value = ["timestamp"]),
-        Index(value = ["host"]),
-        Index(value = ["appPackage"])
+        Index(value = ["timestamp"])
     ]
 )
 data class BlockedEvent(

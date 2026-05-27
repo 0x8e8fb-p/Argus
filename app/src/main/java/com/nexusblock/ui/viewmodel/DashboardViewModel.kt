@@ -11,7 +11,6 @@ import com.nexusblock.data.repository.BlocklistRepository
 import com.nexusblock.data.repository.SettingsRepository
 import com.nexusblock.data.repository.StatsRepository
 import com.nexusblock.service.NexusVpnService
-import com.nexusblock.service.VpnWatchdogService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -152,11 +151,9 @@ class DashboardViewModel @Inject constructor(
         } else {
             context.startService(serviceIntent)
         }
-        VpnWatchdogService.start(context)
     }
 
     private fun stopVpn() {
-        VpnWatchdogService.stop(context)
         val serviceIntent = Intent(context, NexusVpnService::class.java).apply {
             action = NexusVpnService.ACTION_STOP
         }

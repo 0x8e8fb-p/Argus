@@ -24,8 +24,8 @@ class UdpRelayEngine @Inject constructor() {
         private const val TAG = "NexusBlock/UdpRelay"
         private const val MAX_SESSIONS = 256
         private const val SESSION_TIMEOUT_MS = 30_000L
-        private const val IDLE_DELAY_NO_SESSIONS_MS = 25L
-        private const val IDLE_DELAY_ACTIVE_SESSIONS_MS = 5L
+        private const val IDLE_DELAY_NO_SESSIONS_MS = 100L
+        private const val IDLE_DELAY_ACTIVE_SESSIONS_MS = 25L
     }
 
     private val sessions = ConcurrentHashMap<IpFlowKey, UdpSession>(128)

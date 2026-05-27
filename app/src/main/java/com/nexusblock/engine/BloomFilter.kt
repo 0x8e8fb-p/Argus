@@ -11,7 +11,7 @@ import kotlin.math.abs
  * Memory: Fixed size bitset.
  */
 class BloomFilter(
-    private val size: Int = 1024 * 1024 * 8, // 1MB bitset (8 million bits)
+    private val size: Int = 1024 * 1024 * 4, // 512KB bitset (4 million bits)
     private val hashCount: Int = 3
 ) {
     private val bitSet = BitSet(size)

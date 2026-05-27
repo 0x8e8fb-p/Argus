@@ -29,4 +29,7 @@ interface BlockedEventDao {
 
     @Query("DELETE FROM blocked_events")
     suspend fun clearAll()
+
+    @Query("DELETE FROM blocked_events WHERE id NOT IN (SELECT id FROM blocked_events ORDER BY timestamp DESC LIMIT :limit)")
+    suspend fun pruneToMax(limit: Int)
 }
