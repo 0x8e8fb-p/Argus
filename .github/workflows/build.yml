@@ -60,6 +60,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check available secrets
+        id: check
+        run: |
+          if [ -n "${{ secrets.SIGNING_KEY }}" ]; then
+            echo "has_signing=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_signing=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Download APK Artifact
         uses: actions/download-artifact@v4
         with:
@@ -73,11 +82,9 @@ jobs:
           path: artifacts/aab/
 
       - name: Sign APK
-        if: ${{ env.HAS_SIGNING_KEY == 'true' }}
+        if: steps.check.outputs.has_signing == 'true'
         id: sign_apk
         uses: ilharp/sign-android-release@v1
-        env:
-          HAS_SIGNING_KEY: ${{ secrets.SIGNING_KEY != '' }}
         with:
           releaseDir: artifacts/apk/
           signingKey: ${{ secrets.SIGNING_KEY }}
@@ -86,11 +93,9 @@ jobs:
           keyPassword: ${{ secrets.KEY_PASSWORD }}
 
       - name: Sign AAB
-        if: ${{ env.HAS_SIGNING_KEY == 'true' }}
+        if: steps.check.outputs.has_signing == 'true'
         id: sign_aab
         uses: ilharp/sign-android-release@v1
-        env:
-          HAS_SIGNING_KEY: ${{ secrets.SIGNING_KEY != '' }}
         with:
           releaseDir: artifacts/aab/
           signingKey: ${{ secrets.SIGNING_KEY }}
@@ -134,7 +139,7 @@ jobs:
 
             ### Install
             Download the APK and sideload on your Android TV via ADB:
-            ```
+            ```bash
             adb install app-release-unsigned.apk
             ```
         env:
@@ -148,6 +153,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check Play Store secret
+        id: check
+        run: |
+          if [ -n "${{ secrets.PLAY_STORE_JSON_KEY }}" ]; then
+            echo "has_playstore=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_playstore=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Download AAB Artifact
         uses: actions/download-artifact@v4
         with:
@@ -155,16 +169,18 @@ jobs:
           path: app/build/outputs/bundle/release/
 
       - name: Set up Ruby
+        if: steps.check.outputs.has_playstore == 'true'
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
 
       - name: Write Play Store Service Account Key
+        if: steps.check.outputs.has_playstore == 'true'
         run: echo "${{ secrets.PLAY_STORE_JSON_KEY }}" > play-store-key.json
 
       - name: Deploy to Play Store (internal)
-        if: ${{ secrets.PLAY_STORE_JSON_KEY != '' }}
+        if: steps.check.outputs.has_playstore == 'true'
         env:
           SUPPLY_JSON_KEY: play-store-key.json
         run: bundle exec fastlane android deploy_internal
