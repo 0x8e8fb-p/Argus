@@ -25,7 +25,7 @@ class PacketRouter @Inject constructor(
     private val udpRelay: UdpRelayEngine
 ) {
     companion object {
-        private const val TAG = "NexusBlock/Router"
+        private const val TAG = "Argus/Router"
         private const val BUFFER_SIZE = 32768
         private const val PROTO_ICMP = 1
         private const val PROTO_TCP = 6

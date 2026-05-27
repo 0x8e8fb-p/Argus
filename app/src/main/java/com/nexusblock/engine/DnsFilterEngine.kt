@@ -66,7 +66,7 @@ class DnsFilterEngine @Inject constructor(
     private val okHttpClient: OkHttpClient
 ) {
     companion object {
-        private const val TAG = "NexusBlock/DNS"
+        private const val TAG = "Argus/DNS"
         private const val NEGATIVE_CACHE_TTL_MS = 60_000L
         private const val CLOUDFRONT_IP_TTL_MS = 600_000L // 10 min
         private const val LOG_CHANNEL_CAPACITY = 1024

@@ -34,7 +34,7 @@ class BlocklistUpdateWorker @AssistedInject constructor(
 ) : CoroutineWorker(context, params) {
 
     companion object {
-        private const val TAG = "NexusBlock/Updater"
+        private const val TAG = "Argus/Updater"
         private const val ETAG_PREFIX = "blocklist_etag_"
 
         /** Work output keys */
@@ -168,7 +168,7 @@ class BlocklistUpdateWorker @AssistedInject constructor(
     ): List<BlockedDomain>? = withContext(Dispatchers.IO) {
         val requestBuilder = Request.Builder()
             .url(url)
-            .header("User-Agent", "NexusBlock/1.0")
+            .header("User-Agent", "Argus/1.0")
 
         // Add If-None-Match header if we have a cached ETag
         val cachedEtag = sharedPreferences.getString(ETAG_PREFIX + sourceId, null)

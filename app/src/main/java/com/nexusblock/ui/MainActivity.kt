@@ -35,7 +35,7 @@ import com.nexusblock.service.VpnWatchdogService
 import com.nexusblock.ui.components.ArgusBackground
 import com.nexusblock.ui.components.ArgusNavigationRail
 import com.nexusblock.ui.screens.*
-import com.nexusblock.ui.theme.ArgusBlockTheme
+import com.nexusblock.ui.theme.ArgusTheme
 import com.nexusblock.ui.theme.LocalTvDimensions
 import com.nexusblock.ui.theme.dimensionsForWidth
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,7 +45,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     companion object {
-        private const val TAG = "ArgusBlock/Main"
+        private const val TAG = "Argus/Main"
     }
 
     private var pendingVpnStart = false
@@ -79,8 +79,8 @@ class MainActivity : ComponentActivity() {
             }
         }, 1500)
         setContent {
-            ArgusBlockTheme {
-                ArgusBlockApp(
+            ArgusTheme {
+                ArgusApp(
                     onRequestVpnPermission = {
                         val intent = VpnService.prepare(this)
                         if (intent != null) {
@@ -121,7 +121,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun ArgusBlockApp(
+fun ArgusApp(
     onRequestVpnPermission: () -> Unit = {}
 ) {
     val navController = rememberNavController()

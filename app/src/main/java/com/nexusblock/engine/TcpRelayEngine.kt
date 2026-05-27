@@ -30,7 +30,7 @@ class TcpRelayEngine @Inject constructor(
     private val dnsEngine: DnsFilterEngine
 ) {
     companion object {
-        private const val TAG = "NexusBlock/TcpRelay"
+        private const val TAG = "Argus/TcpRelay"
         private const val MAX_SESSIONS = 512
         private const val MAX_PENDING_BYTES_PER_SESSION = 64 * 1024
         private const val SESSION_TIMEOUT_MS = 60_000L

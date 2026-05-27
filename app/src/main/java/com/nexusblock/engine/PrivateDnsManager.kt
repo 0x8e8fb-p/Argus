@@ -35,7 +35,7 @@ class PrivateDnsManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     companion object {
-        private const val TAG = "NexusBlock/PrivateDNS"
+        private const val TAG = "Argus/PrivateDNS"
 
         // Android Settings.Global keys for Private DNS
         private const val MODE_KEY = "private_dns_mode"

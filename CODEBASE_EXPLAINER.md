@@ -1,12 +1,12 @@
-# NexusBlock Codebase Explainer & AI Developer Guide
+# Argus Codebase Explainer & AI Developer Guide
 
-Welcome, AI Developer. This document is a complete, self-contained technical specification of **NexusBlock** — a root-free, device-wide ad-blocker built for Android TV (and mobile). It covers the architecture, packet mechanics, file-by-file APIs, data schemas, sequence flows, and build steps you need to start working on, modifying, and extending this codebase.
+Welcome, AI Developer. This document is a complete, self-contained technical specification of **Argus** — a root-free, device-wide ad-blocker built for Android TV (and mobile). It covers the architecture, packet mechanics, file-by-file APIs, data schemas, sequence flows, and build steps you need to start working on, modifying, and extending this codebase.
 
 ---
 
 ## 1. Core Architecture & System Overview
 
-NexusBlock achieves root-free, system-wide ad-blocking by combining an Android `VpnService` with a custom user-space packet router, local DNS interceptor, and encrypted upstream DNS resolution.
+Argus achieves root-free, system-wide ad-blocking by combining an Android `VpnService` with a custom user-space packet router, local DNS interceptor, and encrypted upstream DNS resolution.
 
 ```mermaid
 graph TD
@@ -56,7 +56,7 @@ graph TD
 ```
 com.nexusblock/
 ├── Constants.kt                  # Global constants: IPs, ports, blocklist URLs, notification IDs
-├── NexusBlockApplication.kt      # Application class (Hilt entry point)
+├── ArgusApplication.kt      # Application class (Hilt entry point)
 ├── cert/
 │   └── LunaCertInstaller.kt      # Exports Luna CA cert to Downloads for manual install
 ├── data/db/
@@ -342,10 +342,10 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 **Logcat Filters**:
 ```bash
-adb logcat -s NexusBlock/VPN
-adb logcat -s NexusBlock/Router
-adb logcat -s NexusBlock/DNS
-adb logcat -s NexusBlock/Relay
+adb logcat -s Argus/VPN
+adb logcat -s Argus/Router
+adb logcat -s Argus/DNS
+adb logcat -s Argus/Relay
 ```
 
 ---

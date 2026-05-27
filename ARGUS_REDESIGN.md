@@ -1,5 +1,5 @@
 # ARGUS — Rethink & Redesign Document
-## From NexusBlock to a Production Android TV Ad Blocker
+## From Argus to a Production Android TV Ad Blocker
 
 **Version:** 2.0  
 **Date:** 2026-05-21  
@@ -15,7 +15,7 @@ The original ARGUS system prompt was an **AI fantasy brief**. It demanded seven 
 
 **We are not building fantasyware.**
 
-This redesign keeps the excellent NexusBlock foundation you already have, adds the **one technique that actually kills SSAI/embedded ads** (the Stash/Surge MITM+script approach from the Reddit post), scopes the ML layer to something thermally realistic, and gives you a **ship-to-users roadmap** instead of an architecture blog post.
+This redesign keeps the excellent Argus foundation you already have, adds the **one technique that actually kills SSAI/embedded ads** (the Stash/Surge MITM+script approach from the Reddit post), scopes the ML layer to something thermally realistic, and gives you a **ship-to-users roadmap** instead of an architecture blog post.
 
 ---
 
@@ -23,7 +23,7 @@ This redesign keeps the excellent NexusBlock foundation you already have, adds t
 
 The Chinese Stash app blocks Spotify & YouTube ads without root by doing exactly three things:
 
-1. **Local VPN tunnel** — routes traffic through itself (same as NexusBlock already does).
+1. **Local VPN tunnel** — routes traffic through itself (same as Argus already does).
 2. **MITM with user-installed CA** — decrypts HTTPS to `youtubei.googleapis.com`, `spclient.wg.spotify.com`, etc.
 3. **JavaScript response injection** — runs scripts inside the decrypted response to strip ad objects before the app sees them.
 
@@ -34,11 +34,11 @@ The `.stoverride` files are just declarative rule manifests:
 
 **Key insight:** YouTube serves ads inside the *same* JSON/protobuf API responses that serve content. Blocking at DNS/SNI is insufficient because `youtubei.googleapis.com` and `*.googlevideo.com` serve both ads AND videos. The Stash YouTube script strips ad arrays from the `player`, `browse`, and `next` API responses at the application layer.
 
-**Our leverage:** NexusBlock already has LittleProxy + BouncyCastle CA. We just need to replace naive path-blocking with **intelligent response body rewriting** for the APIs used by major OTT apps.
+**Our leverage:** Argus already has LittleProxy + BouncyCastle CA. We just need to replace naive path-blocking with **intelligent response body rewriting** for the APIs used by major OTT apps.
 
 ---
 
-## 3. What NexusBlock Already Does Well (Preserve)
+## 3. What Argus Already Does Well (Preserve)
 
 | Component | Quality | Decision |
 |---|---|---|
@@ -98,7 +98,7 @@ The `.stoverride` files are just declarative rule manifests:
 │  LAYER 1 — DNS BLOCKHOLE + SNI FIREWALL                     │
 │  Local DoH resolver (dnsjava), unified blocklists,          │
 │  Bloom+Trie engine, TCP RST injection on blocked SNI.       │
-│  What NexusBlock already does — refined.                    │
+│  What Argus already does — refined.                    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -134,7 +134,7 @@ The `.stoverride` files are just declarative rule manifests:
 
 ## 7. Layer-by-Layer Design
 
-### LAYER 1 — DNS + SNI (Refined NexusBlock)
+### LAYER 1 — DNS + SNI (Refined Argus)
 
 **What changes:**
 - **IPv6 handling:** Currently drops IPv6 entirely. Instead of null-route, let IPv6 DNS queries (AAAA) flow through the DNS engine and return synthetic AAAA sinkholes (`::`). This fixes apps that fail hard on IPv6 unavailability.
@@ -306,7 +306,7 @@ Server-Side Ad Injection (SSAI) stitches ads directly into the video stream at t
 - [ ] Non-root user can install, grant VPN, install CA, and block YouTube ads via API rewriting.
 - [ ] DNS + SNI continues working as today (backward compatible).
 - [ ] CPU usage on S905X4 < 8% during YouTube playback.
-- [ ] APK size increase < 2 MB vs current NexusBlock.
+- [ ] APK size increase < 2 MB vs current Argus.
 
 ### Sprint 2: Layer 3 — Accessibility + Audio (Weeks 4–5)
 **Goal:** Handle SSAI on Netflix/Prime/Hotstar where Layer 2 cannot operate.
@@ -354,7 +354,7 @@ Server-Side Ad Injection (SSAI) stitches ads directly into the video stream at t
 
 ---
 
-## 9. File-by-File Migration from NexusBlock → Argus
+## 9. File-by-File Migration from Argus → Argus
 
 ### Package Rename
 ```
@@ -364,7 +364,7 @@ com.nexusblock → com.argus.adblock
 ### New Directory Structure
 ```
 app/src/main/java/com/argus/adblock/
-├── ArgusApplication.kt           (was NexusBlockApplication)
+├── ArgusApplication.kt           (was ArgusApplication)
 ├── service/
 │   ├── ArgusVpnService.kt        (was NexusVpnService — refactor)
 │   ├── VpnWatchdogService.kt     (keep)

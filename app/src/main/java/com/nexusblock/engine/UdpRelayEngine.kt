@@ -21,7 +21,7 @@ import javax.inject.Singleton
 class UdpRelayEngine @Inject constructor() {
 
     companion object {
-        private const val TAG = "NexusBlock/UdpRelay"
+        private const val TAG = "Argus/UdpRelay"
         private const val MAX_SESSIONS = 256
         private const val SESSION_TIMEOUT_MS = 30_000L
         private const val IDLE_DELAY_NO_SESSIONS_MS = 100L

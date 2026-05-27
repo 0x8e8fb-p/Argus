@@ -39,7 +39,7 @@ class DnsUpstreamManager(
     private val profileManager: DnsProfileManager
 ) {
     companion object {
-        private const val TAG = "NexusBlock/DnsUpstream"
+        private const val TAG = "Argus/DnsUpstream"
         private const val PLAIN_DNS_TIMEOUT_MS = 1500
         private const val DOH_TIMEOUT_MS = 3000L
         /** Budget for encrypted protocol (DoH) after plain fails. */

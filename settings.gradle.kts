@@ -23,5 +23,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "NexusBlock"
+rootProject.name = "Argus"
 include(":app")

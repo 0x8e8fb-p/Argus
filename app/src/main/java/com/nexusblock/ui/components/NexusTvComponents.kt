@@ -253,14 +253,14 @@ fun ArgusNavigationRail(
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_logo_argus),
-            contentDescription = "ArgusBlock",
+            contentDescription = "Argus",
             tint = Color.Unspecified,
             modifier = Modifier.size(36.dp)
         )
         if (dims.navRailWidth > 100.dp) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "ArgusBlock",
+                text = "Argus",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )

@@ -1,8 +1,8 @@
 package com.nexusblock
 
 object Constants {
-    const val CHANNEL_VPN = "nexusblock_vpn"
-    const val CHANNEL_WATCHDOG = "nexusblock_watchdog"
+    const val CHANNEL_VPN = "argus_vpn"
+    const val CHANNEL_WATCHDOG = "argus_watchdog"
     const val NOTIFICATION_ID_VPN = 1001
     const val NOTIFICATION_ID_WATCHDOG = 1002
 

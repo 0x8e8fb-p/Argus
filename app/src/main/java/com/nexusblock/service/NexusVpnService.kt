@@ -31,7 +31,7 @@ import javax.inject.Inject
 class NexusVpnService : VpnService() {
 
     companion object {
-        private const val TAG = "NexusBlock/VPN"
+        private const val TAG = "Argus/VPN"
         const val ACTION_START = "com.nexusblock.START_VPN"
         const val ACTION_STOP = "com.nexusblock.STOP_VPN"
         const val ACTION_RESTART = "com.nexusblock.RESTART_VPN"
@@ -272,7 +272,7 @@ class NexusVpnService : VpnService() {
                 com.nexusblock.data.model.FirewallMode.BLOCK -> {
                     // BLOCK mode: do NOT call addDisallowedApplication.
                     // With the DNS-only VPN route, this denies domains resolved
-                    // through NexusBlock. Full IPv4 packet blocking requires a
+                    // through Argus. Full IPv4 packet blocking requires a
                     // real full-tunnel forwarder before adding 0.0.0.0/0.
                     // Calling addDisallowedApplication would EXCLUDE the app from
                     // the VPN entirely, giving it unrestricted internet — the opposite

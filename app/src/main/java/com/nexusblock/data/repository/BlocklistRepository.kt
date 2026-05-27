@@ -46,7 +46,7 @@ class BlocklistRepository @Inject constructor(
             domainDao.insertAll(
                 listOf(
                     BlockedDomain(
-                        host = "source-state-${source.lowercase().replace('_', '-')}.nexusblock.invalid",
+                        host = "source-state-${source.lowercase().replace('_', '-')}.argus.invalid",
                         source = source,
                         enabled = enabled
                     )

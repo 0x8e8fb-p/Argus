@@ -35,7 +35,7 @@ private val EmeraldGlassScheme = darkColorScheme(
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun ArgusBlockTheme(
+fun ArgusTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(

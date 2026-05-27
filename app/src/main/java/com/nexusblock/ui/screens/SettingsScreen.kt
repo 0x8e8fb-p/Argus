@@ -58,7 +58,7 @@ fun SettingsScreen(
         item {
             ArgusScreenHeader(
                 title = "Settings",
-                subtitle = "General configuration for ArgusBlock."
+                subtitle = "General configuration for Argus."
             )
             Spacer(modifier = Modifier.height(8.dp))
         }

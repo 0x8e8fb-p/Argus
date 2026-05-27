@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ArgusBlock</string>
+    <string name="app_name">Argus</string>
     <string name="app_desc">System-wide ad blocker for Android TV</string>
     <string name="accessibility_service_desc">Detects and skips in-stream video ads using audio and visual cues. No personal data is collected.</string>
     <string name="vpn_notification_title">Argus is active</string>

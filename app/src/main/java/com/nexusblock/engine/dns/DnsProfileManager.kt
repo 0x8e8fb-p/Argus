@@ -42,7 +42,7 @@ class DnsProfileManager @Inject constructor(
     private val okHttpClient: OkHttpClient
 ) {
     companion object {
-        private const val TAG = "NexusBlock/DnsProfiles"
+        private const val TAG = "Argus/DnsProfiles"
 
         /** Remote JSON endpoint containing updated DNS profiles. */
         private const val REMOTE_PROFILES_URL =

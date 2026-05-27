@@ -17,7 +17,7 @@ import java.util.regex.PatternSyntaxException
 class RuleEngine {
 
     companion object {
-        private const val TAG = "NexusBlock/Rules"
+        private const val TAG = "Argus/Rules"
 
         /**
          * Known Prime Video ad-serving CloudFront distribution IDs.

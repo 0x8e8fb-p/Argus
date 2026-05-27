@@ -17,7 +17,7 @@ import javax.inject.Inject
 class BootReceiver : BroadcastReceiver() {
 
     companion object {
-        private const val TAG = "NexusBlock/Boot"
+        private const val TAG = "Argus/Boot"
     }
 
     @Inject

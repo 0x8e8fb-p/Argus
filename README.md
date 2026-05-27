@@ -1,8 +1,8 @@
-# ArgusBlock — Ad Blocker for Android TV
+# Argus — Ad Blocker for Android TV
 
 System-wide ad and tracker blocking for every Android TV device. No root required.
 
-ArgusBlock creates a local VPN tunnel to intercept DNS queries and block advertising/tracking domains before they reach your apps. All processing happens on-device — no external servers, no data collection.
+Argus creates a local VPN tunnel to intercept DNS queries and block advertising/tracking domains before they reach your apps. All processing happens on-device — no external servers, no data collection.
 
 ---
 
@@ -77,7 +77,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
    adb connect <tv-ip>:5555
    adb install argusblock.apk
    ```
-4. Launch ArgusBlock from the TV home screen
+4. Launch Argus from the TV home screen
 5. Approve the VPN permission dialog when prompted
 
 ---

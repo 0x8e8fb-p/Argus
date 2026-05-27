@@ -14,7 +14,7 @@ import kotlinx.coroutines.cancel
 import javax.inject.Inject
 
 @HiltAndroidApp
-class NexusBlockApplication : Application(), Configuration.Provider {
+class ArgusApplication : Application(), Configuration.Provider {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory

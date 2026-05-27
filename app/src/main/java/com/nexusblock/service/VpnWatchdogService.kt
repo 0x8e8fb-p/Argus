@@ -24,7 +24,7 @@ import javax.inject.Inject
 class VpnWatchdogService : Service() {
 
     companion object {
-        private const val TAG = "NexusBlock/Watchdog"
+        private const val TAG = "Argus/Watchdog"
         private const val CHECK_INTERVAL_MS = 300_000L
 
         fun start(context: Context) {
