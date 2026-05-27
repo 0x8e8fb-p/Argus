@@ -6,6 +6,8 @@ import android.util.Log
 import com.nexusblock.Constants
 import com.nexusblock.data.repository.VpnRoutingMode
 import com.nexusblock.data.repository.StatsRepository
+import com.nexusblock.engine.network.FlowCache
+import com.nexusblock.engine.network.PacketParser
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import java.io.FileInputStream
@@ -22,7 +24,8 @@ class PacketRouter @Inject constructor(
     private val statsRepo: StatsRepository,
     private val settingsRepo: com.nexusblock.data.repository.SettingsRepository,
     private val tcpRelay: TcpRelayEngine,
-    private val udpRelay: UdpRelayEngine
+    private val udpRelay: UdpRelayEngine,
+    private val flowCache: FlowCache
 ) {
     companion object {
         private const val TAG = "Argus/Router"
@@ -162,7 +165,14 @@ class PacketRouter @Inject constructor(
         tcpRelay.stop()
         udpRelay.stop()
         dnsEngine.stop()
+        flowCache.clear()
         Log.i(TAG, "Packet router stopped")
+    }
+
+    /** Called by [NexusVpnService.onTrimMemory] when Android TV signals low RAM. */
+    fun trimMemory() {
+        flowCache.trimMemory()
+        Log.d(TAG, "Flow cache trimmed, size=${flowCache.size()}")
     }
 
     fun getRouterStats(): RouterStats = RouterStats(
@@ -183,142 +193,164 @@ class PacketRouter @Inject constructor(
 
     private fun processIPv4(buffer: ByteBuffer, output: FileChannel) {
         val pos = buffer.position()
-        val ipHeaderLen = (buffer.get(pos).toInt() and 0x0F) * 4
-        val totalLen = buffer.getShort(pos + 2).toInt() and 0xFFFF
-        val protocol = buffer.get(pos + 9).toInt() and 0xFF
+        val ipHeaderLen = PacketParser.ipHeaderLength(buffer, pos)
+        val totalLen = PacketParser.totalLength(buffer, pos)
+        val protocol = PacketParser.protocol(buffer, pos)
 
         if (buffer.remaining() < ipHeaderLen) return
 
-        // Read common IPs early for blocked-app checks
-        val srcIp = readIpv4(buffer, pos + 12)
-        val dstIp = readIpv4(buffer, pos + 16)
-        val dstIpStr = "${dstIp[0].toInt() and 0xFF}.${dstIp[1].toInt() and 0xFF}.${dstIp[2].toInt() and 0xFF}.${dstIp[3].toInt() and 0xFF}"
+        val srcIp = PacketParser.srcIpBytes(buffer, pos)
+        val dstIp = PacketParser.dstIpBytes(buffer, pos)
+        val dstIpStr = PacketParser.formatIpv4(dstIp)
+        val srcIpInt = PacketParser.srcIpInt(buffer, pos)
+        val dstIpInt = PacketParser.dstIpInt(buffer, pos)
 
         // 1. Stealth Mode (Block ICMP)
-        if (techniques.stealthMode && protocol == PROTO_ICMP) {
+        if (techniques.stealthMode && protocol == PacketParser.PROTO_ICMP) {
             packetsBlocked++
             return
         }
 
-        // 2. IP Filtering (Fast check) — applies to all protocols
+        // 2. IP Filtering (Fast check) — check flow cache first, then rule engine
         if (techniques.ipBlocking) {
+            val tcpUdpOffset = pos + ipHeaderLen
+            val sp = if (buffer.remaining() >= tcpUdpOffset + 2)
+                PacketParser.srcPort(buffer, tcpUdpOffset) else 0
+            val dp = if (buffer.remaining() >= tcpUdpOffset + 2)
+                PacketParser.dstPort(buffer, tcpUdpOffset) else 0
+            val flowKey = flowCache.key(srcIpInt, dstIpInt, sp, dp)
+
+            val cached = flowCache.get(flowKey)
+            if (cached == FlowCache.Verdict.DROP) {
+                packetsBlocked++
+                if (protocol == PacketParser.PROTO_TCP && buffer.remaining() >= tcpUdpOffset + 4) {
+                    sendRst(output, pos, ipHeaderLen, srcIp, dstIp, sp, dp)
+                }
+                return
+            }
+
             if (dnsEngine.isIpBlocked(dstIpStr)) {
                 packetsBlocked++
-                if (protocol == PROTO_TCP) {
-                    val tcpOffset = pos + ipHeaderLen
-                    if (buffer.remaining() >= tcpOffset + 4) {
-                        val srcPort = buffer.getShort(tcpOffset).toInt() and 0xFFFF
-                        val dstPort = buffer.getShort(tcpOffset + 2).toInt() and 0xFFFF
-                        sendRst(output, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort)
-                    }
+                flowCache.put(flowKey, FlowCache.Verdict.DROP)
+                if (protocol == PacketParser.PROTO_TCP && buffer.remaining() >= tcpUdpOffset + 4) {
+                    sendRst(output, pos, ipHeaderLen, srcIp, dstIp, sp, dp)
                 }
-                // For UDP (including QUIC/443) just drop silently
                 return
             }
         }
 
         when (protocol) {
-            PROTO_UDP -> {
-                val udpOffset = pos + ipHeaderLen
-                val srcPort = if (buffer.remaining() >= udpOffset + 8) buffer.getShort(udpOffset).toInt() and 0xFFFF else 0
-                val dstPort = if (buffer.remaining() >= udpOffset + 8) buffer.getShort(udpOffset + 2).toInt() and 0xFFFF else 0
-                if (buffer.remaining() >= udpOffset + 8) {
-                    if (isDnsBypassIp(dstIpStr) && dstPort != 53 && isDnsBypassPort(dstPort)) {
-                        packetsBlocked++
-                        blockedLogChannel.trySend("$dstIpStr:$dstPort" to "dns-bypass")
-                        return
-                    }
-
-                    // QUIC downgrade: block UDP/443 to ALL CloudFront IPs (both
-                    // CIDR-matched and DNS-observed) so apps fall back to TCP/443
-                    // where TLS SNI inspection gives us visibility to block
-                    // ad-serving CloudFront distributions.
-                    if (dstPort == 443 && techniques.dnsFiltering &&
-                        routingMode == VpnRoutingMode.FULL_ROUTE &&
-                        (dnsEngine.shouldForceDowngradeQuic(dstIpStr) || CloudFrontCidr.isCloudFrontIp(dstIpStr))) {
-                        packetsBlocked++
-                        blockedLogChannel.trySend("$dstIpStr:443" to "quic-downgrade")
-                        return
-                    }
-
-                    // DNS interception
-                    if (dstPort == 53 && techniques.dnsFiltering) {
-                        val udpLen = (buffer.getShort(udpOffset + 4).toInt() and 0xFFFF)
-                        val payloadLen = udpLen - 8
-                        if (payloadLen > 0 && buffer.remaining() >= udpOffset + 8 + payloadLen) {
-                            val queryPayload = ByteArray(payloadLen)
-                            val mark = buffer.position()
-                            buffer.position(udpOffset + 8)
-                            buffer.get(queryPayload)
-                            buffer.position(mark)
-
-                            // Offload DNS to a coroutine so the TUN reader never blocks.
-                            // dnsEngine already caps concurrent upstream queries (Semaphore).
-                            scope.launch {
-                                val responsePayload = try {
-                                    dnsEngine.resolveDns(queryPayload)
-                                } catch (e: Exception) {
-                                    if (isRunning) Log.w(TAG, "DNS resolution error", e)
-                                    null
-                                }
-                                if (responsePayload != null && isRunning) {
-                                    try {
-                                        sendDnsResponse(output, srcIp, dstIp, srcPort, dstPort, responsePayload)
-                                    } catch (e: Exception) {
-                                        if (isRunning) Log.w(TAG, "DNS response injection error", e)
-                                    }
-                                }
-                            }
-                            return // drop original, response injected async above
-                        }
-                    }
-
-                    if (routingMode == VpnRoutingMode.DNS_ONLY) {
-                        // In DNS-only mode, pass non-DNS UDP through untouched
-                        return
-                    }
-
-                    // Non-DNS UDP: relay through protected socket (full-route only)
-                    val udpLen = (buffer.getShort(udpOffset + 4).toInt() and 0xFFFF)
-                    val payloadLen = udpLen - 8
-                    if (payloadLen > 0 && buffer.remaining() >= udpOffset + 8 + payloadLen) {
-                        val payload = ByteArray(payloadLen)
-                        val mark = buffer.position()
-                        buffer.position(udpOffset + 8)
-                        buffer.get(payload)
-                        buffer.position(mark)
-                        udpRelay.handlePacket(srcIp, dstIp, srcPort, dstPort, payload)
-                    }
-                }
-            }
-            PROTO_TCP -> {
-                val tcpOffset = pos + ipHeaderLen
-                if (buffer.remaining() < tcpOffset + 20) return
-
-                val srcPort = buffer.getShort(tcpOffset).toInt() and 0xFFFF
-                val dstPort = buffer.getShort(tcpOffset + 2).toInt() and 0xFFFF
-
-                if (isDnsBypassIp(dstIpStr) && isDnsBypassPort(dstPort)) {
-                    sendRst(output, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort)
-                    packetsBlocked++
-                    blockedLogChannel.trySend("$dstIpStr:$dstPort" to "dns-bypass")
-                    return
-                }
-
-                if (routingMode == VpnRoutingMode.DNS_ONLY) {
-                    // In DNS-only mode, pass all TCP traffic through untouched
-                    writePacket(output, buffer.duplicate())
-                    return
-                }
-
-                // Full-route: delegate to TCP relay engine
-                tcpRelay.handlePacket(
-                    buffer, pos, ipHeaderLen, srcIp, dstIp,
-                    srcPort, dstPort, tcpOffset, totalLen
-                )
-            }
+            PacketParser.PROTO_UDP -> handleUdp(buffer, pos, ipHeaderLen, srcIp, dstIp, srcIpInt, dstIpInt, dstIpStr, output)
+            PacketParser.PROTO_TCP -> handleTcp(buffer, pos, ipHeaderLen, srcIp, dstIp, dstIpStr, totalLen, output)
             else -> writePacket(output, buffer.duplicate())
         }
+    }
+
+    private fun handleUdp(
+        buffer: ByteBuffer, pos: Int, ipHeaderLen: Int,
+        srcIp: ByteArray, dstIp: ByteArray,
+        srcIpInt: Int, dstIpInt: Int, dstIpStr: String,
+        output: FileChannel
+    ) {
+        val udpOffset = pos + ipHeaderLen
+        if (buffer.remaining() < udpOffset + 8) return
+
+        val srcPort = PacketParser.srcPort(buffer, udpOffset)
+        val dstPort = PacketParser.dstPort(buffer, udpOffset)
+        val flowKey = flowCache.key(srcIpInt, dstIpInt, srcPort, dstPort)
+
+        // Check flow cache for QUIC downgrade verdict
+        flowCache.get(flowKey)?.let {
+            if (it == FlowCache.Verdict.DROP) {
+                packetsBlocked++
+                return
+            }
+        }
+
+        if (isDnsBypassIp(dstIpStr) && dstPort != 53 && isDnsBypassPort(dstPort)) {
+            packetsBlocked++
+            blockedLogChannel.trySend("$dstIpStr:$dstPort" to "dns-bypass")
+            flowCache.put(flowKey, FlowCache.Verdict.DROP)
+            return
+        }
+
+        // QUIC downgrade: block UDP/443 to CloudFront IPs
+        if (dstPort == 443 && techniques.dnsFiltering &&
+            routingMode == VpnRoutingMode.FULL_ROUTE &&
+            (dnsEngine.shouldForceDowngradeQuic(dstIpStr) || CloudFrontCidr.isCloudFrontIp(dstIpStr))) {
+            packetsBlocked++
+            blockedLogChannel.trySend("$dstIpStr:443" to "quic-downgrade")
+            flowCache.put(flowKey, FlowCache.Verdict.DROP)
+            return
+        }
+
+        // DNS interception
+        if (dstPort == 53 && techniques.dnsFiltering) {
+            val payloadLen = PacketParser.udpLength(buffer, udpOffset) - 8
+            if (payloadLen > 0 && buffer.remaining() >= udpOffset + 8 + payloadLen) {
+                val queryPayload = ByteArray(payloadLen)
+                val mark = buffer.position()
+                buffer.position(udpOffset + 8)
+                buffer.get(queryPayload)
+                buffer.position(mark)
+
+                scope.launch {
+                    val responsePayload = try {
+                        dnsEngine.resolveDns(queryPayload)
+                    } catch (e: Exception) {
+                        if (isRunning) Log.w(TAG, "DNS resolution error", e)
+                        null
+                    }
+                    if (responsePayload != null && isRunning) {
+                        try {
+                            sendDnsResponse(output, srcIp, dstIp, srcPort, dstPort, responsePayload)
+                        } catch (e: Exception) {
+                            if (isRunning) Log.w(TAG, "DNS response injection error", e)
+                        }
+                    }
+                }
+                return
+            }
+        }
+
+        if (routingMode == VpnRoutingMode.DNS_ONLY) return
+
+        // Non-DNS UDP: relay through protected socket
+        val payloadLen = PacketParser.udpLength(buffer, udpOffset) - 8
+        if (payloadLen > 0 && buffer.remaining() >= udpOffset + 8 + payloadLen) {
+            val payload = ByteArray(payloadLen)
+            val mark = buffer.position()
+            buffer.position(udpOffset + 8)
+            buffer.get(payload)
+            buffer.position(mark)
+            udpRelay.handlePacket(srcIp, dstIp, srcPort, dstPort, payload)
+        }
+    }
+
+    private fun handleTcp(
+        buffer: ByteBuffer, pos: Int, ipHeaderLen: Int,
+        srcIp: ByteArray, dstIp: ByteArray, dstIpStr: String,
+        totalLen: Int, output: FileChannel
+    ) {
+        val tcpOffset = pos + ipHeaderLen
+        if (buffer.remaining() < tcpOffset + 20) return
+
+        val srcPort = PacketParser.srcPort(buffer, tcpOffset)
+        val dstPort = PacketParser.dstPort(buffer, tcpOffset)
+
+        if (isDnsBypassIp(dstIpStr) && isDnsBypassPort(dstPort)) {
+            sendRst(output, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort)
+            packetsBlocked++
+            blockedLogChannel.trySend("$dstIpStr:$dstPort" to "dns-bypass")
+            return
+        }
+
+        if (routingMode == VpnRoutingMode.DNS_ONLY) {
+            writePacket(output, buffer.duplicate())
+            return
+        }
+
+        tcpRelay.handlePacket(buffer, pos, ipHeaderLen, srcIp, dstIp, srcPort, dstPort, tcpOffset, totalLen)
     }
 
     private fun isDnsBypassIp(ip: String): Boolean = ip in Constants.DNS_BYPASS_IPV4_ROUTES

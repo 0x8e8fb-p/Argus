@@ -310,6 +310,14 @@ class DnsFilterEngine @Inject constructor(
             return buildSinkholeResponse(query, type).toWire()
         }
 
+        // DNS Rebinding Protection: block public domains resolving to private IPs
+        if (isDnsRebinding(upstreamResponse)) {
+            queriesBlocked++
+            queueLog(host, "dns-rebinding")
+            Log.w(TAG, "DNS rebinding blocked: $host")
+            return buildServFail(query)
+        }
+
         cacheAllowedResponse(cacheKey, upstreamResponse)
         trackCloudFrontIps(upstreamResponse, whitelistDistribution = false)
         queriesAllowed++
@@ -322,6 +330,63 @@ class DnsFilterEngine @Inject constructor(
      * dropped silently — apps then wait the full 5 s socket timeout, making
      * the system feel frozen. SERVFAIL prompts immediate retry / fallback.
      */
+    /**
+     * DNS Rebinding Protection: inspect resolved A/AAAA records.
+     * If a public domain resolves to a private IP range, treat it as an
+     * attack and return SERVFAIL instead of the private IP.
+     *
+     * Blocks: 10.x.x.x, 172.16-31.x.x, 192.168.x.x, 127.x.x.x, 169.254.x.x,
+     *         fc00::/7, fe80::/10, ::1
+     */
+    private fun isDnsRebinding(responseBytes: ByteArray): Boolean {
+        return try {
+            val response = Message(responseBytes)
+            for (record in response.getSectionArray(Section.ANSWER)) {
+                when (record) {
+                    is ARecord -> {
+                        val addr = record.address
+                        val bytes = addr.address
+                        if (bytes.size == 4 && isPrivateIpv4(bytes)) return true
+                    }
+                    is AAAARecord -> {
+                        val addr = record.address
+                        val bytes = addr.address
+                        if (bytes.size == 16 && isPrivateIpv6(bytes)) return true
+                    }
+                }
+            }
+            false
+        } catch (_: Exception) { false }
+    }
+
+    private fun isPrivateIpv4(b: ByteArray): Boolean {
+        val a0 = b[0].toInt() and 0xFF
+        val a1 = b[1].toInt() and 0xFF
+        // 10.0.0.0/8
+        if (a0 == 10) return true
+        // 172.16.0.0/12
+        if (a0 == 172 && a1 in 16..31) return true
+        // 192.168.0.0/16
+        if (a0 == 192 && a1 == 168) return true
+        // 127.0.0.0/8
+        if (a0 == 127) return true
+        // 169.254.0.0/16 (link-local)
+        if (a0 == 169 && a1 == 254) return true
+        return false
+    }
+
+    private fun isPrivateIpv6(b: ByteArray): Boolean {
+        val a0 = b[0].toInt() and 0xFF
+        val a1 = b[1].toInt() and 0xFF
+        // fc00::/7 (unique local)
+        if ((a0 and 0xFE) == 0xFC) return true
+        // fe80::/10 (link-local)
+        if ((a0 and 0xFC) == 0xFE && (a1 and 0xC0) == 0x80) return true
+        // ::1
+        if (b.all { it == 0.toByte() }) return true
+        return false
+    }
+
     private fun buildServFail(query: Message): ByteArray {
         val response = Message(query.header.id)
         response.header.setFlag(Flags.QR.toInt())

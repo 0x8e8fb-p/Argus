@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.WorkManager
+import com.nexusblock.data.worker.VpnWatchdogWorker
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -29,6 +30,7 @@ class ArgusApplication : Application(), Configuration.Provider {
         // BouncyCastle provider removed — no proxy/MitM layer needs it anymore.
         createNotificationChannels()
         initializeWorkManager()
+        VpnWatchdogWorker.enqueue(this)
 
         // Ensure default streaming-app bypass rules are applied on first launch
         settingsRepo.initDefaultBypassIfEmpty()

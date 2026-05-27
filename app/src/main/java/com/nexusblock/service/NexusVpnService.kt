@@ -8,6 +8,7 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.net.VpnService
+import android.content.ComponentCallbacks2
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.util.Log
@@ -359,6 +360,23 @@ class NexusVpnService : VpnService() {
         }
         networkCallback = null
         activeUnderlyingNetwork = null
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        when (level) {
+            ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL,
+            ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW,
+            ComponentCallbacks2.TRIM_MEMORY_MODERATE -> {
+                Log.w(TAG, "onTrimMemory level=$level — flushing caches")
+                try {
+                    packetRouter.trimMemory()
+                    dnsEngine.clearCache()
+                } catch (e: Exception) {
+                    Log.w(TAG, "trimMemory cleanup error", e)
+                }
+            }
+        }
     }
 
     private fun buildNotification(): Notification {
