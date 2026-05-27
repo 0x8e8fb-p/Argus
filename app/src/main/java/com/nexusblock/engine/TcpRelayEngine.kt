@@ -357,7 +357,7 @@ class TcpRelayEngine @Inject constructor(
             if (written < 0 || zeroWrites > MAX_ZERO_WRITES || System.currentTimeMillis() > deadline) {
                 return false
             }
-            delay(1)
+            Thread.sleep(1)
         }
         return true
     }
