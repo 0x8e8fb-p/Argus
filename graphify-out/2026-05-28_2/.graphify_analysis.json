@@ -22,6 +22,11 @@
       "components_nexustvcomponents_railitem",
       "components_nexustvcomponents_segmentedcontrol",
       "components_nexustvcomponents_statusdot",
+      "engine_bloomfilter_bloomfilter",
+      "engine_bloomfilter_bloomfilter_add",
+      "engine_bloomfilter_bloomfilter_clear",
+      "engine_bloomfilter_bloomfilter_hash",
+      "engine_bloomfilter_bloomfilter_mightcontain",
       "engine_ruleengine_domaintrie_size",
       "engine_ruleengine_ruleengine_rulecount",
       "screens_advancedsettingsscreen_addruledialogadvanced",
@@ -65,61 +70,14 @@
       "theme_dimensions_tvdimensions",
       "ui_mainactivity_argusapp",
       "ui_mainactivity_argusblockapp",
-      "ui_mainactivity_nexusblockapp",
-      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_ui_components_nexustvcomponents_kt"
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_engine_bloomfilter_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_ui_components_nexustvcomponents_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_ui_screens_blocklistscreen_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_ui_screens_customrulesscreen_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_ui_screens_firewallscreen_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_ui_screens_logsscreen_kt"
     ],
     "1": [
-      "codebase_explainer_md",
-      "nexusblock_androidtv_codebase_explainer_1_core_architecture_system_overview",
-      "nexusblock_androidtv_codebase_explainer_2_directory_map",
-      "nexusblock_androidtv_codebase_explainer_3_key_network_process_flows",
-      "nexusblock_androidtv_codebase_explainer_3_navigation_screens",
-      "nexusblock_androidtv_codebase_explainer_4_architecture_layers",
-      "nexusblock_androidtv_codebase_explainer_5_feature_inventory_live",
-      "nexusblock_androidtv_codebase_explainer_5_guidelines_for_ai_code_modifications",
-      "nexusblock_androidtv_codebase_explainer_6_data_flows",
-      "nexusblock_androidtv_codebase_explainer_7_storage_data_schemas",
-      "nexusblock_androidtv_codebase_explainer_8_testing",
-      "nexusblock_androidtv_codebase_explainer_9_build_dependencies",
-      "nexusblock_androidtv_codebase_explainer_blocklist_update_flow",
-      "nexusblock_androidtv_codebase_explainer_boot_restore_flow",
-      "nexusblock_androidtv_codebase_explainer_build_and_compilation_commands",
-      "nexusblock_androidtv_codebase_explainer_codeblock_1",
-      "nexusblock_androidtv_codebase_explainer_codeblock_10",
-      "nexusblock_androidtv_codebase_explainer_codeblock_2",
-      "nexusblock_androidtv_codebase_explainer_codeblock_3",
-      "nexusblock_androidtv_codebase_explainer_codeblock_4",
-      "nexusblock_androidtv_codebase_explainer_codeblock_5",
-      "nexusblock_androidtv_codebase_explainer_codeblock_6",
-      "nexusblock_androidtv_codebase_explainer_codeblock_7",
-      "nexusblock_androidtv_codebase_explainer_codeblock_8",
-      "nexusblock_androidtv_codebase_explainer_codeblock_9",
-      "nexusblock_androidtv_codebase_explainer_connection_owner_app_attribution",
-      "nexusblock_androidtv_codebase_explainer_datastore_preferences",
-      "nexusblock_androidtv_codebase_explainer_dependency_conflict_resolution",
-      "nexusblock_androidtv_codebase_explainer_dns_query_path",
-      "nexusblock_androidtv_codebase_explainer_engine_layer",
-      "nexusblock_androidtv_codebase_explainer_intercepted_dns_query_resolution",
-      "nexusblock_androidtv_codebase_explainer_key_engineering_paradigms",
-      "nexusblock_androidtv_codebase_explainer_logging_diagnostics",
-      "nexusblock_androidtv_codebase_explainer_nexusblock_codebase_explainer_ai_developer_guide",
-      "nexusblock_androidtv_codebase_explainer_preferences_datastore_schema",
-      "nexusblock_androidtv_codebase_explainer_removed_not_implemented",
-      "nexusblock_androidtv_codebase_explainer_repository_layer",
-      "nexusblock_androidtv_codebase_explainer_room_database_appdatabase",
-      "nexusblock_androidtv_codebase_explainer_rules_for_engine_code",
-      "nexusblock_androidtv_codebase_explainer_rules_for_modifying_network_code",
-      "nexusblock_androidtv_codebase_explainer_service_layer",
-      "nexusblock_androidtv_codebase_explainer_sni_interception_and_tcp_rst_injection",
-      "nexusblock_androidtv_codebase_explainer_sqlite_room_database_schema_appdatabase",
-      "nexusblock_androidtv_codebase_explainer_table_blocked_domains",
-      "nexusblock_androidtv_codebase_explainer_table_blocked_events",
-      "nexusblock_androidtv_codebase_explainer_table_custom_rules",
-      "nexusblock_androidtv_codebase_explainer_ui_layer",
-      "nexusblock_androidtv_codebase_explainer_ui_rules",
-      "nexusblock_androidtv_codebase_explainer_viewmodel_layer"
-    ],
-    "2": [
       "argus_redesign_md",
       "nexusblock_androidtv_argus_redesign_10_key_engineering_decisions_documented",
       "nexusblock_androidtv_argus_redesign_11_threat_model_safety",
@@ -167,12 +125,13 @@
       "nexusblock_androidtv_argus_redesign_sprint_4_rooted_power_user_features_weeks_8_9",
       "nexusblock_androidtv_argus_redesign_sprint_5_novel_features_weeks_10_12"
     ],
-    "3": [
+    "2": [
       "db_blockeddomaindao_blockeddomaindao_clearall",
       "db_blockeddomaindao_blockeddomaindao_countbysource",
       "db_blockeddomaindao_blockeddomaindao_deletebysource",
       "db_blockeddomaindao_blockeddomaindao_getbysource",
       "db_blockeddomaindao_blockeddomaindao_getenabled",
+      "db_blockeddomaindao_blockeddomaindao_getsourceenabled",
       "db_blockeddomaindao_blockeddomaindao_insertall",
       "db_blockeddomaindao_blockeddomaindao_observecount",
       "db_blockeddomaindao_blockeddomaindao_observeenabled",
@@ -180,75 +139,35 @@
       "db_blockeddomaindao_blockeddomaindao_replacesource",
       "db_blockeddomaindao_blockeddomaindao_setenabledbysource",
       "db_blockeddomaindao_blocklistsourcestate",
-      "engine_ruleengine_cidrmatcher",
-      "engine_ruleengine_cidrmatcher_matches",
-      "engine_ruleengine_domaintrie",
-      "engine_ruleengine_domaintrie_clear",
-      "engine_ruleengine_domaintrie_contains",
-      "engine_ruleengine_domaintrie_insert",
-      "engine_ruleengine_ruleengine",
-      "engine_ruleengine_ruleengine_addcidrblock",
-      "engine_ruleengine_ruleengine_addhostrule",
-      "engine_ruleengine_ruleengine_addprefixrule",
-      "engine_ruleengine_ruleengine_addregex",
-      "engine_ruleengine_ruleengine_addrules",
-      "engine_ruleengine_ruleengine_addsuffixrule",
-      "engine_ruleengine_ruleengine_clearall",
-      "engine_ruleengine_ruleengine_iptolong",
-      "engine_ruleengine_ruleengine_isadvideoserver",
-      "engine_ruleengine_ruleengine_isblocked",
-      "engine_ruleengine_ruleengine_isipblocked",
-      "engine_ruleengine_ruleengine_loadrules",
-      "engine_ruleengine_trienode",
-      "engine_ruleenginetest_ruleenginetest",
-      "engine_ruleenginetest_ruleenginetest_adguardparserpreservesexceptionrules",
-      "engine_ruleenginetest_ruleenginetest_exactallowdoesnotallowsiblingsubdomains",
-      "engine_ruleenginetest_ruleenginetest_googlevideoadpatternbypassesbloomfastfail",
-      "engine_ruleenginetest_ruleenginetest_hostparsernormalizessinkholeentries",
-      "engine_ruleenginetest_ruleenginetest_plaindomainblockssubdomains",
-      "engine_ruleenginetest_ruleenginetest_subdomainallowstillallowschildrenwhenexplicitlyrequested",
-      "engine_ruleenginetest_ruleenginetest_youtuberecommendationallowlistdoesnotunblockadsubdomains",
       "model_blockeddomain_blockeddomain",
+      "repository_blocklistrepository_blocklistrepository",
+      "repository_blocklistrepository_blocklistrepository_clearall",
+      "repository_blocklistrepository_blocklistrepository_getdomainsbysource",
+      "repository_blocklistrepository_blocklistrepository_getenableddomains",
+      "repository_blocklistrepository_blocklistrepository_issourceenabled",
+      "repository_blocklistrepository_blocklistrepository_observedomaincount",
+      "repository_blocklistrepository_blocklistrepository_observeenableddomains",
+      "repository_blocklistrepository_blocklistrepository_observesourcestates",
+      "repository_blocklistrepository_blocklistrepository_replacesource",
       "repository_builtinblockrules_builtinblockrules",
       "repository_builtinblockrules_builtinblockrules_emergencyrules",
       "repository_rawblocklistloader_rawblocklistloader",
-      "repository_rawblocklistloader_rawblocklistloader_loadbuiltinblocklist"
+      "repository_rawblocklistloader_rawblocklistloader_loadbuiltinblocklist",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_db_blockeddomaindao_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_model_blockeddomain_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_repository_blocklistrepository_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_repository_builtinblockrules_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_repository_rawblocklistloader_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_worker_blocklistupdateworker_kt",
+      "worker_blocklistupdateworker_blocklistupdateworker",
+      "worker_blocklistupdateworker_blocklistupdateworker_dowork",
+      "worker_blocklistupdateworker_blocklistupdateworker_fetchandparse",
+      "worker_blocklistupdateworker_blocklistupdateworker_getbuiltinrules",
+      "worker_blocklistupdateworker_cancel",
+      "worker_blocklistupdateworker_runnow",
+      "worker_blocklistupdateworker_schedule"
     ],
-    "4": [
-      "engine_dnsfilterengine_dnsfilterengine",
-      "engine_dnsfilterengine_dnsfilterengine_buildipv6sinkholebytes",
-      "engine_dnsfilterengine_dnsfilterengine_buildnxdomainbytes",
-      "engine_dnsfilterengine_dnsfilterengine_buildnxdomainresponse",
-      "engine_dnsfilterengine_dnsfilterengine_buildservfail",
-      "engine_dnsfilterengine_dnsfilterengine_buildservfailfrombytes",
-      "engine_dnsfilterengine_dnsfilterengine_buildsinkholebytes",
-      "engine_dnsfilterengine_dnsfilterengine_buildsinkholeresponse",
-      "engine_dnsfilterengine_dnsfilterengine_cacheallowedresponse",
-      "engine_dnsfilterengine_dnsfilterengine_cacheblockedipsfromresponse",
-      "engine_dnsfilterengine_dnsfilterengine_clearcache",
-      "engine_dnsfilterengine_dnsfilterengine_findblockedanswer",
-      "engine_dnsfilterengine_dnsfilterengine_getemergencyrules",
-      "engine_dnsfilterengine_dnsfilterengine_getstats",
-      "engine_dnsfilterengine_dnsfilterengine_isdomainblocked",
-      "engine_dnsfilterengine_dnsfilterengine_isipblocked",
-      "engine_dnsfilterengine_dnsfilterengine_isunknowncloudfrontdistribution",
-      "engine_dnsfilterengine_dnsfilterengine_logdroppedcountifneeded",
-      "engine_dnsfilterengine_dnsfilterengine_plaindnsresolve",
-      "engine_dnsfilterengine_dnsfilterengine_prunenegativecache",
-      "engine_dnsfilterengine_dnsfilterengine_queuelog",
-      "engine_dnsfilterengine_dnsfilterengine_reloadrules",
-      "engine_dnsfilterengine_dnsfilterengine_resolvedns",
-      "engine_dnsfilterengine_dnsfilterengine_shouldforcedowngradequic",
-      "engine_dnsfilterengine_dnsfilterengine_start",
-      "engine_dnsfilterengine_dnsfilterengine_startlogbatcher",
-      "engine_dnsfilterengine_dnsfilterengine_stop",
-      "engine_dnsfilterengine_dnsfilterengine_trackcloudfrontips",
-      "engine_dnsfilterengine_dnsfilterengine_upstreamresolve",
-      "engine_dnsfilterengine_dnsstats",
-      "engine_dnsfilterengine_isupstreamdomain",
-      "engine_dnsfilterengine_removeeldestentry"
-    ],
-    "5": [
+    "3": [
       "engine_pendingbytequeue_pendingbytequeue",
       "engine_pendingbytequeue_pendingbytequeue_clear",
       "engine_pendingbytequeue_pendingbytequeue_drain",
@@ -282,37 +201,72 @@
       "engine_tcprelayengine_tcpsession_bufferpendingdata",
       "engine_tcprelayengine_tcpsession_drainpendingdata"
     ],
-    "6": [
-      "db_appdatabase_appdatabase",
-      "db_blockedeventdao_blockedeventdao_clearall",
-      "db_blockedeventdao_blockedeventdao_countsince",
-      "db_blockedeventdao_blockedeventdao_getrecent",
-      "db_blockedeventdao_blockedeventdao_insert",
-      "db_blockedeventdao_blockedeventdao_insertall",
-      "db_blockedeventdao_blockedeventdao_observerecent",
-      "db_blockedeventdao_blockedeventdao_observetotalcount",
-      "db_blockedeventdao_blockedeventdao_prunetomax",
-      "db_customruledao_customruledao",
-      "db_customruledao_customruledao_clearall",
-      "db_customruledao_customruledao_delete",
-      "db_customruledao_customruledao_deletebyid",
-      "db_customruledao_customruledao_getenabled",
-      "db_customruledao_customruledao_insert",
-      "db_customruledao_customruledao_observeall",
-      "db_customruledao_customruledao_observecount",
-      "db_customruledao_customruledao_observeenabled",
-      "db_customruledao_customruledao_update",
-      "model_blockedevent_blockedevent",
-      "repository_statsrepository_statsrepository",
-      "repository_statsrepository_statsrepository_clearlogs",
-      "repository_statsrepository_statsrepository_getblockedsince",
-      "repository_statsrepository_statsrepository_getrecentevents",
-      "repository_statsrepository_statsrepository_logblocked",
-      "repository_statsrepository_statsrepository_logblockedbatch",
-      "repository_statsrepository_statsrepository_observetotalblocked",
-      "repository_statsrepository_statsrepository_prunelogs"
+    "4": [
+      "engine_dnsfilterengine_dnsfilterengine",
+      "engine_dnsfilterengine_dnsfilterengine_buildipv6sinkholebytes",
+      "engine_dnsfilterengine_dnsfilterengine_buildnxdomainbytes",
+      "engine_dnsfilterengine_dnsfilterengine_buildnxdomainresponse",
+      "engine_dnsfilterengine_dnsfilterengine_buildservfail",
+      "engine_dnsfilterengine_dnsfilterengine_buildservfailfrombytes",
+      "engine_dnsfilterengine_dnsfilterengine_buildsinkholebytes",
+      "engine_dnsfilterengine_dnsfilterengine_buildsinkholeresponse",
+      "engine_dnsfilterengine_dnsfilterengine_cacheallowedresponse",
+      "engine_dnsfilterengine_dnsfilterengine_cacheblockedipsfromresponse",
+      "engine_dnsfilterengine_dnsfilterengine_clearcache",
+      "engine_dnsfilterengine_dnsfilterengine_findblockedanswer",
+      "engine_dnsfilterengine_dnsfilterengine_getemergencyrules",
+      "engine_dnsfilterengine_dnsfilterengine_getstats",
+      "engine_dnsfilterengine_dnsfilterengine_isdomainblocked",
+      "engine_dnsfilterengine_dnsfilterengine_isipblocked",
+      "engine_dnsfilterengine_dnsfilterengine_isunknowncloudfrontdistribution",
+      "engine_dnsfilterengine_dnsfilterengine_logdroppedcountifneeded",
+      "engine_dnsfilterengine_dnsfilterengine_plaindnsresolve",
+      "engine_dnsfilterengine_dnsfilterengine_prunenegativecache",
+      "engine_dnsfilterengine_dnsfilterengine_reloadrules",
+      "engine_dnsfilterengine_dnsfilterengine_resolvedns",
+      "engine_dnsfilterengine_dnsfilterengine_shouldforcedowngradequic",
+      "engine_dnsfilterengine_dnsfilterengine_start",
+      "engine_dnsfilterengine_dnsfilterengine_startlogbatcher",
+      "engine_dnsfilterengine_dnsfilterengine_stop",
+      "engine_dnsfilterengine_dnsfilterengine_trackcloudfrontips",
+      "engine_dnsfilterengine_dnsfilterengine_upstreamresolve",
+      "engine_dnsfilterengine_dnsstats",
+      "engine_dnsfilterengine_isupstreamdomain",
+      "engine_dnsfilterengine_removeeldestentry"
     ],
-    "7": [
+    "5": [
+      "engine_ruleengine_cidrmatcher",
+      "engine_ruleengine_cidrmatcher_matches",
+      "engine_ruleengine_domaintrie",
+      "engine_ruleengine_domaintrie_clear",
+      "engine_ruleengine_domaintrie_contains",
+      "engine_ruleengine_domaintrie_insert",
+      "engine_ruleengine_ruleengine",
+      "engine_ruleengine_ruleengine_addcidrblock",
+      "engine_ruleengine_ruleengine_addhostrule",
+      "engine_ruleengine_ruleengine_addprefixrule",
+      "engine_ruleengine_ruleengine_addregex",
+      "engine_ruleengine_ruleengine_addrules",
+      "engine_ruleengine_ruleengine_addsuffixrule",
+      "engine_ruleengine_ruleengine_clearall",
+      "engine_ruleengine_ruleengine_iptolong",
+      "engine_ruleengine_ruleengine_isadvideoserver",
+      "engine_ruleengine_ruleengine_isblocked",
+      "engine_ruleengine_ruleengine_isipblocked",
+      "engine_ruleengine_ruleengine_loadrules",
+      "engine_ruleengine_trienode",
+      "engine_ruleenginetest_ruleenginetest",
+      "engine_ruleenginetest_ruleenginetest_adguardparserpreservesexceptionrules",
+      "engine_ruleenginetest_ruleenginetest_exactallowdoesnotallowsiblingsubdomains",
+      "engine_ruleenginetest_ruleenginetest_googlevideoadpatternbypassesbloomfastfail",
+      "engine_ruleenginetest_ruleenginetest_hostparsernormalizessinkholeentries",
+      "engine_ruleenginetest_ruleenginetest_plaindomainblockssubdomains",
+      "engine_ruleenginetest_ruleenginetest_subdomainallowstillallowschildrenwhenexplicitlyrequested",
+      "engine_ruleenginetest_ruleenginetest_youtuberecommendationallowlistdoesnotunblockadsubdomains",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_engine_ruleengine_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_test_java_com_nexusblock_engine_ruleenginetest_kt"
+    ],
+    "6": [
       "app_src_main_java_com_nexusblock_ui_theme_theme_kt",
       "model_customrule_customrule",
       "theme_theme_argusblocktheme",
@@ -329,37 +283,42 @@
       "ui_mainactivity_mainactivity_oncreate",
       "ui_mainactivity_mainactivity_onresume",
       "ui_mainactivity_mainactivity_startvpnservice",
+      "ui_mainactivity_nexusblockapp",
       "ui_mainactivity_screen",
       "ui_mainactivity_settings",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_model_customrule_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_ui_mainactivity_kt",
       "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_ui_theme_theme_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_ui_viewmodel_customrulesviewmodel_kt",
       "viewmodel_customrulesviewmodel_customrulesviewmodel",
       "viewmodel_customrulesviewmodel_customrulesviewmodel_addrule",
       "viewmodel_customrulesviewmodel_customrulesviewmodel_deleterule",
       "viewmodel_customrulesviewmodel_customrulesviewmodel_togglerule"
     ],
-    "8": [
-      "engine_connectiontracker_connectiontracker",
-      "engine_connectiontracker_connectiontracker_getpackageforconnection",
-      "engine_connectiontracker_connectiontracker_getuidfromtable",
-      "engine_connectiontracker_connectiontracker_getuidmodern",
-      "engine_connectiontracker_connectiontracker_iptohex",
-      "engine_connectiontracker_connectiontracker_preloaduidcache",
-      "engine_connectiontracker_connectiontracker_readprocfile",
-      "engine_connectiontracker_connectiontracker_readprocforconnection",
-      "engine_connectiontracker_connectiontracker_refreshconnectiontable",
-      "engine_connectiontracker_connectiontracker_resolveuidtopackage",
-      "engine_connectiontracker_connectiontracker_start",
-      "engine_connectiontracker_connectiontracker_stop",
-      "nexusblock_androidtv_codebase_explainer_2_module_by_module_technical_breakdown",
-      "nexusblock_androidtv_codebase_explainer_2_vpnwatchdogservice_kt_bootreceiver_kt",
-      "nexusblock_androidtv_codebase_explainer_3_ruleengine_kt_bloomfilter_kt",
-      "nexusblock_androidtv_codebase_explainer_5_mitmproxymanager_kt_certificatemanager_kt",
-      "nexusblock_androidtv_codebase_explainer_android_core_services_service",
-      "nexusblock_androidtv_codebase_explainer_core_constants_com_nexusblock_constants",
-      "nexusblock_androidtv_codebase_explainer_dependency_injection_modules_di",
-      "nexusblock_androidtv_codebase_explainer_low_level_packet_engine_engine"
+    "7": [
+      "db_blockedeventdao_blockedeventdao_clearall",
+      "db_blockedeventdao_blockedeventdao_countsince",
+      "db_blockedeventdao_blockedeventdao_getrecent",
+      "db_blockedeventdao_blockedeventdao_insert",
+      "db_blockedeventdao_blockedeventdao_insertall",
+      "db_blockedeventdao_blockedeventdao_observerecent",
+      "db_blockedeventdao_blockedeventdao_observetotalcount",
+      "db_blockedeventdao_blockedeventdao_prunetomax",
+      "engine_dnsfilterengine_dnsfilterengine_queuelog",
+      "model_blockedevent_blockedevent",
+      "repository_statsrepository_statsrepository",
+      "repository_statsrepository_statsrepository_clearlogs",
+      "repository_statsrepository_statsrepository_getblockedsince",
+      "repository_statsrepository_statsrepository_getrecentevents",
+      "repository_statsrepository_statsrepository_logblocked",
+      "repository_statsrepository_statsrepository_logblockedbatch",
+      "repository_statsrepository_statsrepository_observetotalblocked",
+      "repository_statsrepository_statsrepository_prunelogs",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_db_blockedeventdao_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_model_blockedevent_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_repository_statsrepository_kt"
     ],
-    "9": [
+    "8": [
       "luna_reverse_engineering_md",
       "nexusblock_androidtv_luna_reverse_engineering_10_subscription_monetization",
       "nexusblock_androidtv_luna_reverse_engineering_1_architecture_overview",
@@ -381,7 +340,7 @@
       "nexusblock_androidtv_luna_reverse_engineering_key_findings",
       "nexusblock_androidtv_luna_reverse_engineering_luna_adblocker_reverse_engineering_report"
     ],
-    "10": [
+    "9": [
       "engine_lunavpnmanager_lunastate",
       "engine_lunavpnmanager_lunavpnmanager",
       "engine_lunavpnmanager_lunavpnmanager_buildprofile",
@@ -402,7 +361,7 @@
       "engine_udprelayengine_udprelayengine_stop",
       "engine_udprelayengine_udpsession"
     ],
-    "11": [
+    "10": [
       "app_src_main_java_com_nexusblock_engine_networkutils_kt",
       "engine_networkutils_bytestoip",
       "engine_networkutils_calculatechecksum",
@@ -422,6 +381,26 @@
       "engine_packetrouter_packetrouter_writepacket",
       "engine_packetrouter_routerstats",
       "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_engine_networkutils_kt"
+    ],
+    "11": [
+      "repository_settingsrepository_blockingtechniques",
+      "repository_settingsrepository_settingsrepository",
+      "repository_settingsrepository_settingsrepository_getblockedpackages",
+      "repository_settingsrepository_settingsrepository_initdefaultbypassifempty",
+      "repository_settingsrepository_settingsrepository_observeautostart",
+      "repository_settingsrepository_settingsrepository_observednsprofile",
+      "repository_settingsrepository_settingsrepository_observefirewallmodes",
+      "repository_settingsrepository_settingsrepository_observetechniques",
+      "repository_settingsrepository_settingsrepository_observevpnactive",
+      "repository_settingsrepository_settingsrepository_observevpnmode",
+      "repository_settingsrepository_settingsrepository_observevpnroutingmode",
+      "repository_settingsrepository_settingsrepository_parsefirewallmodes",
+      "repository_settingsrepository_settingsrepository_serializefirewallmodes",
+      "repository_settingsrepository_vpnmode",
+      "repository_settingsrepository_vpnroutingmode",
+      "repository_vpnroutingmodetest_vpnroutingmodetest_fromstoragekeydefaultstocurrentaggressivebehavior",
+      "repository_vpnroutingmodetest_vpnroutingmodetest_fromstoragekeydefaultstodnsonly",
+      "repository_vpnroutingmodetest_vpnroutingmodetest_fromstoragekeyparsesknownmodes"
     ],
     "12": [
       "nexusblock_androidtv_sprint_1_integration_test_plan_argus_ad_blocker_dns_sni_mitm_api_rewriter_mvp",
@@ -444,26 +423,6 @@
       "sprint_1_integration_test_plan_md"
     ],
     "13": [
-      "repository_settingsrepository_blockingtechniques",
-      "repository_settingsrepository_settingsrepository",
-      "repository_settingsrepository_settingsrepository_getblockedpackages",
-      "repository_settingsrepository_settingsrepository_initdefaultbypassifempty",
-      "repository_settingsrepository_settingsrepository_observeautostart",
-      "repository_settingsrepository_settingsrepository_observednsprofile",
-      "repository_settingsrepository_settingsrepository_observefirewallmodes",
-      "repository_settingsrepository_settingsrepository_observetechniques",
-      "repository_settingsrepository_settingsrepository_observevpnactive",
-      "repository_settingsrepository_settingsrepository_observevpnmode",
-      "repository_settingsrepository_settingsrepository_observevpnroutingmode",
-      "repository_settingsrepository_settingsrepository_parsefirewallmodes",
-      "repository_settingsrepository_settingsrepository_serializefirewallmodes",
-      "repository_settingsrepository_vpnmode",
-      "repository_settingsrepository_vpnroutingmode",
-      "repository_vpnroutingmodetest_vpnroutingmodetest_fromstoragekeydefaultstocurrentaggressivebehavior",
-      "repository_vpnroutingmodetest_vpnroutingmodetest_fromstoragekeydefaultstodnsonly",
-      "repository_vpnroutingmodetest_vpnroutingmodetest_fromstoragekeyparsesknownmodes"
-    ],
-    "14": [
       "app_src_main_assets_luna_vpn_config_json",
       "luna_vpn_config_childdhgroup",
       "luna_vpn_config_childencryption",
@@ -479,6 +438,23 @@
       "luna_vpn_config_remoteidentifier",
       "luna_vpn_config_server",
       "luna_vpn_config_username"
+    ],
+    "14": [
+      "db_appdatabase_appdatabase",
+      "db_appdatabase_appdatabase_blockeddomaindao",
+      "db_appdatabase_appdatabase_blockedeventdao",
+      "db_customruledao_customruledao",
+      "db_customruledao_customruledao_clearall",
+      "db_customruledao_customruledao_delete",
+      "db_customruledao_customruledao_deletebyid",
+      "db_customruledao_customruledao_getenabled",
+      "db_customruledao_customruledao_insert",
+      "db_customruledao_customruledao_observeall",
+      "db_customruledao_customruledao_observecount",
+      "db_customruledao_customruledao_observeenabled",
+      "db_customruledao_customruledao_update",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_db_appdatabase_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_db_customruledao_kt"
     ],
     "15": [
       "service_nexusvpnservice_nexusvpnservice",
@@ -530,6 +506,35 @@
       "readme_md"
     ],
     "18": [
+      "engine_connectiontracker_connectiontracker",
+      "engine_connectiontracker_connectiontracker_getpackageforconnection",
+      "engine_connectiontracker_connectiontracker_getuidfromtable",
+      "engine_connectiontracker_connectiontracker_getuidmodern",
+      "engine_connectiontracker_connectiontracker_iptohex",
+      "engine_connectiontracker_connectiontracker_preloaduidcache",
+      "engine_connectiontracker_connectiontracker_readprocfile",
+      "engine_connectiontracker_connectiontracker_readprocforconnection",
+      "engine_connectiontracker_connectiontracker_refreshconnectiontable",
+      "engine_connectiontracker_connectiontracker_resolveuidtopackage",
+      "engine_connectiontracker_connectiontracker_start",
+      "engine_connectiontracker_connectiontracker_stop",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_engine_connectiontracker_kt"
+    ],
+    "19": [
+      "service_vpnwatchdogservice_start",
+      "service_vpnwatchdogservice_stop",
+      "service_vpnwatchdogservice_vpnwatchdogservice",
+      "service_vpnwatchdogservice_vpnwatchdogservice_buildnotification",
+      "service_vpnwatchdogservice_vpnwatchdogservice_cancelalarm",
+      "service_vpnwatchdogservice_vpnwatchdogservice_checkvpnhealth",
+      "service_vpnwatchdogservice_vpnwatchdogservice_onbind",
+      "service_vpnwatchdogservice_vpnwatchdogservice_oncreate",
+      "service_vpnwatchdogservice_vpnwatchdogservice_ondestroy",
+      "service_vpnwatchdogservice_vpnwatchdogservice_onstartcommand",
+      "service_vpnwatchdogservice_vpnwatchdogservice_schedulealarm",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_service_vpnwatchdogservice_kt"
+    ],
+    "20": [
       "engine_dnsupstreammanager_dnsupstreammanager",
       "engine_dnsupstreammanager_dnsupstreammanager_resolutionorder",
       "engine_dnsupstreammanager_dnsupstreammanager_resolve",
@@ -542,7 +547,7 @@
       "engine_dnsupstreammanager_dnsupstreammanager_selectfirstnonnull",
       "engine_dnsupstreammanager_protocol"
     ],
-    "19": [
+    "21": [
       "engine_privatednsmanager_dnsprovider",
       "engine_privatednsmanager_privatednsmanager",
       "engine_privatednsmanager_privatednsmanager_checkpermission",
@@ -555,7 +560,7 @@
       "engine_privatednsmanager_privatednsmanager_refreshpermission",
       "engine_privatednsmanager_privatednsmanager_toggle"
     ],
-    "20": [
+    "22": [
       "nexusblock_androidtv_readme_10_background_resilience",
       "nexusblock_androidtv_readme_1_nexusvpnservice_service_nexusvpnservice_kt",
       "nexusblock_androidtv_readme_2_ruleengine_engine_ruleengine_kt",
@@ -568,32 +573,19 @@
       "nexusblock_androidtv_readme_9_blocklistupdateworker_data_worker_blocklistupdateworker_kt",
       "nexusblock_androidtv_readme_key_components"
     ],
-    "21": [
-      "service_vpnwatchdogservice_start",
-      "service_vpnwatchdogservice_stop",
-      "service_vpnwatchdogservice_vpnwatchdogservice",
-      "service_vpnwatchdogservice_vpnwatchdogservice_buildnotification",
-      "service_vpnwatchdogservice_vpnwatchdogservice_cancelalarm",
-      "service_vpnwatchdogservice_vpnwatchdogservice_checkvpnhealth",
-      "service_vpnwatchdogservice_vpnwatchdogservice_onbind",
-      "service_vpnwatchdogservice_vpnwatchdogservice_oncreate",
-      "service_vpnwatchdogservice_vpnwatchdogservice_ondestroy",
-      "service_vpnwatchdogservice_vpnwatchdogservice_onstartcommand",
-      "service_vpnwatchdogservice_vpnwatchdogservice_schedulealarm"
-    ],
-    "22": [
-      "db_blockeddomaindao_blockeddomaindao_getsourceenabled",
-      "repository_blocklistrepository_blocklistrepository",
-      "repository_blocklistrepository_blocklistrepository_clearall",
-      "repository_blocklistrepository_blocklistrepository_getdomainsbysource",
-      "repository_blocklistrepository_blocklistrepository_getenableddomains",
-      "repository_blocklistrepository_blocklistrepository_issourceenabled",
-      "repository_blocklistrepository_blocklistrepository_observedomaincount",
-      "repository_blocklistrepository_blocklistrepository_observeenableddomains",
-      "repository_blocklistrepository_blocklistrepository_observesourcestates",
-      "repository_blocklistrepository_blocklistrepository_replacesource"
-    ],
     "23": [
+      "repository_customrulerepository_customrulerepository",
+      "repository_customrulerepository_customrulerepository_addrule",
+      "repository_customrulerepository_customrulerepository_clearall",
+      "repository_customrulerepository_customrulerepository_deleterule",
+      "repository_customrulerepository_customrulerepository_deleterulebyid",
+      "repository_customrulerepository_customrulerepository_getenabledrules",
+      "repository_customrulerepository_customrulerepository_observeallrules",
+      "repository_customrulerepository_customrulerepository_observeenabledrules",
+      "repository_customrulerepository_customrulerepository_updaterule",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_repository_customrulerepository_kt"
+    ],
+    "24": [
       "viewmodel_settingsviewmodel_settingsviewmodel",
       "viewmodel_settingsviewmodel_settingsviewmodel_checkbatteryoptimization",
       "viewmodel_settingsviewmodel_settingsviewmodel_installlunacert",
@@ -605,7 +597,7 @@
       "viewmodel_settingsviewmodel_settingsviewmodel_setvpnmode",
       "viewmodel_settingsviewmodel_settingsviewmodel_setvpnroutingmode"
     ],
-    "24": [
+    "25": [
       "dns_dnsprofilemanager_dnsprofilemanager",
       "dns_dnsprofilemanager_dnsprofilemanager_activeprofile",
       "dns_dnsprofilemanager_dnsprofilemanager_allprofiles",
@@ -616,7 +608,18 @@
       "dns_dnsprofilemanager_dnsprofilemanager_millisuntilnextrefresh",
       "dns_dnsprofilemanager_dnsprofilemanager_setactiveprofile"
     ],
-    "25": [
+    "26": [
+      "nexusblock_androidtv_codebase_explainer_7_storage_data_schemas",
+      "nexusblock_androidtv_codebase_explainer_codeblock_5",
+      "nexusblock_androidtv_codebase_explainer_datastore_preferences",
+      "nexusblock_androidtv_codebase_explainer_preferences_datastore_schema",
+      "nexusblock_androidtv_codebase_explainer_room_database_appdatabase",
+      "nexusblock_androidtv_codebase_explainer_sqlite_room_database_schema_appdatabase",
+      "nexusblock_androidtv_codebase_explainer_table_blocked_domains",
+      "nexusblock_androidtv_codebase_explainer_table_blocked_events",
+      "nexusblock_androidtv_codebase_explainer_table_custom_rules"
+    ],
+    "27": [
       "nexusblock_androidtv_readme_adguard_style_rule_engine",
       "nexusblock_androidtv_readme_advanced_youtube_ad_blocking",
       "nexusblock_androidtv_readme_custom_rules_editor",
@@ -627,7 +630,7 @@
       "nexusblock_androidtv_readme_recent_improvements",
       "nexusblock_androidtv_readme_system_wide_indian_ott_ad_blocking"
     ],
-    "26": [
+    "28": [
       "kimi_plans_nexusblock_overhaul_plan_md",
       "plans_nexusblock_overhaul_plan_execution_plan",
       "plans_nexusblock_overhaul_plan_nexusblock_overhaul_plan_indian_ott_youtube_adblocking",
@@ -638,18 +641,18 @@
       "plans_nexusblock_overhaul_plan_phase_5_build_deploy",
       "plans_nexusblock_overhaul_plan_root_cause_analysis"
     ],
-    "27": [
-      "repository_customrulerepository_customrulerepository",
-      "repository_customrulerepository_customrulerepository_addrule",
-      "repository_customrulerepository_customrulerepository_clearall",
-      "repository_customrulerepository_customrulerepository_deleterule",
-      "repository_customrulerepository_customrulerepository_deleterulebyid",
-      "repository_customrulerepository_customrulerepository_getenabledrules",
-      "repository_customrulerepository_customrulerepository_observeallrules",
-      "repository_customrulerepository_customrulerepository_observeenabledrules",
-      "repository_customrulerepository_customrulerepository_updaterule"
+    "29": [
+      "repository_blocklistsources_blocklistformat",
+      "repository_blocklistsources_blocklistsourcedefinition",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_repository_blocklistsources_kt",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_ui_viewmodel_blocklistviewmodel_kt",
+      "viewmodel_blocklistviewmodel_blocklistsource",
+      "viewmodel_blocklistviewmodel_blocklistupdateresult",
+      "viewmodel_blocklistviewmodel_blocklistviewmodel",
+      "viewmodel_blocklistviewmodel_blocklistviewmodel_togglesource",
+      "viewmodel_blocklistviewmodel_blocklistviewmodel_updatenow"
     ],
-    "28": [
+    "30": [
       "viewmodel_dashboardviewmodel_dashboarduistate",
       "viewmodel_dashboardviewmodel_dashboardviewmodel",
       "viewmodel_dashboardviewmodel_dashboardviewmodel_formatbytes",
@@ -660,7 +663,37 @@
       "viewmodel_dashboardviewmodel_dashboardviewmodel_stopvpn",
       "viewmodel_dashboardviewmodel_dashboardviewmodel_togglevpn"
     ],
-    "29": [
+    "31": [
+      "nexusblock_androidtv_codebase_explainer_2_module_by_module_technical_breakdown",
+      "nexusblock_androidtv_codebase_explainer_2_vpnwatchdogservice_kt_bootreceiver_kt",
+      "nexusblock_androidtv_codebase_explainer_3_ruleengine_kt_bloomfilter_kt",
+      "nexusblock_androidtv_codebase_explainer_5_mitmproxymanager_kt_certificatemanager_kt",
+      "nexusblock_androidtv_codebase_explainer_android_core_services_service",
+      "nexusblock_androidtv_codebase_explainer_core_constants_com_nexusblock_constants",
+      "nexusblock_androidtv_codebase_explainer_dependency_injection_modules_di",
+      "nexusblock_androidtv_codebase_explainer_low_level_packet_engine_engine"
+    ],
+    "32": [
+      "nexusblock_androidtv_codebase_explainer_4_architecture_layers",
+      "nexusblock_androidtv_codebase_explainer_codeblock_3",
+      "nexusblock_androidtv_codebase_explainer_engine_layer",
+      "nexusblock_androidtv_codebase_explainer_repository_layer",
+      "nexusblock_androidtv_codebase_explainer_service_layer",
+      "nexusblock_androidtv_codebase_explainer_sni_interception_and_tcp_rst_injection",
+      "nexusblock_androidtv_codebase_explainer_ui_layer",
+      "nexusblock_androidtv_codebase_explainer_viewmodel_layer"
+    ],
+    "33": [
+      "codebase_explainer_md",
+      "nexusblock_androidtv_codebase_explainer_1_core_architecture_system_overview",
+      "nexusblock_androidtv_codebase_explainer_3_navigation_screens",
+      "nexusblock_androidtv_codebase_explainer_5_feature_inventory_live",
+      "nexusblock_androidtv_codebase_explainer_codeblock_1",
+      "nexusblock_androidtv_codebase_explainer_key_engineering_paradigms",
+      "nexusblock_androidtv_codebase_explainer_nexusblock_codebase_explainer_ai_developer_guide",
+      "nexusblock_androidtv_codebase_explainer_removed_not_implemented"
+    ],
+    "34": [
       "nexusblock_androidtv_readme_build_instructions",
       "nexusblock_androidtv_readme_codeblock_2",
       "nexusblock_androidtv_readme_codeblock_3",
@@ -670,7 +703,17 @@
       "nexusblock_androidtv_readme_project_structure",
       "nexusblock_androidtv_readme_step_by_step"
     ],
-    "30": [
+    "35": [
+      "repository_blocklistparsers_blocklistparsers",
+      "repository_blocklistparsers_blocklistparsers_extractadguarddomain",
+      "repository_blocklistparsers_blocklistparsers_issinkholeaddress",
+      "repository_blocklistparsers_blocklistparsers_isvaliddomain",
+      "repository_blocklistparsers_blocklistparsers_normalizedomain",
+      "repository_blocklistparsers_blocklistparsers_parseadguardfilter",
+      "repository_blocklistparsers_blocklistparsers_parsehostfile",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_repository_blocklistparsers_kt"
+    ],
+    "36": [
       "cert_lunacertinstaller_lunacertinstaller",
       "cert_lunacertinstaller_lunacertinstaller_exportcerttocache",
       "cert_lunacertinstaller_lunacertinstaller_exportcerttodownloads",
@@ -679,7 +722,7 @@
       "cert_lunacertinstaller_lunacertinstaller_install",
       "cert_lunacertinstaller_lunacertinstaller_parsecertificate"
     ],
-    "31": [
+    "37": [
       "github_copilot_instructions_1_think_before_coding",
       "github_copilot_instructions_2_simplicity_first",
       "github_copilot_instructions_3_surgical_changes",
@@ -688,7 +731,16 @@
       "github_copilot_instructions_codeblock_1",
       "github_copilot_instructions_md"
     ],
-    "32": [
+    "38": [
+      "nexusblock_androidtv_codebase_explainer_6_data_flows",
+      "nexusblock_androidtv_codebase_explainer_blocklist_update_flow",
+      "nexusblock_androidtv_codebase_explainer_boot_restore_flow",
+      "nexusblock_androidtv_codebase_explainer_codeblock_4",
+      "nexusblock_androidtv_codebase_explainer_codeblock_6",
+      "nexusblock_androidtv_codebase_explainer_dns_query_path",
+      "nexusblock_androidtv_codebase_explainer_rules_for_modifying_network_code"
+    ],
+    "39": [
       "nexusblock_androidtv_readme_1_three_tier_domain_matching_trie",
       "nexusblock_androidtv_readme_2_sni_inspection_certificate_pinning_bypass",
       "nexusblock_androidtv_readme_3_nxdomain_instead_of_drops",
@@ -697,25 +749,16 @@
       "nexusblock_androidtv_readme_6_youtube_specific_rules",
       "nexusblock_androidtv_readme_optimizations_hacks"
     ],
-    "33": [
-      "repository_blocklistparsers_blocklistparsers",
-      "repository_blocklistparsers_blocklistparsers_extractadguarddomain",
-      "repository_blocklistparsers_blocklistparsers_issinkholeaddress",
-      "repository_blocklistparsers_blocklistparsers_isvaliddomain",
-      "repository_blocklistparsers_blocklistparsers_normalizedomain",
-      "repository_blocklistparsers_blocklistparsers_parseadguardfilter",
-      "repository_blocklistparsers_blocklistparsers_parsehostfile"
+    "40": [
+      "nexusblock_nexusblockapplication_nexusblockapplication",
+      "nexusblock_nexusblockapplication_nexusblockapplication_createnotificationchannels",
+      "nexusblock_nexusblockapplication_nexusblockapplication_initializeworkmanager",
+      "nexusblock_nexusblockapplication_nexusblockapplication_oncreate",
+      "nexusblock_nexusblockapplication_nexusblockapplication_onterminate",
+      "nexusblock_nexusblockapplication_nexusblockapplication_scheduleperiodicblocklistupdate",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_nexusblockapplication_kt"
     ],
-    "34": [
-      "repository_blocklistsources_blocklistformat",
-      "repository_blocklistsources_blocklistsourcedefinition",
-      "viewmodel_blocklistviewmodel_blocklistsource",
-      "viewmodel_blocklistviewmodel_blocklistupdateresult",
-      "viewmodel_blocklistviewmodel_blocklistviewmodel",
-      "viewmodel_blocklistviewmodel_blocklistviewmodel_togglesource",
-      "viewmodel_blocklistviewmodel_blocklistviewmodel_updatenow"
-    ],
-    "35": [
+    "41": [
       "vscode_mcp_fetch_args",
       "vscode_mcp_fetch_command",
       "vscode_mcp_fetch_type",
@@ -724,16 +767,7 @@
       "vscode_mcp_servers_fetch",
       "vscode_mcp_servers_filesystem"
     ],
-    "36": [
-      "worker_blocklistupdateworker_blocklistupdateworker",
-      "worker_blocklistupdateworker_blocklistupdateworker_dowork",
-      "worker_blocklistupdateworker_blocklistupdateworker_fetchandparse",
-      "worker_blocklistupdateworker_blocklistupdateworker_getbuiltinrules",
-      "worker_blocklistupdateworker_cancel",
-      "worker_blocklistupdateworker_runnow",
-      "worker_blocklistupdateworker_schedule"
-    ],
-    "37": [
+    "42": [
       "app_src_main_assets_transformers_hotstar_json",
       "transformers_hotstar_host_patterns",
       "transformers_hotstar_path_patterns",
@@ -741,23 +775,7 @@
       "transformers_hotstar_remove_objects_with_keys",
       "transformers_hotstar_set_null_fields"
     ],
-    "38": [
-      "nexusblock_androidtv_readme_1_certificate_pinning",
-      "nexusblock_androidtv_readme_2_apps_using_private_dns_doh_dot",
-      "nexusblock_androidtv_readme_3_ipv6_only_networks",
-      "nexusblock_androidtv_readme_4_google_play_store_rejection",
-      "nexusblock_androidtv_readme_5_youtube_anti_adblock_arms_race",
-      "nexusblock_androidtv_readme_limitations_workarounds"
-    ],
-    "39": [
-      "nexusblock_nexusblockapplication_nexusblockapplication",
-      "nexusblock_nexusblockapplication_nexusblockapplication_createnotificationchannels",
-      "nexusblock_nexusblockapplication_nexusblockapplication_initializeworkmanager",
-      "nexusblock_nexusblockapplication_nexusblockapplication_oncreate",
-      "nexusblock_nexusblockapplication_nexusblockapplication_onterminate",
-      "nexusblock_nexusblockapplication_nexusblockapplication_scheduleperiodicblocklistupdate"
-    ],
-    "40": [
+    "43": [
       "app_src_main_assets_transformers_primevideo_json",
       "transformers_primevideo_host_patterns",
       "transformers_primevideo_path_patterns",
@@ -765,226 +783,267 @@
       "transformers_primevideo_remove_objects_with_keys",
       "transformers_primevideo_set_null_fields"
     ],
-    "41": [
+    "44": [
       "di_databasemodule_databasemodule",
       "di_databasemodule_databasemodule_provideblockeddomaindao",
       "di_databasemodule_databasemodule_provideblockedeventdao",
       "di_databasemodule_databasemodule_providecustomruledao",
-      "di_databasemodule_databasemodule_providedatabase"
-    ],
-    "42": [
-      "app_src_main_java_com_nexusblock_engine_cloudfrontcidr_kt",
-      "engine_cloudfrontcidr_cloudfrontcidr",
-      "engine_cloudfrontcidr_cloudfrontcidr_cidr",
-      "engine_cloudfrontcidr_cloudfrontcidr_iptolong",
-      "engine_cloudfrontcidr_cloudfrontcidr_iscloudfrontip"
-    ],
-    "43": [
-      "engine_ipflowkeytest_ipflowkeytest",
-      "engine_ipflowkeytest_ipflowkeytest_identicalflowvaluesproduceidenticalkeys",
-      "engine_ipflowkeytest_ipflowkeytest_ipv4",
-      "engine_ipflowkeytest_ipflowkeytest_tcpflowkeyincludesdestinationaddressandport",
-      "engine_ipflowkeytest_ipflowkeytest_udpflowkeyincludesdestinationport"
-    ],
-    "44": [
-      "nexusblock_argusapplication_argusapplication",
-      "nexusblock_argusapplication_argusapplication_createnotificationchannels",
-      "nexusblock_argusapplication_argusapplication_initializeworkmanager",
-      "nexusblock_argusapplication_argusapplication_oncreate",
-      "nexusblock_argusapplication_argusapplication_onterminate"
+      "di_databasemodule_databasemodule_providedatabase",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_di_databasemodule_kt"
     ],
     "45": [
-      "engine_bloomfilter_bloomfilter",
-      "engine_bloomfilter_bloomfilter_add",
-      "engine_bloomfilter_bloomfilter_clear",
-      "engine_bloomfilter_bloomfilter_hash",
-      "engine_bloomfilter_bloomfilter_mightcontain"
+      "nexusblock_androidtv_codebase_explainer_8_testing",
+      "nexusblock_androidtv_codebase_explainer_9_build_dependencies",
+      "nexusblock_androidtv_codebase_explainer_build_and_compilation_commands",
+      "nexusblock_androidtv_codebase_explainer_codeblock_7",
+      "nexusblock_androidtv_codebase_explainer_codeblock_8",
+      "nexusblock_androidtv_codebase_explainer_codeblock_9"
     ],
     "46": [
+      "nexusblock_androidtv_codebase_explainer_5_guidelines_for_ai_code_modifications",
+      "nexusblock_androidtv_codebase_explainer_codeblock_10",
+      "nexusblock_androidtv_codebase_explainer_dependency_conflict_resolution",
+      "nexusblock_androidtv_codebase_explainer_logging_diagnostics",
+      "nexusblock_androidtv_codebase_explainer_rules_for_engine_code",
+      "nexusblock_androidtv_codebase_explainer_ui_rules"
+    ],
+    "47": [
+      "nexusblock_androidtv_readme_1_certificate_pinning",
+      "nexusblock_androidtv_readme_2_apps_using_private_dns_doh_dot",
+      "nexusblock_androidtv_readme_3_ipv6_only_networks",
+      "nexusblock_androidtv_readme_4_google_play_store_rejection",
+      "nexusblock_androidtv_readme_5_youtube_anti_adblock_arms_race",
+      "nexusblock_androidtv_readme_limitations_workarounds"
+    ],
+    "48": [
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_ui_viewmodel_firewallviewmodel_kt",
       "viewmodel_firewallviewmodel_appfirewallinfo",
       "viewmodel_firewallviewmodel_firewallviewmodel",
       "viewmodel_firewallviewmodel_firewallviewmodel_getlaunchablepackages",
       "viewmodel_firewallviewmodel_firewallviewmodel_loadapps",
       "viewmodel_firewallviewmodel_firewallviewmodel_setmode"
     ],
-    "47": [
+    "49": [
       "di_appmodule_appmodule",
       "di_appmodule_appmodule_providedatastore",
       "di_appmodule_appmodule_provideokhttpclient",
-      "di_appmodule_appmodule_providesharedpreferences"
-    ],
-    "48": [
-      "dns_bootstrapdns_bootstrapdns",
-      "dns_bootstrapdns_bootstrapdns_buildhostmap",
-      "dns_bootstrapdns_bootstrapdns_hostfromurl",
-      "dns_bootstrapdns_bootstrapdns_lookup"
-    ],
-    "49": [
-      "engine_sniextractor_sniextractor",
-      "engine_sniextractor_sniextractor_extractsni",
-      "engine_sniextractor_sniextractor_parseclienthello",
-      "engine_sniextractor_sniextractor_parsesniextension"
+      "di_appmodule_appmodule_providesharedpreferences",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_di_appmodule_kt"
     ],
     "50": [
-      "nexusblock_androidtv_readme_adb_commands_for_debugging",
-      "nexusblock_androidtv_readme_codeblock_5",
-      "nexusblock_androidtv_readme_manual_verification_checklist",
-      "nexusblock_androidtv_readme_testing_guide"
+      "app_src_main_java_com_nexusblock_engine_cloudfrontcidr_kt",
+      "engine_cloudfrontcidr_cloudfrontcidr",
+      "engine_cloudfrontcidr_cloudfrontcidr_cidr",
+      "engine_cloudfrontcidr_cloudfrontcidr_iptolong",
+      "engine_cloudfrontcidr_cloudfrontcidr_iscloudfrontip"
     ],
     "51": [
-      "service_adblocktileservice_adblocktileservice",
-      "service_adblocktileservice_adblocktileservice_onclick",
-      "service_adblocktileservice_adblocktileservice_onstartlistening",
-      "service_adblocktileservice_adblocktileservice_onstoplistening"
+      "engine_ipflowkeytest_ipflowkeytest",
+      "engine_ipflowkeytest_ipflowkeytest_identicalflowvaluesproduceidenticalkeys",
+      "engine_ipflowkeytest_ipflowkeytest_ipv4",
+      "engine_ipflowkeytest_ipflowkeytest_tcpflowkeyincludesdestinationaddressandport",
+      "engine_ipflowkeytest_ipflowkeytest_udpflowkeyincludesdestinationport"
     ],
     "52": [
+      "nexusblock_androidtv_codebase_explainer_2_directory_map",
+      "nexusblock_androidtv_codebase_explainer_3_key_network_process_flows",
+      "nexusblock_androidtv_codebase_explainer_codeblock_2",
+      "nexusblock_androidtv_codebase_explainer_connection_owner_app_attribution",
+      "nexusblock_androidtv_codebase_explainer_intercepted_dns_query_resolution"
+    ],
+    "53": [
+      "nexusblock_argusapplication_argusapplication",
+      "nexusblock_argusapplication_argusapplication_createnotificationchannels",
+      "nexusblock_argusapplication_argusapplication_initializeworkmanager",
+      "nexusblock_argusapplication_argusapplication_oncreate",
+      "nexusblock_argusapplication_argusapplication_onterminate"
+    ],
+    "54": [
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_ui_viewmodel_logsviewmodel_kt",
       "viewmodel_logsviewmodel_logsviewmodel",
       "viewmodel_logsviewmodel_logsviewmodel_clearlogs",
       "viewmodel_logsviewmodel_logsviewmodel_formattimestamp",
       "viewmodel_logsviewmodel_logsviewmodel_setfilter"
     ],
-    "53": [
+    "55": [
+      "dns_bootstrapdns_bootstrapdns",
+      "dns_bootstrapdns_bootstrapdns_buildhostmap",
+      "dns_bootstrapdns_bootstrapdns_hostfromurl",
+      "dns_bootstrapdns_bootstrapdns_lookup"
+    ],
+    "56": [
+      "engine_sniextractor_sniextractor",
+      "engine_sniextractor_sniextractor_extractsni",
+      "engine_sniextractor_sniextractor_parseclienthello",
+      "engine_sniextractor_sniextractor_parsesniextension"
+    ],
+    "57": [
+      "model_firewallmode_description",
+      "model_firewallmode_displayname",
+      "model_firewallmode_firewallmode",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_data_model_firewallmode_kt"
+    ],
+    "58": [
+      "nexusblock_androidtv_readme_adb_commands_for_debugging",
+      "nexusblock_androidtv_readme_codeblock_5",
+      "nexusblock_androidtv_readme_manual_verification_checklist",
+      "nexusblock_androidtv_readme_testing_guide"
+    ],
+    "59": [
+      "service_adblocktileservice_adblocktileservice",
+      "service_adblocktileservice_adblocktileservice_onclick",
+      "service_adblocktileservice_adblocktileservice_onstartlistening",
+      "service_adblocktileservice_adblocktileservice_onstoplistening"
+    ],
+    "60": [
       "dns_dnsproviderprofile_byid",
       "dns_dnsproviderprofile_category",
       "dns_dnsproviderprofile_dnsproviderprofile"
     ],
-    "54": [
+    "61": [
       "engine_ipflowkey_from",
       "engine_ipflowkey_ipflowkey",
       "engine_ipflowkey_ipv4toint"
     ],
-    "55": [
+    "62": [
+      "engine_vpnprotectedsocketfactory_vpnprotectedsocketfactory",
+      "engine_vpnprotectedsocketfactory_vpnprotectedsocketfactory_createsocket",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_engine_vpnprotectedsocketfactory_kt"
+    ],
+    "63": [
+      "engine_vpnprotector_vpnprotector",
+      "engine_vpnprotector_vpnprotector_protect",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_engine_vpnprotector_kt"
+    ],
+    "64": [
       "gemini_settings_hooks",
       "gemini_settings_hooks_beforetool",
       "gemini_settings_json"
     ],
-    "56": [
-      "model_firewallmode_description",
-      "model_firewallmode_displayname",
-      "model_firewallmode_firewallmode"
+    "65": [
+      "service_bootreceiver_bootreceiver",
+      "service_bootreceiver_bootreceiver_onreceive",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_service_bootreceiver_kt"
     ],
-    "57": [
+    "66": [
+      "service_uninstallcleanupreceiver_uninstallcleanupreceiver",
+      "service_uninstallcleanupreceiver_uninstallcleanupreceiver_onreceive",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_service_uninstallcleanupreceiver_kt"
+    ],
+    "67": [
       "app_src_main_assets_transformers_spotify_js",
       "transformers_spotify_transform"
     ],
-    "58": [
-      "engine_vpnprotectedsocketfactory_vpnprotectedsocketfactory",
-      "engine_vpnprotectedsocketfactory_vpnprotectedsocketfactory_createsocket"
+    "68": [
+      "components_tvbottomnavigation_tvbottomnavigation",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_ui_components_tvbottomnavigation_kt"
     ],
-    "59": [
-      "engine_vpnprotector_vpnprotector",
-      "engine_vpnprotector_vpnprotector_protect"
-    ],
-    "60": [
+    "69": [
       "gemini_md",
       "nexusblock_androidtv_gemini_graphify"
     ],
-    "61": [
-      "service_bootreceiver_bootreceiver",
-      "service_bootreceiver_bootreceiver_onreceive"
-    ],
-    "62": [
-      "service_uninstallcleanupreceiver_uninstallcleanupreceiver",
-      "service_uninstallcleanupreceiver_uninstallcleanupreceiver_onreceive"
-    ],
-    "63": [
+    "70": [
       "app_src_main_assets_transformers_youtube_js",
       "transformers_youtube_transform"
     ],
-    "64": [
+    "71": [
+      "nexusblock_constants_constants",
+      "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_constants_kt"
+    ],
+    "72": [
       "build_gradle_kts"
     ],
-    "65": [
+    "73": [
       "settings_gradle_kts"
     ],
-    "66": [
+    "74": [
       "app_build_gradle_kts"
     ],
-    "67": [
-      "nexusblock_constants_constants"
-    ],
-    "68": [
-      "components_tvbottomnavigation_tvbottomnavigation"
-    ],
-    "69": [
+    "75": [
       "app_src_main_java_com_nexusblock_ui_theme_type_kt"
     ],
-    "70": [
+    "76": [
       "users_prabha_desktop_cod_nexusblock_androidtv_app_src_main_java_com_nexusblock_ui_theme_type_kt"
     ]
   },
   "cohesion": {
-    "0": 0.06666666666666667,
-    "1": 0.047619047619047616,
-    "2": 0.043478260869565216,
-    "3": 0.08080808080808081,
-    "4": 0.10685483870967742,
-    "5": 0.13306451612903225,
-    "6": 0.07407407407407407,
-    "7": 0.1067193675889328,
-    "8": 0.14210526315789473,
-    "9": 0.1,
-    "10": 0.1871345029239766,
-    "11": 0.21637426900584794,
+    "0": 0.05477477477477478,
+    "1": 0.043478260869565216,
+    "2": 0.06025641025641026,
+    "3": 0.13306451612903225,
+    "4": 0.10967741935483871,
+    "5": 0.14482758620689656,
+    "6": 0.11396011396011396,
+    "7": 0.1,
+    "8": 0.1,
+    "9": 0.1871345029239766,
+    "10": 0.21637426900584794,
+    "11": 0.1111111111111111,
     "12": 0.1111111111111111,
-    "13": 0.1111111111111111,
+    "13": 0.13333333333333333,
     "14": 0.13333333333333333,
     "15": 0.3047619047619048,
     "16": 0.3516483516483517,
     "17": 0.17582417582417584,
-    "18": 0.34545454545454546,
-    "19": 0.2909090909090909,
-    "20": 0.18181818181818182,
-    "21": 0.2545454545454545,
-    "22": 0.2,
+    "18": 0.2564102564102564,
+    "19": 0.25757575757575757,
+    "20": 0.34545454545454546,
+    "21": 0.2909090909090909,
+    "22": 0.18181818181818182,
     "23": 0.2,
-    "24": 0.2777777777777778,
-    "25": 0.2222222222222222,
+    "24": 0.2,
+    "25": 0.2777777777777778,
     "26": 0.2222222222222222,
     "27": 0.2222222222222222,
-    "28": 0.3055555555555556,
-    "29": 0.25,
-    "30": 0.5714285714285714,
-    "31": 0.2857142857142857,
-    "32": 0.2857142857142857,
-    "33": 0.5238095238095238,
-    "34": 0.3333333333333333,
+    "28": 0.2222222222222222,
+    "29": 0.3333333333333333,
+    "30": 0.3055555555555556,
+    "31": 0.25,
+    "32": 0.25,
+    "33": 0.25,
+    "34": 0.25,
     "35": 0.42857142857142855,
-    "36": 0.38095238095238093,
-    "37": 0.3333333333333333,
-    "38": 0.3333333333333333,
-    "39": 0.5333333333333333,
-    "40": 0.3333333333333333,
-    "41": 0.4,
-    "42": 0.6,
-    "43": 0.7,
-    "44": 0.6,
-    "45": 0.6,
-    "46": 0.6,
-    "47": 0.5,
-    "48": 0.6666666666666666,
-    "49": 0.8333333333333334,
-    "50": 0.5,
-    "51": 0.5,
-    "52": 0.5,
-    "53": 0.6666666666666666,
-    "54": 1.0,
+    "36": 0.5714285714285714,
+    "37": 0.2857142857142857,
+    "38": 0.2857142857142857,
+    "39": 0.2857142857142857,
+    "40": 0.42857142857142855,
+    "41": 0.42857142857142855,
+    "42": 0.3333333333333333,
+    "43": 0.3333333333333333,
+    "44": 0.3333333333333333,
+    "45": 0.4,
+    "46": 0.3333333333333333,
+    "47": 0.3333333333333333,
+    "48": 0.5333333333333333,
+    "49": 0.4,
+    "50": 0.6,
+    "51": 0.7,
+    "52": 0.4,
+    "53": 0.6,
+    "54": 0.4,
     "55": 0.6666666666666666,
-    "56": 0.6666666666666666,
-    "57": 1.0,
-    "58": 1.0,
-    "59": 1.0,
-    "60": 1.0,
+    "56": 0.8333333333333334,
+    "57": 0.8333333333333334,
+    "58": 0.5,
+    "59": 0.5,
+    "60": 0.6666666666666666,
     "61": 1.0,
-    "62": 1.0,
-    "63": 1.0,
-    "64": 1.0,
-    "65": 1.0,
-    "66": 1.0,
+    "62": 0.6666666666666666,
+    "63": 0.6666666666666666,
+    "64": 0.6666666666666666,
+    "65": 0.6666666666666666,
+    "66": 0.6666666666666666,
     "67": 1.0,
     "68": 1.0,
     "69": 1.0,
-    "70": 1.0
+    "70": 1.0,
+    "71": 1.0,
+    "72": 1.0,
+    "73": 1.0,
+    "74": 1.0,
+    "75": 1.0,
+    "76": 1.0
   },
   "gods": [
     {
@@ -995,12 +1054,12 @@
     {
       "id": "model_blockeddomain_blockeddomain",
       "label": "BlockedDomain",
-      "degree": 23
+      "degree": 24
     },
     {
       "id": "engine_ruleengine_ruleengine",
       "label": "RuleEngine",
-      "degree": 23
+      "degree": 24
     },
     {
       "id": "engine_tcprelayengine_tcprelayengine",
@@ -1015,7 +1074,7 @@
     {
       "id": "ui_mainactivity_mainactivity",
       "label": "MainActivity",
-      "degree": 16
+      "degree": 17
     },
     {
       "id": "screens_dashboardscreen_dashboardscreen",
@@ -1051,6 +1110,17 @@
       "why": "inferred connection - not explicitly stated in source; peripheral node `ArgusVignette()` unexpectedly reaches hub `ArgusBlockApp()`"
     },
     {
+      "source": "NexusBlockApp()",
+      "target": "SettingsScreen()",
+      "source_files": [
+        "app/src/main/java/com/nexusblock/ui/MainActivity.kt",
+        "app/src/main/java/com/nexusblock/ui/screens/SettingsScreen.kt"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities"
+    },
+    {
       "source": "SettingSwitchRow()",
       "target": "FocusPanel()",
       "source_files": [
@@ -1073,26 +1143,15 @@
       "why": "inferred connection - not explicitly stated in source; peripheral node `SettingActionRow()` unexpectedly reaches hub `FocusPanel()`"
     },
     {
-      "source": "LogItem()",
-      "target": "FocusPanel()",
+      "source": "NexusBlockApp()",
+      "target": "DashboardScreen()",
       "source_files": [
-        "app/src/main/java/com/nexusblock/ui/screens/LogsScreen.kt",
-        "app/src/main/java/com/nexusblock/ui/components/NexusTvComponents.kt"
+        "app/src/main/java/com/nexusblock/ui/MainActivity.kt",
+        "app/src/main/java/com/nexusblock/ui/screens/DashboardScreen.kt"
       ],
       "confidence": "INFERRED",
       "relation": "calls",
-      "why": "inferred connection - not explicitly stated in source; peripheral node `LogItem()` unexpectedly reaches hub `FocusPanel()`"
-    },
-    {
-      "source": "MetricTile()",
-      "target": "AnimatedCounter()",
-      "source_files": [
-        "app/src/main/java/com/nexusblock/ui/components/NexusTvComponents.kt",
-        "app/src/main/java/com/nexusblock/ui/components/Animations.kt"
-      ],
-      "confidence": "INFERRED",
-      "relation": "calls",
-      "why": "inferred connection - not explicitly stated in source; peripheral node `AnimatedCounter()` unexpectedly reaches hub `MetricTile()`"
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities"
     }
   ],
   "tokens": {
