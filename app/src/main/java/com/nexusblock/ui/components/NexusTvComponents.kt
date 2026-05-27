@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -297,16 +298,37 @@ private fun NavRailItem(
     onClick: () -> Unit
 ) {
     var focused by remember { mutableStateOf(false) }
+
+    val scale by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (focused) 1.04f else 1f,
+        animationSpec = tween(160),
+        label = "navScale"
+    )
+
     val bgColor by animateColorAsState(
         when {
-            selected -> Emerald.copy(alpha = 0.15f)
-            focused -> MaterialTheme.colorScheme.surfaceVariant
+            selected -> Emerald.copy(alpha = 0.18f)
+            focused -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
             else -> Color.Transparent
         },
         tween(160), label = "navBg"
     )
+
+    val borderColor by animateColorAsState(
+        when {
+            selected -> Emerald.copy(alpha = 0.7f)
+            focused -> Emerald.copy(alpha = 0.5f)
+            else -> Color.Transparent
+        },
+        tween(160), label = "navBorder"
+    )
+
     val iconTint by animateColorAsState(
-        if (selected) Emerald else MaterialTheme.colorScheme.onSurfaceVariant,
+        when {
+            selected -> Emerald
+            focused -> Color.White
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
+        },
         tween(160), label = "navTint"
     )
 
@@ -314,8 +336,14 @@ private fun NavRailItem(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
             .clip(RoundedCornerShape(10.dp))
             .background(bgColor)
+            .border(
+                width = if (selected || focused) 2.dp else 0.dp,
+                color = borderColor,
+                shape = RoundedCornerShape(10.dp)
+            )
             .clickable(onClick = onClick)
             .onFocusChanged { focused = it.isFocused || it.hasFocus }
             .focusable()
