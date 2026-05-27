@@ -1,327 +1,364 @@
 # NexusBlock Codebase Explainer & AI Developer Guide
 
-Welcome, AI Developer. This document is a complete, self-contained, high-fidelity technical specification of **NexusBlock**—a root-free, device-wide ad-blocker and firewall tailored for Android TV and Mobile devices. It contains everything you need to know about the architecture, low-level packet mechanics, file-by-file APIs, data schemas, sequence flows, and build steps to start working on, modifying, and extending this codebase immediately.
+Welcome, AI Developer. This document is a complete, self-contained technical specification of **NexusBlock** — a root-free, device-wide ad-blocker built for Android TV (and mobile). It covers the architecture, packet mechanics, file-by-file APIs, data schemas, sequence flows, and build steps you need to start working on, modifying, and extending this codebase.
 
 ---
 
 ## 1. Core Architecture & System Overview
 
-NexusBlock achieves root-free, system-wide ad-blocking and firewalling by combining an Android `VpnService` with a custom user-space packet router, local DNS interceptor, unencrypted SNI packet inspector, and a local MITM HTTPS proxy.
+NexusBlock achieves root-free, system-wide ad-blocking by combining an Android `VpnService` with a custom user-space packet router, local DNS interceptor, and encrypted upstream DNS resolution.
 
 ```mermaid
 graph TD
     A["App Network Traffic"] --> B{"App Firewall Mode?"}
-    
-    B -- "Bypass (ALLOW)" --> C["Direct Network Stack (Bypass VPN)"]
-    B -- "VPN (DEFAULT/BLOCK)" --> D["TUN Interface (10.0.0.2)"]
-    
-    D --> E["PacketRouter (processPacket)"]
-    
-    E -- "UDP Port 53 (DNS Query)" --> F["DnsFilterEngine"]
-    E -- "TCP Port 443 (HTTPS ClientHello)" --> G["SNI Inspector"]
-    E -- "Other TCP/UDP (Firewall BLOCK)" --> H["TCP RST / Silent Drop"]
-    
-    F --> F1{"Domain/IP Blocklist Match?"}
-    F1 -- "Yes" --> F2["Handcrafted NXDOMAIN Response"]
-    F1 -- "No" --> F3["Parallel Upstream DoH / UDP Resolve"]
-    
+
+    B -- "ALLOW (Bypass VPN)" --> C["Direct Network Stack"]
+    B -- "DEFAULT / BLOCK" --> D["TUN Interface (10.0.0.2)"]
+
+    D --> E["PacketRouter"]
+
+    E -- "UDP/53 DNS" --> F["DnsFilterEngine"]
+    E -- "TCP/443 TLS" --> G["TcpRelayEngine + SniExtractor"]
+    E -- "Other UDP/TCP" --> H["Relay / Drop"]
+
+    F --> F1{"Local Rule / Blocklist Match?"}
+    F1 -- "Yes" --> F2["Sinkhole Response (0.0.0.0 / ::)"]
+    F1 -- "No" --> F3["Upstream Filtered DNS (DoH / UDP)"]
+
     G --> G1{"SNI Domain Blocked?"}
-    G1 -- "Yes" --> G2["TCP RST Injection"]
-    G1 -- "No" --> G3["Forward Packet to Destination"]
-    
-    F2 & F6["Blocked Events logged in batch"] --> I["Room Database (AppDatabase)"]
+    G1 -- "Yes" --> G2["Drop / Reset Connection"]
+    G1 -- "No" --> G3["Relay to Destination"]
+
+    F2 & G2 --> I["Room Database (blocked_events)"]
 ```
 
-### Key Engineering Paradigms & Optimizations
+### Key Engineering Paradigms
 
-1. **The DNS-Routing Trick (Zero-Bottleneck Performance)**:
-   Unlike standard VPNs that route all device traffic (`0.0.0.0/0`) through the virtual interface, NexusBlock only sets a route to the local virtual DNS server IP: `10.0.0.1/32` (via `addRoute("10.0.0.1", 32)`).
-   * **Why**: Only DNS packets enter the TUN interface. Standard application traffic (video streams, images, downloads) bypasses the VPN completely at full hardware speed, avoiding routing loops, memory overhead, and CPU heating.
-   * **Exceptions**: When an app is placed in `BLOCK` firewall mode, its entire traffic routing is captured by the VPN so it can be dropped at the packet level.
+1. **Local VPN TUN with Selective Routing**  
+   `NexusVpnService` creates a TUN interface (`10.0.0.2/24`) and routes traffic through it. Apps marked `ALLOW` in the firewall are excluded via `addDisallowedApplication()`. The routing mode can be DNS-only or full-tunnel depending on aggressiveness settings.
 
-2. **Per-App Firewall Loop & Uid Mapping**:
-   * **ALLOW (Bypass)**: The package is passed to `addDisallowedApplication(pkg)`. The operating system routes its traffic completely outside the VPN.
-   * **BLOCK (Internet Denied)**: The package is *not* disallowed, meaning its traffic flows into the TUN. The `PacketRouter` matches the connection socket to a UID and package using `ConnectionTracker`. If it matches a blocked package, `PacketRouter` intercepts DNS queries with an instant `NXDOMAIN` and drops TCP/UDP streams using injected `TCP RST` packets or silent drops.
+2. **Upstream Filtered DNS (Primary Defense)**  
+   Rather than maintaining massive local blocklists, the app delegates to upstream filtered resolvers (AdGuard DNS, Cloudflare Family, Quad9, etc.) over DNS-over-HTTPS (DoH). This gives ~3M+ daily-updated block rules with near-zero local memory cost.
 
-3. **Hybrid DNS Engine with Parallel Resolver**:
-   * Intercepted DNS queries are parsed using `dnsjava`.
-   * The resolver uses a tiered pipeline: LRU Cache (1000 entries) $\rightarrow$ Rule Engine (AdGuard syntax + Bloom filter + Domain Trie) $\rightarrow$ Upstream parallel lookup (DNS-over-HTTPS via OkHttp and Plain UDP resolver).
-   * To prevent apps from bypassing local filtering, DNS-over-HTTPS endpoints (like `cloudflare-dns.com`) are explicitly blocked at the DNS level.
+3. **Local Custom Rules + Emergency Blocks**  
+   `DnsFilterEngine` still evaluates local custom rules and a small built-in emergency list for Indian OTT domains that upstream lists may miss.
 
-4. **YouTube Ad Blocking Mechanics**:
-   * **SNI Inspection**: YouTube utilizes SSL pinning, meaning full HTTPS MITM decryption fails. Instead, the `PacketRouter` parses the unencrypted TLS `ClientHello` handshake, extracts the SNI hostname, and injects a raw `TCP RST` packet before the TLS handshake completes.
-   * **Custom WebView skipping**: In the UI, a custom YouTube player utilizes the official YouTube IFrame API and custom JS injection inside a WebView to strip ads on the fly.
+4. **SNI Inspection for Encrypted Traffic**  
+   `TcpRelayEngine` performs split-TCP termination. `SniExtractor` parses the unencrypted TLS `ClientHello` to extract the SNI hostname. Known ad-serving CloudFront distributions are blocked at the SNI level (Prime Video SSAI defeat).
+
+5. **QUIC Downgrade Strategy**  
+   DNS SVCB/HTTPS records for streaming CDN domains are blocked, forcing apps to fall back to TCP/443 where SNI inspection is possible.
 
 ---
 
-## 2. Module-by-Module Technical Breakdown
+## 2. Directory Map
 
-### Core Constants: `com.nexusblock.Constants`
-Contains global constants for networking, notification channels, preference keys, and default blocklists.
-* **Ports**: MITM Proxy port is `8123`. VPN TUN MTU is `1500`.
-* **Default Blocklist URLs**:
-  * AdGuard: `https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt`
-  * OISD Big: `https://big.oisd.nl/`
-  * StevenBlack: `https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts`
-
-### Dependency Injection Modules (`di/`)
-* **`AppModule.kt`**:
-  * `provideDataStore`: Creates the Preference DataStore instance with SharedPreferences migration backing `nexusblock_settings`.
-  * `provideSharedPreferences`: Legacy fallback editor.
-  * `provideOkHttpClient`: Configures standard network client with 30s timeouts and basic interceptor logging.
-* **`DatabaseModule.kt`**:
-  * `provideDatabase`: Builds Hilt-managed SQLite Room Database `nexusblock.db` with destructive migrations enabled for rapid schema changes.
-  * Provides DAOs: `BlockedDomainDao`, `BlockedEventDao`, `CustomRuleDao`.
-
----
-
-### Low-Level Packet Engine (`engine/`)
-
-#### 1. `PacketRouter.kt`
-The brain of the user-space VPN tunnel. It reads IP packets from the TUN `FileDescriptor` and processes them in an IO-bound coroutine loop.
-
-* **Primary APIs**:
-  * `start(vpnService, tunFd, dnsAddress)`: Initiates coroutine worker reading from a `FileInputStream(tunFd)` channel.
-  * `stop()`: Resets diagnostic counters and cancels jobs.
-* **Packet Processing**:
-  * Checks IP headers (IPv4 version byte shift: `version = buffer.get(0) shr 4 and 0x0F`).
-  * **ICMP**: If stealth mode is enabled, drops ICMP packets.
-  * **UDP**: Intercepts port 53 traffic, parses query via `DnsFilterEngine`, and injects response.
-  * **TCP**: Intercepts port 443. Parses TLS `ClientHello` unencrypted frames (ContentType `22`, HandshakeType `1`). If SNI matches a blocked domain, drops the packet and injects a custom-crafted `TCP RST` packet.
-* **Low-Level Helper Methods**:
-  * `sendRst(...)`: Hand-crafts a TCP packet with `RST` flag set (`0x04`) and swaps the source/destination IPs and ports. Computes IP/TCP checksums using 16-bit word binary sums.
-  * `sendDnsResponse(...)`: Hand-crafts a UDP packet wrapping the serialized `dnsjava` DNS payload and swaps addresses.
-
-#### 2. `DnsFilterEngine.kt`
-Evaluates, caches, and routes DNS queries.
-* **Primary APIs**:
-  * `resolveDns(queryPayload: ByteArray): ByteArray?`: Processes raw DNS packet bytes, checks the Bloom filter, traverses the subdomain trie, queries cache, and coordinates upstream lookups.
-  * `reloadBlocklists()`: Pulls enabled remote domains and custom database rules, compiles them into a fresh `RuleEngine`, and purges the DNS cache.
-* **Special Whitelists**:
-  * `YOUTUBE_WHITELIST_RULES`: Hard-coded set of domains whitelisted to keep YouTube recommendations working (`youtubei.googleapis.com`, `ytimg.com`, `accounts.google.com`) while allowing video ad-block filters to target video servers.
-
-#### 3. `RuleEngine.kt` & `BloomFilter.kt`
-Combines a Bloom Filter for O(1) negative caching and a reversed-subdomain suffix Tree (Trie) for wildcard matching.
-* **Bloom Filter**: Evaluates string hash values using custom bitwise iterations over an 8-Million bit `java.util.BitSet`.
-* **Domain Trie**: Subdomains are split by dot (`.`) and inserted in **reversed order** (e.g. `ads.google.com` $\rightarrow$ `com` $\rightarrow$ `google` $\rightarrow$ `ads`). This allows O(N) lookup where N is the label depth of the query.
-
-#### 4. `ConnectionTracker.kt`
-Resolves TCP/UDP sockets to package names.
-* **Android 10+ (API 29+)**: Queries `ConnectivityManager.getConnectionOwnerUid(IPPROTO, localSocket, remoteSocket)`.
-* **Android 9 and below**: Parses `/proc/net/tcp`, `/proc/net/tcp6`, `/proc/net/udp`, and `/proc/net/udp6` in real-time, matching hex IP tuples.
-* **Package Resolution**: Translates UID to Package Name using `packageManager.getPackagesForUid(uid)`.
-
-#### 5. `MitmProxyManager.kt` & `CertificateManager.kt`
-Manages the local HTTP/HTTPS MITM Proxy.
-* **`MitmProxyManager`**: Bootstraps Netty-based `LittleProxy` on `127.0.0.1:8123`. Filters requests by evaluating URL paths (`/youtubei/v1/ads`, `/pagead`) and host regexes. Intercepted ads receive an instant `HTTP 204 No Content` response.
-* **`CertificateManager`**: Uses BouncyCastle to generate a 2048-bit RSA CA certificate (`nexusblock-ca.crt`) and signs dynamic domain leaf certificates on-the-fly for decrypting HTTPS streams.
-
----
-
-### Android Core Services (`service/`)
-
-#### 1. `NexusVpnService.kt`
-Extends `VpnService`. Manages TUN setup and OS network callbacks.
-* **TUN Setup**: MTU 1500, IP `10.0.0.2/24`, Route `10.0.0.1/32` (DNS).
-* **Firewall Isolation**: Adds disallowed packages using `builder.addDisallowedApplication(pkg)`.
-* **Connectivity Monitoring**: Registers `ConnectivityManager.NetworkCallback` to detect underlying network changes (Wi-Fi $\leftrightarrow$ Mobile) and triggers a debounced VPN restart to keep routing tables valid.
-
-#### 2. `VpnWatchdogService.kt` & `BootReceiver.kt`
-* **Watchdog**: Periodically checks `NexusVpnService.isRunning`. If the VPN crashed, restarts it foreground. Schedules `AlarmManager.setExactAndAllowWhileIdle` as a fallback to survive system deep doze.
-* **BootReceiver**: BroadcastReceiver for `BOOT_COMPLETED` that automatically restarts the VPN on device boot if auto-start is toggled on.
-
----
-
-## 3. Key Network & Process Flows
-
-### Intercepted DNS Query Resolution
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant App as Android Application
-    participant Tun as TUN Interface (10.0.0.1)
-    participant Router as PacketRouter
-    participant DnsEngine as DnsFilterEngine
-    participant RuleEng as RuleEngine
-    participant Upstream as DnsUpstreamManager
-    
-    App->>Tun: Sends UDP DNS Query (Port 53)
-    Tun->>Router: Forward packet bytes
-    Router->>DnsEngine: resolveDns(queryPayload)
-    DnsEngine->>DnsEngine: Check Local LRU Cache
-    alt Cache Hit
-        DnsEngine-->>Router: Return Cached Response Bytes
-    else Cache Miss
-        DnsEngine->>RuleEng: isBlocked(domain)
-        RuleEng->>RuleEng: Check Bloom Filter & Trie
-        alt Domain Blocked
-            RuleEng-->>DnsEngine: Block Match
-            DnsEngine->>DnsEngine: Queue log in database
-            DnsEngine-->>Router: Return handcrafted NXDOMAIN Response
-        else Domain Allowed
-            RuleEng-->>DnsEngine: Safe Match
-            DnsEngine->>Upstream: resolve(queryPayload) (Parallel DoH)
-            Upstream-->>DnsEngine: Return DNS Answer
-            DnsEngine->>DnsEngine: Update LRU Cache
-            DnsEngine-->>Router: Return DNS Answer Bytes
-        end
-    end
-    Router->>Tun: Write response UDP packet
-    Tun->>App: Deliver DNS resolution
 ```
-
-### SNI Interception and TCP RST Injection
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant App as Blocked App (e.g. YouTube ad domain)
-    participant Router as PacketRouter (processTCP)
-    participant DnsEngine as DnsFilterEngine
-    participant Web as Target Server
-    
-    App->>Router: TCP SYN Packet (port 443)
-    Router->>Web: Pass-through (allow connection handshake)
-    Web-->>App: TCP SYN-ACK
-    App->>Router: TLS ClientHello (Contains SNI payload)
-    Router->>Router: Parse SNI hostname from TLS frame
-    Router->>DnsEngine: isDomainBlocked(sniHost)
-    DnsEngine-->>Router: Yes (Domain is blocked)
-    
-    rect rgb(200, 50, 50)
-        Note over Router, App: TCP RST Injection Triggered
-        Router->>App: Injected TCP RST (Source = Target IP, Dest = App Local IP)
-        Router->>Web: Injected TCP RST (Source = App Local IP, Dest = Target IP)
-    end
-    
-    Note over App: Connection instantly terminated
-```
-
-### Connection Owner App Attribution
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Router as PacketRouter
-    participant Tracker as ConnectionTracker
-    participant OS as OS /proc/net/ files
-    participant PM as PackageManager
-    
-    Router->>Tracker: getPackageForConnection(SrcIP, SrcPort, DstIP, DstPort, Proto)
-    alt API >= 29
-        Tracker->>Tracker: cm.getConnectionOwnerUid(Proto, localSock, remoteSock)
-    else API < 29
-        Tracker->>OS: Read /proc/net/[tcp/udp/tcp6/udp6]
-        OS-->>Tracker: Match Hex IP Tuple & return UID
-    end
-    
-    Tracker->>Tracker: Query local memory UID cache
-    alt Cache Miss
-        Tracker->>PM: getPackagesForUid(uid)
-        PM-->>Tracker: Return package list (e.g., com.google.android.youtube.tv)
-        Tracker->>Tracker: Update Cache
-    end
-    Tracker-->>Router: Return package name
+com.nexusblock/
+├── Constants.kt                  # Global constants: IPs, ports, blocklist URLs, notification IDs
+├── NexusBlockApplication.kt      # Application class (Hilt entry point)
+├── cert/
+│   └── LunaCertInstaller.kt      # Exports Luna CA cert to Downloads for manual install
+├── data/db/
+│   ├── AppDatabase.kt            # Room database (blocked_domains, blocked_events, custom_rules)
+│   ├── BlockedDomainDao.kt
+│   ├── BlockedEventDao.kt
+│   └── CustomRuleDao.kt
+├── data/model/
+│   ├── BlockedDomain.kt
+│   ├── BlockedEvent.kt
+│   ├── CustomRule.kt
+│   └── FirewallMode.kt           # DEFAULT / ALLOW / BLOCK enum
+├── data/repository/
+│   ├── SettingsRepository.kt     # DataStore Preferences (VPN state, techniques, firewall modes, DNS profile)
+│   ├── BlocklistRepository.kt    # Room-backed blocklist source management
+│   ├── StatsRepository.kt        # Aggregates blocked event logs
+│   ├── CustomRuleRepository.kt
+│   ├── RawBlocklistLoader.kt     # Parses raw blocklist files
+│   ├── BlocklistParsers.kt       # HOSTS and AdGuard-syntax parsers
+│   ├── BlocklistSources.kt       # URLs and metadata for remote blocklists
+│   └── BuiltInBlockRules.kt      # Hard-coded emergency rules
+├── data/worker/
+│   └── BlocklistUpdateWorker.kt  # WorkManager periodic update of remote blocklists
+├── di/
+│   ├── AppModule.kt              # Hilt: DataStore, SharedPreferences, OkHttpClient
+│   └── DatabaseModule.kt         # Hilt: Room database + DAOs
+├── engine/
+│   ├── PacketRouter.kt           # Reads TUN fd, dispatches UDP/TCP/ICMP packets
+│   ├── DnsFilterEngine.kt        # DNS resolution: cache → local rules → upstream DoH
+│   ├── RuleEngine.kt             # AdGuard-syntax domain matching + CIDR IP blocking
+│   ├── TcpRelayEngine.kt         # Split-TCP relay with SNI extraction
+│   ├── UdpRelayEngine.kt         # UDP packet relay through VPN
+│   ├── SniExtractor.kt           # Parses TLS ClientHello for SNI hostname
+│   ├── VpnProtector.kt           # Protects sockets from VPN loopback
+│   ├── VpnProtectedSocketFactory.kt # OkHttp SocketFactory using VpnProtector
+│   └── dns/
+│       ├── DnsUpstreamManager.kt # DoH / DoT / plain UDP resolver with fallback
+│       ├── DnsProfileManager.kt  # Manages provider profiles (AdGuard, Cloudflare, etc.)
+│       ├── DnsProviderProfile.kt
+│       └── BootstrapDns.kt       # Prevents DoH hostname resolution loops
+├── service/
+│   ├── NexusVpnService.kt        # Android VpnService: TUN setup, foreground notification
+│   ├── VpnWatchdogService.kt     # AlarmManager-based watchdog to restart crashed VPN
+│   ├── BootReceiver.kt           # Restores VPN on BOOT_COMPLETED if auto-start enabled
+│   └── UninstallCleanupReceiver.kt # Cleans up on package removal / suspension
+├── ui/
+│   ├── MainActivity.kt           # Root Compose activity + NavHost (3 routes)
+│   ├── Screen.kt                 # Sealed class for navigation routes
+│   ├── components/
+│   │   ├── NexusTvComponents.kt  # Navigation rail, buttons, cards, focus handling
+│   │   ├── Animations.kt         # AnimatedCounter, shimmerBrush, vignette
+│   │   └── TvBottomNavigation.kt # Bottom nav (alternative to rail)
+│   ├── screens/
+│   │   ├── DashboardScreen.kt    # VPN toggle, stats, shield animation, bandwidth
+│   │   ├── SettingsScreen.kt     # DNS provider, routing mode, auto-start, Luna CA install
+│   │   ├── AdvancedSettingsScreen.kt # Inline tabs: Techniques, Blocklists, Rules, Firewall
+│   │   └── LogsScreen.kt         # Blocked event list with filter and clear
+│   ├── theme/
+│   │   ├── Theme.kt              # MaterialTheme + TV dimensions
+│   │   ├── Type.kt               # Dubai font family typography
+│   │   └── Dimensions.kt         # Responsive dimension provider for TV widths
+│   └── viewmodel/
+│       ├── DashboardViewModel.kt
+│       ├── SettingsViewModel.kt
+│       ├── BlocklistViewModel.kt
+│       ├── CustomRulesViewModel.kt
+│       ├── FirewallViewModel.kt
+│       └── LogsViewModel.kt
 ```
 
 ---
 
-## 4. Storage & Data Schemas
+## 3. Navigation & Screens
 
-### SQLite Room Database Schema (`AppDatabase`)
+`MainActivity` hosts a single `NavHost` with **3 top-level routes**:
 
-#### Table: `blocked_domains`
-Stores list of domains from downloaded blocklists.
-* **`id`**: Integer Primary Key Auto-Increment.
-* **`host`**: Text (Unique index for fast matching).
-* **`source`**: Text (Index; remote blocklist identifier).
-* **`enabled`**: Integer (Boolean toggle).
-* **`isRegex`**: Integer (Boolean for custom regex matches).
-* **`regexPattern`**: Text (Nullable regex pattern string).
-* **`insertedAt`**: Integer (Unix timestamp).
+| Route | Screen | Purpose |
+|-------|--------|---------|
+| `home` | `DashboardScreen` | VPN toggle, shield animation, blocked count, data saved, active rules, bandwidth |
+| `activity` | `LogsScreen` | Recent blocked events with filter/clear actions |
+| `settings` | `SettingsScreen` | Auto-start, DNS provider, routing mode, Luna CA install, battery optimization |
 
-#### Table: `custom_rules`
-Stores custom block/allow rules added by the user.
-* **`id`**: Integer Primary Key Auto-Increment.
-* **`rule`**: Text (Unique index; supports domains, prefixes `|`, wildcards `||`, exceptions `@@`).
-* **`isAllow`**: Integer (Boolean; 1 = Exception rule, 0 = Block rule).
-* **`enabled`**: Integer (Boolean toggle).
-* **`description`**: Text.
-* **`createdAt`**: Integer (Unix timestamp).
-
-#### Table: `blocked_events`
-Database log for blocked connection attempts.
-* **`id`**: Integer Primary Key Auto-Increment.
-* **`host`**: Text (Index).
-* **`appPackage`**: Text (Index; stores app package that initiated query).
-* **`type`**: Text (`dns`, `sni`, `https`).
-* **`timestamp`**: Integer (Index; Unix timestamp).
+`AdvancedSettingsScreen` is **not a NavHost route** — it is an inline tabbed panel embedded inside `SettingsScreen` with 4 tabs:
+- **Techniques** — Toggle live blocking features (DNS, Header, IP, Stealth, Firewall)
+- **Blocklists** — Enable/disable remote blocklist sources + manual update
+- **Rules** — User-defined custom block/allow rules with AdGuard syntax
+- **Firewall** — Per-app VPN bypass and DNS-block modes
 
 ---
 
-### Preferences DataStore Schema
+## 4. Architecture Layers
 
-Key settings are stored in `DataStore<Preferences>` and serialized to XML/JSON:
-1. **`firewall_modes_json`**: String JSON representing packet-blocking modes.
-   ```json
-   {
-     "com.example.analyticsapp": "BLOCK",
-     "com.netflix.mediaclient": "ALLOW",
-     "com.android.youtube.tv": "DEFAULT"
-   }
-   ```
-2. **Blocking Techniques (`BlockingTechniques`)**:
-   * `tech_dns`: Boolean (Enable DNS filter engine).
-   * `tech_sni`: Boolean (Enable SNI TLS unencrypted parsing).
-   * `tech_mitm`: Boolean (Enable LittleProxy HTTPS proxy).
-   * `tech_header`: Boolean (Enable custom HTTP header stripping).
-   * `tech_ip`: Boolean (Enable CIDR and IP-level blacklists).
-   * `tech_stealth`: Boolean (Enable ICMP drop).
-   * `tech_firewall_v2`: Boolean (Enable App Firewall uid matching).
+### UI Layer
+- **Jetpack Compose + TV Material3** for Android TV-optimized UI
+- `StateFlow` + `collectAsState()` for reactive state
+- `SharingStarted.WhileSubscribed(5000)` for lifecycle-aware upstream collection
+- `hiltViewModel()` for DI-scoped ViewModels
 
----
+### ViewModel Layer
+- `DashboardViewModel`: Combines VPN state, stats, blocklist domain count, and bandwidth into an immutable `DashboardUiState`
+- `SettingsViewModel`: Wraps `SettingsRepository` for reactive settings UI
+- `BlocklistViewModel`, `CustomRulesViewModel`, `FirewallViewModel`: Manage inline tab content in AdvancedSettings
+- `LogsViewModel`: Observes `BlockedEventDao` with filtering
 
-## 5. Guidelines for AI Code Modifications
+### Repository Layer
+- `SettingsRepository`: `DataStore<Preferences>` for all user settings. Hot `StateFlow`s for synchronous + reactive access.
+- `BlocklistRepository`: Room-backed. Stores domains from remote sources with per-source enable toggles.
+- `StatsRepository`: Batched logging of blocked events to Room.
+- `CustomRuleRepository`: CRUD for user custom rules.
 
-### Rules for Modifying Network Code
-1. **Never perform blocking operations in the packet loop**: The `PacketRouter` loop processes thousands of packets per second. Heavy Room DB operations, network tasks, or expensive regular expressions *must* be scheduled off-thread using asynchronous Coroutines (`scope.launch`).
-2. **Byte Buffer Thread-Safety**: When sending generated UDP/TCP response packets, lock the channel writes to avoid concurrent write crashes:
-   ```kotlin
-   synchronized(outputLock) {
-       output.write(packet)
-   }
-   ```
-3. **Keep the VPN DNS Route Isolated**: Do **not** attempt to add a default route `0.0.0.0/0` unless you have explicitly coded a full TCP/UDP stack handler (e.g. using Netty or `tun2socks` emulation). Adding `0.0.0.0/0` without a local NAT/TCP reassembler will completely break network routing.
-
-### Build and Compilation Commands
-
-The project uses Gradle Kotlin DSL.
-* **Clean & Build**:
-  ```powershell
-  ./gradlew clean assembleDebug
-  ```
-* **Run Unit Tests**:
-  ```powershell
-  ./gradlew test
-  ```
-* **Install via ADB**:
-  ```powershell
-  adb install -r app/build/outputs/apk/debug/app-debug.apk
-  ```
-
-### Dependency Conflict Resolution
-If you update Netty or Guava, you may experience a `DuplicateClassException` due to `LittleProxy` transitive dependencies. Ensure Guava is explicitly imported at the application layer and transitive Guava instances are excluded from `LittleProxy` in `build.gradle.kts`:
-```kotlin
-implementation("com.google.guava:guava:33.0.0-jre")
-implementation("org.littleshoot:littleproxy:1.1.2") {
-    exclude(group = "com.google.guava", module = "guava")
-}
+### Engine Layer
+```
+PacketRouter (IO coroutine, reads TUN fd)
+├── UDP/53 → DnsFilterEngine
+│   ├── LRU Cache (4096 entries)
+│   ├── Negative Cache (SERVFAIL/NXDOMAIN, 60s)
+│   ├── Local RuleEngine (custom rules + blocklists)
+│   └── DnsUpstreamManager (DoH → DoT → plain UDP fallback)
+├── TCP/443 → TcpRelayEngine
+│   └── SniExtractor (TLS ClientHello parsing)
+│   └── Block if domain/IP matches or unknown CloudFront dist
+└── Other → UdpRelayEngine / relay or drop
 ```
 
-### Logging & Diagnostics
-Filter specific log outputs in Logcat to debug network behaviors:
-* **VPN Service Logs**: `adb logcat -s NexusBlock/VPN`
-* **Packet Router Logs**: `adb logcat -s NexusBlock/Router`
-* **DNS Query Logs**: `adb logcat -s NexusBlock/DNS`
-* **Connection Owner Logs**: `adb logcat -s NexusBlock/ConnTrack`
+### Service Layer
+- `NexusVpnService`: Establishes TUN, manages `PacketRouter`, foreground notification
+- `VpnWatchdogService`: `AlarmManager`-based health check every 30s. Restarts VPN if expected but not running.
+- `BootReceiver`: Restores VPN state after reboot if `auto_start` and `vpn_active` are true.
+
+---
+
+## 5. Feature Inventory (Live)
+
+| Feature | Implementation | Configurable |
+|---------|---------------|--------------|
+| Local VPN ad-blocking | `NexusVpnService` + `PacketRouter` + `DnsFilterEngine` | Always on when VPN active |
+| DNS filtering | `DnsFilterEngine` upstream DoH + local rules | Toggle: "DNS Filtering" |
+| Header filter | `BlockingTechniques.headerFilter` | Toggle: "Header Filter" |
+| IP blocking | `RuleEngine.isIpBlocked()` + CIDR matching | Toggle: "IP Blocking" |
+| Stealth mode | Drops ICMP in `PacketRouter` if enabled | Toggle: "Stealth Mode" |
+| App Firewall | Per-package `FirewallMode` via `SettingsRepository` | Toggle: "App Firewall" + per-app selector |
+| Luna IKEv2 failover | `LunaVpnManager` + `VpnFailoverController` | `VpnMode` enum (Luna primary / local only / Luna only) |
+| SNI inspection | `TcpRelayEngine` + `SniExtractor` | Always active during full-tunnel |
+| QUIC downgrade | Block SVCB/HTTPS records for CDN domains | Always active |
+| Custom rules | `CustomRuleDao` + `RuleEngine` | User-managed in AdvancedSettings |
+| Blocklist management | `BlocklistUpdateWorker` + `BlocklistRepository` | Per-source toggles + manual update |
+| Boot auto-start | `BootReceiver` | Toggle in Settings |
+| Watchdog | `VpnWatchdogService` | Always active when VPN enabled |
+
+### Removed / Not Implemented
+The following features exist in design docs or forks but are **not present** in this codebase:
+- **SNI Watch toggle** — SNI inspection is automatic in full-tunnel mode; no user toggle exists
+- **HTTPS Proxy / MITM** — No proxy server, no certificate interception, no `LittleProxy`
+- **Albania Mode** — No region-spoofing logic; upstream DNS handles geo-specific blocking
+
+---
+
+## 6. Data Flows
+
+### DNS Query Path
+```
+App → TUN (10.0.0.1:53) → PacketRouter → DnsFilterEngine.resolveDns()
+  1. Check LRU cache → return instantly
+  2. Check negative cache → return SERVFAIL instantly
+  3. Critical-allow list → plain DNS bypass (bypass filtered upstream for video domains)
+  4. Local RuleEngine block check → sinkhole (0.0.0.0 / ::)
+  5. Upstream filtered DoH (AdGuard/Cloudflare/Quad9) → cache + return
+```
+
+### Blocklist Update Flow
+```
+WorkManager (24h periodic)
+  → BlocklistUpdateWorker.doWork()
+    → Fetch each enabled remote source (OkHttp)
+    → Parse (HOSTS or AdGuard syntax)
+    → Store in Room (blocked_domains table)
+    → If VPN running: DnsFilterEngine.reloadRules()
+```
+
+### Boot Restore Flow
+```
+BOOT_COMPLETED → BootReceiver.onReceive()
+  → If auto_start && vpn_active:
+    → startForegroundService(NexusVpnService)
+    → VpnWatchdogService.start()
+```
+
+---
+
+## 7. Storage & Data Schemas
+
+### Room Database (`AppDatabase`)
+
+**`blocked_domains`**
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | Int PK | Auto-increment |
+| `host` | String | Unique index |
+| `source` | String | Blocklist source ID |
+| `enabled` | Boolean | Per-source toggle |
+| `isRegex` | Boolean | For custom rules |
+| `regexPattern` | String? | Nullable regex |
+| `insertedAt` | Long | Unix timestamp |
+
+**`custom_rules`**
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | Int PK | Auto-increment |
+| `rule` | String | Unique; `||domain^`, `@@domain^`, `/regex/` |
+| `isAllow` | Boolean | Exception rule flag |
+| `enabled` | Boolean | User toggle |
+| `description` | String? | Nullable |
+| `createdAt` | Long | Unix timestamp |
+
+**`blocked_events`**
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | Int PK | Auto-increment |
+| `host` | String | Blocked domain |
+| `appPackage` | String? | Originating package (if known) |
+| `type` | String | `dns`, `dns-svcb`, `dns-cname`, `sni`, `ip` |
+| `timestamp` | Long | Unix timestamp |
+
+### DataStore Preferences
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `auto_start` | Boolean | `true` | Restart VPN on boot |
+| `battery_opt` | Boolean | `false` | Ignore battery optimizations flag |
+| `vpn_active` | Boolean | `false` | User desires VPN on |
+| `vpn_routing_mode` | String | `full_route_aggressive` | DNS-only / full-route-safe / full-route-aggressive |
+| `vpn_mode` | String | `luna_primary` | Luna+Local / Local-only / Luna-only |
+| `dns_profile` | String | `adguard_standard` | Selected upstream DNS provider |
+| `tech_dns` | Boolean | `true` | DNS Filtering toggle |
+| `tech_header` | Boolean | `true` | Header Filter toggle |
+| `tech_ip` | Boolean | `true` | IP Blocking toggle |
+| `tech_stealth` | Boolean | `false` | Stealth Mode toggle |
+| `tech_firewall_v2` | Boolean | `false` | App Firewall toggle |
+| `firewall_modes_json` | String | `{}` | JSON map of package → `DEFAULT`/`ALLOW`/`BLOCK` |
+
+---
+
+## 8. Testing
+
+Existing unit tests in `app/src/test/java/com/nexusblock/`:
+
+| Test | Coverage |
+|------|----------|
+| `RuleEngineTest.kt` | Domain matching, exception rules (`@@`), regex, CIDR, hosts parser |
+| `IpFlowKeyTest.kt` | Flow key hashing and equality for IPv4/IPv6 |
+| `PendingByteQueueTest.kt` | Byte queue buffer coalescing |
+| `VpnRoutingModeTest.kt` | Serialization of `VpnRoutingMode` enum |
+
+Run:
+```bash
+./gradlew test
+```
+
+---
+
+## 9. Build & Dependencies
+
+**Build**: Gradle Kotlin DSL (`build.gradle.kts`)
+**Kotlin**: 2.0.21
+**AGP**: 8.9.1
+
+**Notable Libraries**:
+- Jetpack Compose (UI, Navigation, TV Material3)
+- Hilt (DI)
+- Room (local DB)
+- DataStore Preferences
+- WorkManager (periodic blocklist updates)
+- OkHttp (DoH queries, blocklist downloads)
+- dnsjava (`org.xbill.DNS`) (DNS packet parsing)
+- Kotlinx Coroutines
+
+**Build Commands**:
+```bash
+./gradlew clean assembleDebug
+./gradlew test
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+**Logcat Filters**:
+```bash
+adb logcat -s NexusBlock/VPN
+adb logcat -s NexusBlock/Router
+adb logcat -s NexusBlock/DNS
+adb logcat -s NexusBlock/Relay
+```
+
+---
+
+## 10. Guidelines for AI Code Modifications
+
+### Rules for Engine Code
+1. **Never block the packet loop**: `PacketRouter` reads from the TUN fd in a tight IO coroutine. Expensive work (DB queries, regex compilation) must be offloaded to `Dispatchers.Default` or pre-computed.
+2. **Cache aggressively**: DNS is queried hundreds of times per minute. The LRU cache and negative cache are critical for performance.
+3. **Protect outbound sockets**: Any socket that talks to the real internet must call `VpnProtector.protect()` before connecting, or the packet will loop back into the TUN.
+4. **Avoid default routes without a full stack**: Do not add `0.0.0.0/0` to the TUN builder unless `TcpRelayEngine` and `UdpRelayEngine` are fully ready to handle all protocols.
+
+### UI Rules
+1. **Use `tvDimensions()` for spacing**: Do not hardcode TV-unsafe padding. The dimension provider scales based on screen width.
+2. **Respect focus**: All interactive elements must be focusable on TV (D-pad navigation).
+3. **StateFlow snapshots**: Prefer single immutable UI-state objects over many individual `remember` pieces to minimize recompositions.

@@ -15,7 +15,6 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.SSLSocketFactory
 
 /**
  * Rewritten upstream DNS resolver that delegates to the currently selected
@@ -44,8 +43,7 @@ class DnsUpstreamManager(
         private const val TAG = "NexusBlock/DnsUpstream"
         private const val PLAIN_DNS_TIMEOUT_MS = 1500
         private const val DOH_TIMEOUT_MS = 3000L
-        private const val DOT_TIMEOUT_MS = 3000
-        /** Budget for encrypted protocols (DoH/DoT) after plain fails. */
+        /** Budget for encrypted protocol (DoH) after plain fails. */
         private const val ENCRYPTED_TIMEOUT_MS = 3000L
         private const val FALLBACK_TIMEOUT_MS = 2000L
         // Cap concurrent upstream resolutions so a burst of packets from the
@@ -99,7 +97,6 @@ class DnsUpstreamManager(
                 async(Dispatchers.IO) {
                     when (proto) {
                         Protocol.DOH -> resolveDoh(profile, queryBytes)
-                        Protocol.DOT -> resolveDot(profile, queryBytes)
                         Protocol.PLAIN -> null
                     }
                 }
@@ -166,56 +163,6 @@ class DnsUpstreamManager(
     }
 
     // ─────────────────────────────────────────────────────────────
-    // DoT (DNS-over-TLS)
-    // We implement DoT by wrapping a plain UDP query inside an TLS
-    // connection to port 853. For simplicity we fallback to plain
-    // DNS tunnelled over TLS via an SSLSocket to the resolver.
-    // ─────────────────────────────────────────────────────────────
-
-    private suspend fun resolveDot(
-        profile: DnsProviderProfile,
-        queryBytes: ByteArray
-    ): ByteArray? = withContext(Dispatchers.IO) {
-        val hostname = profile.dotHostname ?: return@withContext null
-        val servers = profile.plainIpv4.takeIf { it.isNotEmpty() } ?: return@withContext null
-
-        for (server in servers) {
-            try {
-                val sslSocket = SSLSocketFactory.getDefault().createSocket(server, 853) as javax.net.ssl.SSLSocket
-                VpnProtector.protect(sslSocket)
-                sslSocket.soTimeout = DOT_TIMEOUT_MS
-                sslSocket.use { socket ->
-                    socket.startHandshake()
-
-                    // DNS-over-TLS framing: 2-byte length prefix + raw DNS message
-                    val out = socket.outputStream
-                    out.write(queryBytes.size shr 8 and 0xFF)
-                    out.write(queryBytes.size and 0xFF)
-                    out.write(queryBytes)
-                    out.flush()
-
-                    val input = socket.inputStream
-                    val lenHi = input.read()
-                    val lenLo = input.read()
-                    if (lenHi < 0 || lenLo < 0) return@use null
-                    val len = (lenHi shl 8) or lenLo
-                    val response = ByteArray(len)
-                    var read = 0
-                    while (read < len) {
-                        val r = input.read(response, read, len - read)
-                        if (r < 0) return@use null
-                        read += r
-                    }
-                    return@withContext response
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "DoT failed for $server:$hostname: ${e.message}")
-            }
-        }
-        null
-    }
-
-    // ─────────────────────────────────────────────────────────────
     // Plain UDP (profile servers)
     // ─────────────────────────────────────────────────────────────
 
@@ -277,10 +224,9 @@ class DnsUpstreamManager(
         // resolution layer with the clearest view of the full domain name.
         val list = mutableListOf<Protocol>()
         if (!dohUrl.isNullOrBlank()) list.add(Protocol.DOH)
-        if (!dotHostname.isNullOrBlank()) list.add(Protocol.DOT)
         list.add(Protocol.PLAIN)
         return list
     }
 
-    private enum class Protocol { DOH, DOT, PLAIN }
+    private enum class Protocol { DOH, PLAIN }
 }

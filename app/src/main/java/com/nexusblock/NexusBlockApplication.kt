@@ -50,7 +50,6 @@ class NexusBlockApplication : Application(), Configuration.Provider {
     }
 
     private fun schedulePeriodicBlocklistUpdate() {
-        BlocklistUpdateWorker.schedule(this)
         BlocklistUpdateWorker.runNow(this)
     }
 

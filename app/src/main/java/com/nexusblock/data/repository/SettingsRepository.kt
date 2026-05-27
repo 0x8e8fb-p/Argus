@@ -22,7 +22,6 @@ import javax.inject.Singleton
  */
 data class BlockingTechniques(
     val dnsFiltering: Boolean = true,
-    val headerFilter: Boolean = true,
     val ipBlocking: Boolean = true,
     val stealthMode: Boolean = false,
     val appFirewall: Boolean = false
@@ -30,26 +29,15 @@ data class BlockingTechniques(
 
 enum class VpnRoutingMode(val storageKey: String) {
     DNS_ONLY("dns_only"),
-    FULL_ROUTE_SAFE("full_route_safe"),
-    FULL_ROUTE_AGGRESSIVE("full_route_aggressive");
+    FULL_ROUTE("full_route");
 
     companion object {
         fun fromStorageKey(value: String?): VpnRoutingMode = entries.firstOrNull { it.storageKey == value }
-            ?: FULL_ROUTE_AGGRESSIVE
+            ?: DNS_ONLY
     }
 }
 
-enum class VpnMode(val storageKey: String) {
-    LUNA_PRIMARY("luna_primary"),
-    LOCAL_ONLY("local_only"),
-    LUNA_ONLY("luna_only"),
-    PRIVATE_DNS("private_dns");
 
-    companion object {
-        fun fromStorageKey(value: String?): VpnMode = entries.firstOrNull { it.storageKey == value }
-            ?: LUNA_PRIMARY
-    }
-}
 
 @Singleton
 class SettingsRepository @Inject constructor(
@@ -64,12 +52,10 @@ class SettingsRepository @Inject constructor(
     private val KEY_VPN_ROUTING_MODE = stringPreferencesKey("vpn_routing_mode")
     private val KEY_DNS_PROFILE = stringPreferencesKey("dns_profile")
     private val KEY_TECH_DNS = booleanPreferencesKey("tech_dns")
-    private val KEY_TECH_HEADER = booleanPreferencesKey("tech_header")
     private val KEY_TECH_IP = booleanPreferencesKey("tech_ip")
     private val KEY_TECH_STEALTH = booleanPreferencesKey("tech_stealth")
     private val KEY_TECH_FIREWALL = booleanPreferencesKey("tech_firewall_v2")
     private val KEY_FIREWALL_MODES = stringPreferencesKey("firewall_modes_json")
-    private val KEY_VPN_MODE = stringPreferencesKey("vpn_mode")
 
     // Hot StateFlows for reactive + synchronous access
     private val autoStartFlow = dataStore.data
@@ -86,13 +72,12 @@ class SettingsRepository @Inject constructor(
 
     private val vpnRoutingModeFlow = dataStore.data
         .map { VpnRoutingMode.fromStorageKey(it[KEY_VPN_ROUTING_MODE]) }
-        .stateIn(scope, SharingStarted.Eagerly, VpnRoutingMode.FULL_ROUTE_AGGRESSIVE)
+        .stateIn(scope, SharingStarted.Eagerly, VpnRoutingMode.DNS_ONLY)
 
     private val techniquesFlow = dataStore.data
         .map { prefs ->
             BlockingTechniques(
                 dnsFiltering = prefs[KEY_TECH_DNS] ?: true,
-                headerFilter = prefs[KEY_TECH_HEADER] ?: true,
                 ipBlocking = prefs[KEY_TECH_IP] ?: true,
                 stealthMode = prefs[KEY_TECH_STEALTH] ?: false,
                 appFirewall = prefs[KEY_TECH_FIREWALL] ?: false
@@ -107,9 +92,7 @@ class SettingsRepository @Inject constructor(
         }
         .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-    private val vpnModeFlow = dataStore.data
-        .map { VpnMode.fromStorageKey(it[KEY_VPN_MODE]) }
-        .stateIn(scope, SharingStarted.Eagerly, VpnMode.LUNA_PRIMARY)
+
 
     // ─────────────────────────────────────────────────────────────
     // Synchronous accessors (for Service/Engine code paths)
@@ -131,17 +114,12 @@ class SettingsRepository @Inject constructor(
         get() = vpnRoutingModeFlow.value
         set(value) { scope.launch { dataStore.edit { it[KEY_VPN_ROUTING_MODE] = value.storageKey } } }
 
-    var vpnMode: VpnMode
-        get() = vpnModeFlow.value
-        set(value) { scope.launch { dataStore.edit { it[KEY_VPN_MODE] = value.storageKey } } }
-
     var techniques: BlockingTechniques
         get() = techniquesFlow.value
         set(value) {
             scope.launch {
                 dataStore.edit {
                     it[KEY_TECH_DNS] = value.dnsFiltering
-                    it[KEY_TECH_HEADER] = value.headerFilter
                     it[KEY_TECH_IP] = value.ipBlocking
                     it[KEY_TECH_STEALTH] = value.stealthMode
                     it[KEY_TECH_FIREWALL] = value.appFirewall
@@ -174,7 +152,25 @@ class SettingsRepository @Inject constructor(
     fun observeTechniques(): StateFlow<BlockingTechniques> = techniquesFlow
     fun observeDnsProfile(): Flow<String> = dnsProfileFlow
     fun observeVpnRoutingMode(): StateFlow<VpnRoutingMode> = vpnRoutingModeFlow
-    fun observeVpnMode(): StateFlow<VpnMode> = vpnModeFlow
+
+    // ─────────────────────────────────────────────────────────────
+    // Default bypass packages for streaming apps
+    // ─────────────────────────────────────────────────────────────
+
+    val defaultBypassPackages = setOf(
+        "com.netflix.mediaclient",
+        "com.disney.disneyplus",
+        "com.amazon.aiv.AIVApp",
+        "in.startv.hotstar",
+        "com.sonyliv",
+    )
+
+    fun initDefaultBypassIfEmpty() {
+        if (firewallModesFlow.value.isEmpty()) {
+            val defaults = defaultBypassPackages.associateWith { FirewallMode.ALLOW }
+            firewallModes = defaults
+        }
+    }
 
     // ─────────────────────────────────────────────────────────────
     // Serialization helpers

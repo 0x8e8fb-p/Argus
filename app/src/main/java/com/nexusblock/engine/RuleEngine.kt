@@ -88,7 +88,6 @@ class RuleEngine {
     private val exactIpBlocks = HashSet<String>()
     private val cidrBlocks = mutableListOf<CidrMatcher>()
 
-    @Synchronized
     fun loadRules(domains: List<BlockedDomain>) {
         clearAll()
         addRules(domains)
@@ -104,7 +103,6 @@ class RuleEngine {
      * (AdGuard), local rules only need to cover custom rules + emergency
      * blocklist domains that the upstream might miss.
      */
-    @Synchronized
     fun addRules(domains: List<BlockedDomain>) {
         for (domain in domains) {
             // Hard cap: prevent OOM from loading millions of domains
@@ -174,7 +172,6 @@ class RuleEngine {
         }
     }
 
-    @Synchronized
     fun isBlocked(host: String): Boolean {
         val normalized = host.lowercase().trimEnd('.')
         if (normalized.isEmpty()) return false
@@ -233,7 +230,6 @@ class RuleEngine {
         return false
     }
 
-    @Synchronized
     fun isIpBlocked(ip: String): Boolean {
         if (exactIpBlocks.contains(ip)) return true
         
@@ -349,7 +345,6 @@ class RuleEngine {
         return false
     }
 
-    @Synchronized
     fun clearAll() {
         exactBlocks.clear()
         exactAllows.clear()

@@ -17,7 +17,6 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -57,14 +56,15 @@ class DashboardViewModel @Inject constructor(
         blocklistRepo.observeDomainCount(),
         settingsRepo.observeTechniques()
     ) { _, running, blocked, domains, techs ->
-        val kb = blocked * 150
+        // Estimate ~35KB saved per blocked request (avg ad creative size)
+        val savedKb = blocked * 35L
         DashboardUiState(
             vpnActive = running,
             blockedCountText = blocked.toString(),
             dataSavedText = when {
-                kb > 1_000_000 -> String.format("%.1f GB", kb / 1_000_000.0)
-                kb > 1000 -> String.format("%.1f MB", kb / 1000.0)
-                else -> "$kb KB"
+                savedKb > 1_000_000 -> String.format("%.1f GB", savedKb / 1_000_000.0)
+                savedKb > 1000 -> String.format("%.1f MB", savedKb / 1000.0)
+                else -> "$savedKb KB"
             },
             domainCountText = domains.toString(),
             techniques = techs
@@ -109,12 +109,7 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    private fun observeVpnRunning(): Flow<Boolean> = flow {
-        while (currentCoroutineContext().isActive) {
-            emit(NexusVpnService.isRunning)
-            delay(1000)
-        }
-    }.distinctUntilChanged()
+    private fun observeVpnRunning(): Flow<Boolean> = NexusVpnService.runningState
 
     fun toggleVpn(onRequestPermission: () -> Unit = {}) {
         val currentlyActive = uiState.value.vpnActive
@@ -140,7 +135,6 @@ class DashboardViewModel @Inject constructor(
         val current = settingsRepo.techniques
         val updated = when (name) {
             "dns" -> current.copy(dnsFiltering = enabled)
-            "header" -> current.copy(headerFilter = enabled)
             "ip" -> current.copy(ipBlocking = enabled)
             "stealth" -> current.copy(stealthMode = enabled)
             "firewall" -> current.copy(appFirewall = enabled)

@@ -21,6 +21,9 @@ import com.nexusblock.engine.PacketRouter
 import com.nexusblock.ui.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.net.InetAddress
 import javax.inject.Inject
 
@@ -32,12 +35,13 @@ class NexusVpnService : VpnService() {
         const val ACTION_START = "com.nexusblock.START_VPN"
         const val ACTION_STOP = "com.nexusblock.STOP_VPN"
         const val ACTION_RESTART = "com.nexusblock.RESTART_VPN"
-        const val ACTION_START_SECONDARY = "com.nexusblock.START_VPN_SECONDARY"
-        const val ACTION_STOP_FOR_PRIMARY = "com.nexusblock.STOP_VPN_FOR_PRIMARY"
 
         @Volatile
         var isRunning = false
             private set
+
+        private val _runningState = MutableStateFlow(false)
+        val runningState: StateFlow<Boolean> = _runningState.asStateFlow()
 
         /** Exposed so other components can call [protect] on their sockets. */
         @Volatile
@@ -79,21 +83,6 @@ class NexusVpnService : VpnService() {
                 explicitStop = false
                 stopVpnInternal(updateDesiredState = false)
                 startVpn()
-                return START_STICKY
-            }
-            ACTION_STOP_FOR_PRIMARY -> {
-                // Luna VPN is taking over — stop quietly without updating desired state
-                Log.i(TAG, "Stopping local VPN for primary (Luna)")
-                stopVpnInternal(updateDesiredState = false)
-                stopSelf()
-                return START_NOT_STICKY
-            }
-            ACTION_START_SECONDARY -> {
-                // Start as failover secondary — don't update vpnActive pref
-                explicitStop = false
-                if (!isRunning) {
-                    startVpnAsSecondary()
-                }
                 return START_STICKY
             }
             else -> {
@@ -179,6 +168,7 @@ class NexusVpnService : VpnService() {
             }
 
             isRunning = true
+            _runningState.value = true
             settingsRepo.vpnActive = true
 
             // Start packet router (includes DNS engine)
@@ -193,59 +183,6 @@ class NexusVpnService : VpnService() {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start VPN", e)
             settingsRepo.vpnActive = false
-            stopSelf()
-        }
-    }
-
-    /**
-     * Start VPN as a secondary/failover — same as startVpn but does NOT update
-     * settingsRepo.vpnActive, since the user's primary intent is Luna VPN.
-     */
-    private fun startVpnAsSecondary() {
-        if (isRunning) return
-
-        try {
-            startForeground(Constants.NOTIFICATION_ID_VPN, buildNotification())
-
-            val builder = Builder()
-                .setSession(getString(R.string.app_name) + " (Failover)")
-                .setMtu(Constants.VPN_MTU)
-                .addAddress(Constants.VPN_ADDRESS, 24)
-                .addDnsServer(Constants.VPN_DNS)
-
-            val routingMode = settingsRepo.vpnRoutingMode
-            if (routingMode != VpnRoutingMode.DNS_ONLY) {
-                builder.addRoute("0.0.0.0", 0)
-            }
-
-            try {
-                builder.addAddress("fd00:1:fd00:1:fd00:1:fd00:1", 128)
-                Constants.DNS_BYPASS_IPV6_ROUTES.forEach { ip ->
-                    try { builder.addRoute(ip, 128) } catch (_: Exception) {}
-                }
-            } catch (_: Exception) {}
-
-            applyDnsBypassRoutes(builder)
-            builder.addDisallowedApplication(packageName)
-            applyFirewallRules(builder)
-
-            vpnInterface = builder.establish()
-            if (vpnInterface == null) {
-                Log.e(TAG, "Failed to establish secondary VPN interface")
-                stopForeground(STOP_FOREGROUND_REMOVE)
-                return
-            }
-
-            isRunning = true
-            // NOTE: intentionally NOT setting settingsRepo.vpnActive = true
-
-            val dnsAddr = InetAddress.getByName(Constants.VPN_DNS)
-            packetRouter.start(this, vpnInterface!!, dnsAddr)
-            registerNetworkCallback()
-
-            Log.i(TAG, "VPN started as secondary (failover) with routing mode $routingMode")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to start secondary VPN", e)
             stopSelf()
         }
     }
@@ -273,6 +210,7 @@ class NexusVpnService : VpnService() {
 
     private fun stopVpnInternal(updateDesiredState: Boolean) {
         isRunning = false
+        _runningState.value = false
         if (updateDesiredState) {
             settingsRepo.vpnActive = false
         }

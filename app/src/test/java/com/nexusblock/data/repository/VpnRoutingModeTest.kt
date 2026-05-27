@@ -8,13 +8,12 @@ class VpnRoutingModeTest {
     @Test
     fun fromStorageKeyParsesKnownModes() {
         assertEquals(VpnRoutingMode.DNS_ONLY, VpnRoutingMode.fromStorageKey("dns_only"))
-        assertEquals(VpnRoutingMode.FULL_ROUTE_SAFE, VpnRoutingMode.fromStorageKey("full_route_safe"))
-        assertEquals(VpnRoutingMode.FULL_ROUTE_AGGRESSIVE, VpnRoutingMode.fromStorageKey("full_route_aggressive"))
+        assertEquals(VpnRoutingMode.FULL_ROUTE, VpnRoutingMode.fromStorageKey("full_route"))
     }
 
     @Test
-    fun fromStorageKeyDefaultsToCurrentAggressiveBehavior() {
-        assertEquals(VpnRoutingMode.FULL_ROUTE_AGGRESSIVE, VpnRoutingMode.fromStorageKey(null))
-        assertEquals(VpnRoutingMode.FULL_ROUTE_AGGRESSIVE, VpnRoutingMode.fromStorageKey("unknown"))
+    fun fromStorageKeyDefaultsToDnsOnly() {
+        assertEquals(VpnRoutingMode.DNS_ONLY, VpnRoutingMode.fromStorageKey(null))
+        assertEquals(VpnRoutingMode.DNS_ONLY, VpnRoutingMode.fromStorageKey("unknown"))
     }
 }

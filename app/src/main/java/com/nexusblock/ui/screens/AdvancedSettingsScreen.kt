@@ -459,7 +459,6 @@ private data class Technique(
 
 private val TECHNIQUES = listOf(
     Technique("DNS Filtering", "Blocks ad domains before apps connect", "dns"),
-    Technique("Header Filter", "Removes common tracking headers in proxy mode", "header"),
     Technique("IP Blocking", "Drops known ad server IP ranges when visible", "ip"),
     Technique("Stealth Mode", "Blocks ICMP probes from the TV profile", "stealth"),
     Technique("App Firewall", "Applies per-app VPN bypass and block modes", "firewall")
@@ -468,7 +467,6 @@ private val TECHNIQUES = listOf(
 private fun com.nexusblock.data.repository.BlockingTechniques.isEnabled(key: String): Boolean {
     return when (key) {
         "dns" -> dnsFiltering
-        "header" -> headerFilter
         "ip" -> ipBlocking
         "stealth" -> stealthMode
         "firewall" -> appFirewall

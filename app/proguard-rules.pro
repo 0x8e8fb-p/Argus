@@ -54,7 +54,3 @@
 -dontwarn java.beans.**
 -dontwarn javax.lang.model.SourceVersion
 -dontwarn org.slf4j.impl.StaticLoggerBinder
-
-# Android TV / Compose
--keep class androidx.tv.** { *; }
--keep class androidx.compose.** { *; }

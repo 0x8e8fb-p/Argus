@@ -48,7 +48,7 @@ class PacketRouter @Inject constructor(
         onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
     )
     private var techniques = com.nexusblock.data.repository.BlockingTechniques()
-    private var routingMode = VpnRoutingMode.FULL_ROUTE_AGGRESSIVE
+    private var routingMode = VpnRoutingMode.DNS_ONLY
     private val dnsQueryLimiter = Semaphore(MAX_CONCURRENT_DNS_QUERIES)
     private val outputLock = Any()
 
@@ -76,7 +76,7 @@ class PacketRouter @Inject constructor(
             packetsBlocked++
             blockedLogChannel.trySend(target to type)
         }
-        tcpRelay.blockUnknownCloudFrontDistributions = settingsRepo.vpnRoutingMode == VpnRoutingMode.FULL_ROUTE_AGGRESSIVE
+        tcpRelay.blockUnknownCloudFrontDistributions = settingsRepo.vpnRoutingMode == VpnRoutingMode.FULL_ROUTE
         tcpRelay.start(vpnService, outputChannel)
         udpRelay.start(vpnService, outputChannel)
 
@@ -92,7 +92,7 @@ class PacketRouter @Inject constructor(
         routingModeJob = scope.launch {
             settingsRepo.observeVpnRoutingMode().collect {
                 routingMode = it
-                tcpRelay.blockUnknownCloudFrontDistributions = it == VpnRoutingMode.FULL_ROUTE_AGGRESSIVE
+                tcpRelay.blockUnknownCloudFrontDistributions = it == VpnRoutingMode.FULL_ROUTE
                 Log.d(TAG, "Routing mode updated: $routingMode")
             }
         }
@@ -221,7 +221,7 @@ class PacketRouter @Inject constructor(
                     // where TLS SNI inspection gives us visibility to block
                     // ad-serving CloudFront distributions.
                     if (dstPort == 443 && techniques.dnsFiltering &&
-                        routingMode == VpnRoutingMode.FULL_ROUTE_AGGRESSIVE &&
+                        routingMode == VpnRoutingMode.FULL_ROUTE &&
                         (dnsEngine.shouldForceDowngradeQuic(dstIpStr) || CloudFrontCidr.isCloudFrontIp(dstIpStr))) {
                         packetsBlocked++
                         blockedLogChannel.trySend("$dstIpStr:443" to "quic-downgrade")

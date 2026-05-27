@@ -26,7 +26,7 @@ internal data class IpFlowKey(
         )
 
         private fun ipv4ToInt(address: ByteArray): Int {
-            require(address.size == 4) { "IPv4 flow keys require 4-byte addresses" }
+            if (address.size != 4) return 0
             return ((address[0].toInt() and 0xFF) shl 24) or
                 ((address[1].toInt() and 0xFF) shl 16) or
                 ((address[2].toInt() and 0xFF) shl 8) or
