@@ -1,13 +1,28 @@
+# AI tool configs (not relevant for public)
+.gemini/
+.kimi/
+.claude/
+.cursor/
+.aider/
+.dev-pills/
+vscode-pills/
+
+# IDE
+.vscode/
+.idea/
 *.iml
+
+# Gradle / Android build
 .gradle
 /local.properties
-/.idea/
-.DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+
+# Misc
+.DS_Store
 .artifacts
 .antigravitycli
 *.apk
