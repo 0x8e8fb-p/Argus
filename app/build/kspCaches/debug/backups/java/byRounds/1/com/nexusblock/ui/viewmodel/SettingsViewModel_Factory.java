@@ -2,6 +2,7 @@ package com.nexusblock.ui.viewmodel;
 
 import android.app.Application;
 import com.nexusblock.data.repository.SettingsRepository;
+import com.nexusblock.engine.PrivateDnsManager;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
 import dagger.internal.QualifierMetadata;
@@ -29,24 +30,29 @@ public final class SettingsViewModel_Factory implements Factory<SettingsViewMode
 
   private final Provider<SettingsRepository> settingsRepoProvider;
 
+  private final Provider<PrivateDnsManager> privateDnsManagerProvider;
+
   public SettingsViewModel_Factory(Provider<Application> applicationProvider,
-      Provider<SettingsRepository> settingsRepoProvider) {
+      Provider<SettingsRepository> settingsRepoProvider,
+      Provider<PrivateDnsManager> privateDnsManagerProvider) {
     this.applicationProvider = applicationProvider;
     this.settingsRepoProvider = settingsRepoProvider;
+    this.privateDnsManagerProvider = privateDnsManagerProvider;
   }
 
   @Override
   public SettingsViewModel get() {
-    return newInstance(applicationProvider.get(), settingsRepoProvider.get());
+    return newInstance(applicationProvider.get(), settingsRepoProvider.get(), privateDnsManagerProvider.get());
   }
 
   public static SettingsViewModel_Factory create(Provider<Application> applicationProvider,
-      Provider<SettingsRepository> settingsRepoProvider) {
-    return new SettingsViewModel_Factory(applicationProvider, settingsRepoProvider);
+      Provider<SettingsRepository> settingsRepoProvider,
+      Provider<PrivateDnsManager> privateDnsManagerProvider) {
+    return new SettingsViewModel_Factory(applicationProvider, settingsRepoProvider, privateDnsManagerProvider);
   }
 
   public static SettingsViewModel newInstance(Application application,
-      SettingsRepository settingsRepo) {
-    return new SettingsViewModel(application, settingsRepo);
+      SettingsRepository settingsRepo, PrivateDnsManager privateDnsManager) {
+    return new SettingsViewModel(application, settingsRepo, privateDnsManager);
   }
 }

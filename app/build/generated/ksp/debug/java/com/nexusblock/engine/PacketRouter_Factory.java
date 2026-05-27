@@ -31,27 +31,35 @@ public final class PacketRouter_Factory implements Factory<PacketRouter> {
 
   private final Provider<SettingsRepository> settingsRepoProvider;
 
+  private final Provider<TcpRelayEngine> tcpRelayProvider;
+
+  private final Provider<UdpRelayEngine> udpRelayProvider;
+
   public PacketRouter_Factory(Provider<DnsFilterEngine> dnsEngineProvider,
       Provider<StatsRepository> statsRepoProvider,
-      Provider<SettingsRepository> settingsRepoProvider) {
+      Provider<SettingsRepository> settingsRepoProvider, Provider<TcpRelayEngine> tcpRelayProvider,
+      Provider<UdpRelayEngine> udpRelayProvider) {
     this.dnsEngineProvider = dnsEngineProvider;
     this.statsRepoProvider = statsRepoProvider;
     this.settingsRepoProvider = settingsRepoProvider;
+    this.tcpRelayProvider = tcpRelayProvider;
+    this.udpRelayProvider = udpRelayProvider;
   }
 
   @Override
   public PacketRouter get() {
-    return newInstance(dnsEngineProvider.get(), statsRepoProvider.get(), settingsRepoProvider.get());
+    return newInstance(dnsEngineProvider.get(), statsRepoProvider.get(), settingsRepoProvider.get(), tcpRelayProvider.get(), udpRelayProvider.get());
   }
 
   public static PacketRouter_Factory create(Provider<DnsFilterEngine> dnsEngineProvider,
       Provider<StatsRepository> statsRepoProvider,
-      Provider<SettingsRepository> settingsRepoProvider) {
-    return new PacketRouter_Factory(dnsEngineProvider, statsRepoProvider, settingsRepoProvider);
+      Provider<SettingsRepository> settingsRepoProvider, Provider<TcpRelayEngine> tcpRelayProvider,
+      Provider<UdpRelayEngine> udpRelayProvider) {
+    return new PacketRouter_Factory(dnsEngineProvider, statsRepoProvider, settingsRepoProvider, tcpRelayProvider, udpRelayProvider);
   }
 
   public static PacketRouter newInstance(DnsFilterEngine dnsEngine, StatsRepository statsRepo,
-      SettingsRepository settingsRepo) {
-    return new PacketRouter(dnsEngine, statsRepo, settingsRepo);
+      SettingsRepository settingsRepo, TcpRelayEngine tcpRelay, UdpRelayEngine udpRelay) {
+    return new PacketRouter(dnsEngine, statsRepo, settingsRepo, tcpRelay, udpRelay);
   }
 }

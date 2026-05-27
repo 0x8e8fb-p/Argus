@@ -1,16 +1,16 @@
-# Graph Report - NexusBlock-AndroidTV  (2026-05-22)
+# Graph Report - NexusBlock-AndroidTV  (2026-05-23)
 
 ## Corpus Check
-- 72 files · ~40,663 words
+- 84 files · ~48,601 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 656 nodes · 805 edges · 63 communities (29 shown, 34 thin omitted)
-- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 56 edges (avg confidence: 0.8)
+- 858 nodes · 1163 edges · 81 communities (42 shown, 39 thin omitted)
+- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 94 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `88611914`
+- Built from commit: `c60289bd`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -71,36 +71,54 @@
 - [[_COMMUNITY_KSP Plugin|KSP Plugin]]
 - [[_COMMUNITY_Compose Plugin|Compose Plugin]]
 - [[_COMMUNITY_DNS Upstream Manager|DNS Upstream Manager]]
+- [[_COMMUNITY_Community 63|Community 63]]
+- [[_COMMUNITY_Community 64|Community 64]]
+- [[_COMMUNITY_Community 65|Community 65]]
+- [[_COMMUNITY_Community 66|Community 66]]
+- [[_COMMUNITY_Community 67|Community 67]]
+- [[_COMMUNITY_Community 68|Community 68]]
+- [[_COMMUNITY_Community 69|Community 69]]
+- [[_COMMUNITY_Community 70|Community 70]]
+- [[_COMMUNITY_Community 71|Community 71]]
+- [[_COMMUNITY_Community 72|Community 72]]
+- [[_COMMUNITY_Community 73|Community 73]]
+- [[_COMMUNITY_Community 74|Community 74]]
+- [[_COMMUNITY_Community 75|Community 75]]
+- [[_COMMUNITY_Community 76|Community 76]]
+- [[_COMMUNITY_Community 77|Community 77]]
+- [[_COMMUNITY_Community 78|Community 78]]
+- [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 80|Community 80]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `DnsFilterEngine` - 22 edges
-2. `RuleEngine` - 21 edges
-3. `FocusPanel()` - 16 edges
-4. `ARGUS — Rethink & Redesign Document` - 15 edges
-5. `NexusVpnService` - 14 edges
-6. `BlockedDomainDao` - 14 edges
-7. `PacketRouter` - 14 edges
-8. `ConnectionTracker` - 13 edges
-9. `NexusBlock — Device-Wide Ad Blocker for Android TV` - 13 edges
-10. `BlockedDomain` - 12 edges
+1. `DnsFilterEngine` - 28 edges
+2. `FocusPanel()` - 22 edges
+3. `RuleEngine` - 22 edges
+4. `TcpRelayEngine` - 21 edges
+5. `NexusVpnService` - 15 edges
+6. `ARGUS — Rethink & Redesign Document` - 15 edges
+7. `NexusBlock Codebase Explainer & AI Developer Guide` - 15 edges
+8. `BlockedDomainDao` - 14 edges
+9. `PacketRouter` - 14 edges
+10. `SettingsScreen()` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `NexusBlockApp()` --calls--> `NexusBackground()`  [INFERRED]
+- `ArgusBlockApp()` --calls--> `dimensionsForWidth()`  [INFERRED]
+  app/src/main/java/com/nexusblock/ui/MainActivity.kt → app/src/main/java/com/nexusblock/ui/theme/Dimensions.kt
+- `ArgusBlockApp()` --calls--> `ArgusBackground()`  [INFERRED]
   app/src/main/java/com/nexusblock/ui/MainActivity.kt → app/src/main/java/com/nexusblock/ui/components/NexusTvComponents.kt
-- `NexusBlockApp()` --calls--> `NexusNavigationRail()`  [INFERRED]
-  app/src/main/java/com/nexusblock/ui/MainActivity.kt → app/src/main/java/com/nexusblock/ui/components/NexusTvComponents.kt
+- `ArgusBlockApp()` --calls--> `ArgusVignette()`  [INFERRED]
+  app/src/main/java/com/nexusblock/ui/MainActivity.kt → app/src/main/java/com/nexusblock/ui/components/Animations.kt
+- `NexusBlockApp()` --calls--> `SettingsScreen()`  [INFERRED]
+  app/src/main/java/com/nexusblock/ui/MainActivity.kt → app/src/main/java/com/nexusblock/ui/screens/SettingsScreen.kt
 - `NexusBlockApp()` --calls--> `DashboardScreen()`  [INFERRED]
   app/src/main/java/com/nexusblock/ui/MainActivity.kt → app/src/main/java/com/nexusblock/ui/screens/DashboardScreen.kt
-- `NexusBlockApp()` --calls--> `BlocklistScreen()`  [INFERRED]
-  app/src/main/java/com/nexusblock/ui/MainActivity.kt → app/src/main/java/com/nexusblock/ui/screens/BlocklistScreen.kt
-- `NexusBlockApp()` --calls--> `CustomRulesScreen()`  [INFERRED]
-  app/src/main/java/com/nexusblock/ui/MainActivity.kt → app/src/main/java/com/nexusblock/ui/screens/CustomRulesScreen.kt
 
-## Communities (63 total, 34 thin omitted)
+## Communities (81 total, 39 thin omitted)
 
 ### Community 0 - "UI Screens & Compose Components"
-Cohesion: 0.09
-Nodes (36): AnimatedStateText(), FocusPanel(), MetricTile(), NavRailItem(), NexusBackground(), NexusNavigationRail(), NexusScreenHeader(), RailItem (+28 more)
+Cohesion: 0.06
+Nodes (56): AnimatedCounter(), ArgusMotion, ArgusVignette(), AnimatedStateText(), ArgusBackground(), ArgusNavigationRail(), ArgusScreenHeader(), FocusPanel() (+48 more)
 
 ### Community 1 - "VPN DNS Update & Filtering"
 Cohesion: 0.06
@@ -114,9 +132,17 @@ Nodes (45): 10. Key Engineering Decisions Documented, 11. Threat Model & Safety,
 Cohesion: 0.19
 Nodes (5): bytesToIp(), calculateChecksum(), calculatePseudoChecksum(), PacketRouter, RouterStats
 
+### Community 7 - "Configuration & Settings"
+Cohesion: 0.16
+Nodes (13): ArgusBlockTheme(), NexusBlockTheme(), Activity, Blocklists, CustomRules, Dashboard, Firewall, Home (+5 more)
+
 ### Community 9 - "Content Transformers"
 Cohesion: 0.23
 Nodes (3): start(), stop(), VpnWatchdogService
+
+### Community 10 - "Domain DAO & Repository"
+Cohesion: 0.13
+Nodes (4): BlockingTechniques, SettingsRepository, VpnMode, VpnRoutingMode
 
 ### Community 19 - "QuickJS Transformer"
 Cohesion: 0.36
@@ -131,8 +157,8 @@ Cohesion: 0.60
 Nodes (3): description(), displayName(), FirewallMode
 
 ### Community 40 - "Blocklist ViewModel"
-Cohesion: 0.05
-Nodes (40): 1. Core Architecture & System Overview, 1. `NexusVpnService.kt`, 1. `PacketRouter.kt`, 2. `DnsFilterEngine.kt`, 2. Module-by-Module Technical Breakdown, 2. `VpnWatchdogService.kt` & `BootReceiver.kt`, 3. Key Network & Process Flows, 3. `RuleEngine.kt` & `BloomFilter.kt` (+32 more)
+Cohesion: 0.17
+Nodes (12): 1. `NexusVpnService.kt`, 1. `PacketRouter.kt`, 2. `DnsFilterEngine.kt`, 2. Module-by-Module Technical Breakdown, 2. `VpnWatchdogService.kt` & `BootReceiver.kt`, 3. `RuleEngine.kt` & `BloomFilter.kt`, 4. `ConnectionTracker.kt`, 5. `MitmProxyManager.kt` & `CertificateManager.kt` (+4 more)
 
 ### Community 41 - "Logs ViewModel"
 Cohesion: 0.10
@@ -155,8 +181,8 @@ Cohesion: 0.22
 Nodes (8): Execution Plan, NexusBlock Overhaul Plan — Indian OTT + YouTube Adblocking, Phase 1: Full-Tunnel Packet Router (CRITICAL), Phase 2: Enhanced Ad Detection, Phase 3: YouTube IFrame Player, Phase 4: UI Overhaul with Dubai Font, Phase 5: Build & Deploy, Root Cause Analysis
 
 ### Community 46 - "App Build Config"
-Cohesion: 0.22
-Nodes (8): Acknowledgments, Architecture, code:block1 (┌───────────────────────────────────────────────────────────), Features, Future Improvements, License, NexusBlock — Device-Wide Ad Blocker for Android TV, Table of Contents
+Cohesion: 0.18
+Nodes (13): Acknowledgments, Architecture, ArgusBlock — Ad Blocker for Android TV, Build, code:bash (# Debug build), Features, Future Improvements, License (+5 more)
 
 ### Community 47 - "Project Settings"
 Cohesion: 0.22
@@ -179,32 +205,76 @@ Cohesion: 0.33
 Nodes (6): 1. Certificate Pinning, 2. Apps Using Private DNS (DoH/DoT), 3. IPv6-Only Networks, 4. Google Play Store Rejection, 5. YouTube Anti-Adblock Arms Race, Limitations & Workarounds
 
 ### Community 52 - "Kotlin Plugin"
-Cohesion: 0.33
-Nodes (6): Build Instructions, code:bash (./gradlew assembleDebug), code:bash (adb connect <TV_IP_ADDRESS>:5555), code:bash (adb logcat -s NexusBlock/DNS NexusBlock/Router NexusBlock/Pr), Prerequisites, Step-by-Step
+Cohesion: 0.25
+Nodes (8): Build Instructions, code:bash (adb connect <tv-ip>:5555), code:block3 (app/src/main/java/com/nexusblock/), code:bash (adb logcat -s NexusBlock/DNS NexusBlock/Router NexusBlock/Pr), Install on Android TV, Prerequisites, Project Structure, Step-by-Step
 
 ### Community 54 - "KSP Plugin"
 Cohesion: 0.50
 Nodes (4): ADB Commands for Debugging, code:bash (# Real-time logs for all NexusBlock components), Manual Verification Checklist, Testing Guide
 
+### Community 63 - "Community 63"
+Cohesion: 0.18
+Nodes (3): SessionState, TcpRelayEngine, TcpSession
+
+### Community 64 - "Community 64"
+Cohesion: 0.16
+Nodes (4): LunaState, LunaVpnManager, UdpRelayEngine, UdpSession
+
+### Community 65 - "Community 65"
+Cohesion: 0.13
+Nodes (14): childDhGroup, childEncryption, childIntegrity, disableMobike, dns, enablePfs, ikeDhGroup, ikeEncryption (+6 more)
+
+### Community 67 - "Community 67"
+Cohesion: 0.18
+Nodes (10): 10. Guidelines for AI Code Modifications, 3. Navigation & Screens, 5. Feature Inventory (Live), 7. Storage & Data Schemas, DataStore Preferences, NexusBlock Codebase Explainer & AI Developer Guide, Removed / Not Implemented, Room Database (`AppDatabase`) (+2 more)
+
+### Community 73 - "Community 73"
+Cohesion: 0.83
+Nodes (3): from(), IpFlowKey, ipv4ToInt()
+
+### Community 75 - "Community 75"
+Cohesion: 0.22
+Nodes (9): 4. Storage & Data Schemas, 6. Data Flows, Blocklist Update Flow, code:block5 (WorkManager (24h periodic)), Preferences DataStore Schema, SQLite Room Database Schema (`AppDatabase`), Table: `blocked_domains`, Table: `blocked_events` (+1 more)
+
+### Community 76 - "Community 76"
+Cohesion: 0.25
+Nodes (8): 4. Architecture Layers, code:block3 (PacketRouter (IO coroutine, reads TUN fd)), Engine Layer, Repository Layer, Service Layer, SNI Interception and TCP RST Injection, UI Layer, ViewModel Layer
+
+### Community 77 - "Community 77"
+Cohesion: 0.29
+Nodes (7): 2. Directory Map, 3. Key Network & Process Flows, code:block2 (com.nexusblock/), code:block4 (App → TUN (10.0.0.1:53) → PacketRouter → DnsFilterEngine.res), Connection Owner App Attribution, DNS Query Path, Intercepted DNS Query Resolution
+
+### Community 78 - "Community 78"
+Cohesion: 0.29
+Nodes (7): 5. Guidelines for AI Code Modifications, Boot Restore Flow, code:kotlin (implementation("com.google.guava:guava:33.0.0-jre")), code:block6 (BOOT_COMPLETED → BootReceiver.onReceive()), Dependency Conflict Resolution, Logging & Diagnostics, Rules for Modifying Network Code
+
+### Community 79 - "Community 79"
+Cohesion: 0.40
+Nodes (6): 8. Testing, 9. Build & Dependencies, Build and Compilation Commands, code:bash (./gradlew test), code:bash (./gradlew clean assembleDebug), code:bash (adb logcat -s NexusBlock/VPN)
+
+### Community 80 - "Community 80"
+Cohesion: 0.50
+Nodes (4): 1. Core Architecture & System Overview, code:mermaid (graph TD), Key Engineering Paradigms, Key Engineering Paradigms & Optimizations
+
 ## Knowledge Gaps
-- **155 isolated node(s):** `BeforeTool`, `DashboardUiState`, `Technique`, `BlockingTechniques`, `Protocol` (+150 more)
+- **180 isolated node(s):** `BeforeTool`, `Home`, `Activity`, `DashboardUiState`, `AdvancedTab` (+175 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **34 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **39 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `BlockedDomain` connect `VPN DNS Update & Filtering` to `Network Packet Routing`, `QuickJS Transformer`?**
-  _High betweenness centrality (0.012) - this node is a cross-community bridge._
-- **Why does `RuleEngine` connect `VPN DNS Update & Filtering` to `Network Packet Routing`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **Why does `RuleEngine` connect `VPN DNS Update & Filtering` to `UI Screens & Compose Components`, `Network Packet Routing`?**
+  _High betweenness centrality (0.035) - this node is a cross-community bridge._
+- **Are the 17 inferred relationships involving `FocusPanel()` (e.g. with `SettingsScreen()` and `SettingSwitchRow()`) actually correct?**
+  _`FocusPanel()` has 17 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 7 inferred relationships involving `RuleEngine` (e.g. with `.plainDomainBlocksSubdomains()` and `.exactAllowDoesNotAllowSiblingSubdomains()`) actually correct?**
   _`RuleEngine` has 7 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 11 inferred relationships involving `FocusPanel()` (e.g. with `CustomRulesScreen()` and `CustomRuleItem()`) actually correct?**
-  _`FocusPanel()` has 11 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `BeforeTool`, `DashboardUiState`, `Technique` to the rest of the system?**
-  _155 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `BeforeTool`, `Home`, `Activity` to the rest of the system?**
+  _180 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `UI Screens & Compose Components` be split into smaller, more focused modules?**
-  _Cohesion score 0.08979591836734693 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.060718252499074414 - nodes in this community are weakly interconnected._
 - **Should `VPN DNS Update & Filtering` be split into smaller, more focused modules?**
-  _Cohesion score 0.05519480519480519 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06127946127946128 - nodes in this community are weakly interconnected._
+- **Should `Network Packet Routing` be split into smaller, more focused modules?**
+  _Cohesion score 0.10483870967741936 - nodes in this community are weakly interconnected._

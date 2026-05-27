@@ -187,6 +187,20 @@ public class BlockedEventDao_Impl(
     }
   }
 
+  public override suspend fun pruneToMax(limit: Int) {
+    val _sql: String = "DELETE FROM blocked_events WHERE id NOT IN (SELECT id FROM blocked_events ORDER BY timestamp DESC LIMIT ?)"
+    return performSuspending(__db, false, true) { _connection ->
+      val _stmt: SQLiteStatement = _connection.prepare(_sql)
+      try {
+        var _argIndex: Int = 1
+        _stmt.bindLong(_argIndex, limit.toLong())
+        _stmt.step()
+      } finally {
+        _stmt.close()
+      }
+    }
+  }
+
   public companion object {
     public fun getRequiredConverters(): List<KClass<*>> = emptyList()
   }

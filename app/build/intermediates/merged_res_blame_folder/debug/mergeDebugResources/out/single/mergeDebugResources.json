@@ -16,10 +16,6 @@
         "source": "com.nexusblock.app-main-56:/drawable/ic_banner.xml"
     },
     {
-        "merged": "com.nexusblock.app-debug-54:/drawable_ic_nav_firewall.xml.flat",
-        "source": "com.nexusblock.app-main-56:/drawable/ic_nav_firewall.xml"
-    },
-    {
         "merged": "com.nexusblock.app-debug-54:/drawable_ic_nav_logs.xml.flat",
         "source": "com.nexusblock.app-main-56:/drawable/ic_nav_logs.xml"
     },
@@ -34,6 +30,10 @@
     {
         "merged": "com.nexusblock.app-debug-54:/mipmap-anydpi-v26_ic_launcher.xml.flat",
         "source": "com.nexusblock.app-main-56:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.nexusblock.app-debug-54:/drawable_ic_logo_argus.xml.flat",
+        "source": "com.nexusblock.app-main-56:/drawable/ic_logo_argus.xml"
     },
     {
         "merged": "com.nexusblock.app-debug-54:/mipmap-anydpi_ic_launcher_round.xml.flat",
@@ -52,24 +52,16 @@
         "source": "com.nexusblock.app-main-56:/drawable/ic_nav_settings.xml"
     },
     {
-        "merged": "com.nexusblock.app-debug-54:/drawable_ic_logo_nexus.xml.flat",
-        "source": "com.nexusblock.app-main-56:/drawable/ic_logo_nexus.xml"
-    },
-    {
         "merged": "com.nexusblock.app-debug-54:/font_dubai_bold.ttf.flat",
         "source": "com.nexusblock.app-main-56:/font/dubai_bold.ttf"
     },
     {
-        "merged": "com.nexusblock.app-debug-54:/drawable_ic_nav_blocklists.xml.flat",
-        "source": "com.nexusblock.app-main-56:/drawable/ic_nav_blocklists.xml"
+        "merged": "com.nexusblock.app-debug-54:/xml_network_security_config.xml.flat",
+        "source": "com.nexusblock.app-main-56:/xml/network_security_config.xml"
     },
     {
-        "merged": "com.nexusblock.app-debug-54:/drawable_ic_nav_rules.xml.flat",
-        "source": "com.nexusblock.app-main-56:/drawable/ic_nav_rules.xml"
-    },
-    {
-        "merged": "com.nexusblock.app-debug-54:/drawable_ic_vpn_key.xml.flat",
-        "source": "com.nexusblock.app-main-56:/drawable/ic_vpn_key.xml"
+        "merged": "com.nexusblock.app-debug-54:/xml_file_paths.xml.flat",
+        "source": "com.nexusblock.app-main-56:/xml/file_paths.xml"
     },
     {
         "merged": "com.nexusblock.app-debug-54:/mipmap-anydpi_ic_launcher.xml.flat",

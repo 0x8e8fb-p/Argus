@@ -40,19 +40,17 @@ public class AppDatabase_Impl : AppDatabase() {
   }
 
   protected override fun createOpenDelegate(): RoomOpenDelegate {
-    val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(2, "22ae43e6ab2448a28bff086b1cac1553", "5476accb4cc576606e83470b62c3097a") {
+    val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(2, "6e1342a5788162a9de47dd0aefa736d1", "7ba516f33c7c2da6c53957f14daa8d3b") {
       public override fun createAllTables(connection: SQLiteConnection) {
         connection.execSQL("CREATE TABLE IF NOT EXISTS `blocked_domains` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `host` TEXT NOT NULL, `source` TEXT NOT NULL, `enabled` INTEGER NOT NULL, `isRegex` INTEGER NOT NULL, `regexPattern` TEXT, `insertedAt` INTEGER NOT NULL)")
         connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_blocked_domains_host` ON `blocked_domains` (`host`)")
         connection.execSQL("CREATE INDEX IF NOT EXISTS `index_blocked_domains_source` ON `blocked_domains` (`source`)")
         connection.execSQL("CREATE TABLE IF NOT EXISTS `blocked_events` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `host` TEXT NOT NULL, `appPackage` TEXT, `type` TEXT NOT NULL, `timestamp` INTEGER NOT NULL)")
         connection.execSQL("CREATE INDEX IF NOT EXISTS `index_blocked_events_timestamp` ON `blocked_events` (`timestamp`)")
-        connection.execSQL("CREATE INDEX IF NOT EXISTS `index_blocked_events_host` ON `blocked_events` (`host`)")
-        connection.execSQL("CREATE INDEX IF NOT EXISTS `index_blocked_events_appPackage` ON `blocked_events` (`appPackage`)")
         connection.execSQL("CREATE TABLE IF NOT EXISTS `custom_rules` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `rule` TEXT NOT NULL, `isAllow` INTEGER NOT NULL, `enabled` INTEGER NOT NULL, `description` TEXT, `createdAt` INTEGER NOT NULL)")
         connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_custom_rules_rule` ON `custom_rules` (`rule`)")
         connection.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)")
-        connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '22ae43e6ab2448a28bff086b1cac1553')")
+        connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6e1342a5788162a9de47dd0aefa736d1')")
       }
 
       public override fun dropAllTables(connection: SQLiteConnection) {
@@ -108,8 +106,6 @@ public class AppDatabase_Impl : AppDatabase() {
         val _foreignKeysBlockedEvents: MutableSet<TableInfo.ForeignKey> = mutableSetOf()
         val _indicesBlockedEvents: MutableSet<TableInfo.Index> = mutableSetOf()
         _indicesBlockedEvents.add(TableInfo.Index("index_blocked_events_timestamp", false, listOf("timestamp"), listOf("ASC")))
-        _indicesBlockedEvents.add(TableInfo.Index("index_blocked_events_host", false, listOf("host"), listOf("ASC")))
-        _indicesBlockedEvents.add(TableInfo.Index("index_blocked_events_appPackage", false, listOf("appPackage"), listOf("ASC")))
         val _infoBlockedEvents: TableInfo = TableInfo("blocked_events", _columnsBlockedEvents, _foreignKeysBlockedEvents, _indicesBlockedEvents)
         val _existingBlockedEvents: TableInfo = read(connection, "blocked_events")
         if (!_infoBlockedEvents.equals(_existingBlockedEvents)) {

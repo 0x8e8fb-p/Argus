@@ -44,15 +44,12 @@ public final class DnsFilterEngine_Factory implements Factory<DnsFilterEngine> {
 
   private final Provider<OkHttpClient> okHttpClientProvider;
 
-  private final Provider<ConnectionTracker> connectionTrackerProvider;
-
   public DnsFilterEngine_Factory(Provider<Context> contextProvider,
       Provider<StatsRepository> statsRepoProvider, Provider<CustomRuleDao> customRuleDaoProvider,
       Provider<BlocklistRepository> blocklistRepoProvider,
       Provider<SettingsRepository> settingsRepoProvider,
       Provider<DnsProfileManager> dnsProfileManagerProvider,
-      Provider<OkHttpClient> okHttpClientProvider,
-      Provider<ConnectionTracker> connectionTrackerProvider) {
+      Provider<OkHttpClient> okHttpClientProvider) {
     this.contextProvider = contextProvider;
     this.statsRepoProvider = statsRepoProvider;
     this.customRuleDaoProvider = customRuleDaoProvider;
@@ -60,12 +57,11 @@ public final class DnsFilterEngine_Factory implements Factory<DnsFilterEngine> {
     this.settingsRepoProvider = settingsRepoProvider;
     this.dnsProfileManagerProvider = dnsProfileManagerProvider;
     this.okHttpClientProvider = okHttpClientProvider;
-    this.connectionTrackerProvider = connectionTrackerProvider;
   }
 
   @Override
   public DnsFilterEngine get() {
-    return newInstance(contextProvider.get(), statsRepoProvider.get(), customRuleDaoProvider.get(), blocklistRepoProvider.get(), settingsRepoProvider.get(), dnsProfileManagerProvider.get(), okHttpClientProvider.get(), connectionTrackerProvider.get());
+    return newInstance(contextProvider.get(), statsRepoProvider.get(), customRuleDaoProvider.get(), blocklistRepoProvider.get(), settingsRepoProvider.get(), dnsProfileManagerProvider.get(), okHttpClientProvider.get());
   }
 
   public static DnsFilterEngine_Factory create(Provider<Context> contextProvider,
@@ -73,15 +69,14 @@ public final class DnsFilterEngine_Factory implements Factory<DnsFilterEngine> {
       Provider<BlocklistRepository> blocklistRepoProvider,
       Provider<SettingsRepository> settingsRepoProvider,
       Provider<DnsProfileManager> dnsProfileManagerProvider,
-      Provider<OkHttpClient> okHttpClientProvider,
-      Provider<ConnectionTracker> connectionTrackerProvider) {
-    return new DnsFilterEngine_Factory(contextProvider, statsRepoProvider, customRuleDaoProvider, blocklistRepoProvider, settingsRepoProvider, dnsProfileManagerProvider, okHttpClientProvider, connectionTrackerProvider);
+      Provider<OkHttpClient> okHttpClientProvider) {
+    return new DnsFilterEngine_Factory(contextProvider, statsRepoProvider, customRuleDaoProvider, blocklistRepoProvider, settingsRepoProvider, dnsProfileManagerProvider, okHttpClientProvider);
   }
 
   public static DnsFilterEngine newInstance(Context context, StatsRepository statsRepo,
       CustomRuleDao customRuleDao, BlocklistRepository blocklistRepo,
       SettingsRepository settingsRepo, DnsProfileManager dnsProfileManager,
-      OkHttpClient okHttpClient, ConnectionTracker connectionTracker) {
-    return new DnsFilterEngine(context, statsRepo, customRuleDao, blocklistRepo, settingsRepo, dnsProfileManager, okHttpClient, connectionTracker);
+      OkHttpClient okHttpClient) {
+    return new DnsFilterEngine(context, statsRepo, customRuleDao, blocklistRepo, settingsRepo, dnsProfileManager, okHttpClient);
   }
 }

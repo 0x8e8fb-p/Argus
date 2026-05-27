@@ -42,365 +42,395 @@
 22    <uses-permission android:name="android.permission.BIND_VPN_SERVICE" />
 22-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:18:5-19:47
 22-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:18:22-72
-23    <uses-permission
-23-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:20:5-108
-24        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-24-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:20:22-78
-25        android:maxSdkVersion="28" />
-25-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:20:79-105
-26    <uses-permission
-26-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:21:5-107
-27        android:name="android.permission.READ_EXTERNAL_STORAGE"
-27-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:21:22-77
-28        android:maxSdkVersion="28" />
-28-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:21:78-104
-29
-30    <!-- TV feature declarations -->
-31    <uses-feature
-31-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:24:5-26:35
-32        android:name="android.software.leanback"
-32-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:25:9-49
-33        android:required="true" />
-33-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:26:9-32
-34    <uses-feature
-34-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:27:5-29:36
-35        android:name="android.hardware.touchscreen"
-35-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:28:9-52
-36        android:required="false" />
-36-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:29:9-33
-37
-38    <uses-permission android:name="android.permission.WAKE_LOCK" />
-38-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:23:5-68
-38-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:23:22-65
-39
-40    <permission
-40-->[androidx.core:core:1.18.0] /Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/AndroidManifest.xml:22:5-24:47
-41        android:name="com.nexusblock.debug.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-41-->[androidx.core:core:1.18.0] /Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/AndroidManifest.xml:23:9-81
-42        android:protectionLevel="signature" />
-42-->[androidx.core:core:1.18.0] /Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/AndroidManifest.xml:24:9-44
-43
-44    <uses-permission android:name="com.nexusblock.debug.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-44-->[androidx.core:core:1.18.0] /Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/AndroidManifest.xml:26:5-97
-44-->[androidx.core:core:1.18.0] /Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/AndroidManifest.xml:26:22-94
-45
-46    <application
-46-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:31:5-117:19
-47        android:name="com.nexusblock.NexusBlockApplication"
-47-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:32:9-46
-48        android:allowBackup="true"
-48-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:33:9-35
-49        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-49-->[androidx.core:core:1.18.0] /Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/AndroidManifest.xml:28:18-86
-50        android:banner="@drawable/ic_banner"
-50-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:34:9-45
-51        android:debuggable="true"
-52        android:extractNativeLibs="false"
-53        android:icon="@mipmap/ic_launcher"
-53-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:35:9-43
-54        android:label="Argus Ad Blocker"
-54-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:36:9-41
-55        android:roundIcon="@mipmap/ic_launcher_round"
-55-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:37:9-54
-56        android:supportsRtl="true"
-56-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:38:9-35
-57        android:theme="@style/Theme.NexusBlock"
-57-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:39:9-48
-58        android:usesCleartextTraffic="true" >
-58-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:40:9-44
-59
-60        <!-- Main Activity -->
-61        <activity
-61-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:43:9-54:20
-62            android:name="com.nexusblock.ui.MainActivity"
-62-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:44:13-44
-63            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize"
-63-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:45:13-93
-64            android:exported="true"
-64-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:46:13-36
-65            android:launchMode="singleTask"
-65-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:47:13-44
-66            android:theme="@style/Theme.NexusBlock" >
-66-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:48:13-52
-67            <intent-filter>
-67-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:49:13-53:29
-68                <action android:name="android.intent.action.MAIN" />
-68-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:50:17-69
-68-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:50:25-66
+23    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+23-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:20:5-21:47
+23-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:20:22-77
+24
+25    <!-- TV feature declarations -->
+26    <uses-feature
+26-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:24:5-26:35
+27        android:name="android.software.leanback"
+27-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:25:9-49
+28        android:required="true" />
+28-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:26:9-32
+29    <uses-feature
+29-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:27:5-29:36
+30        android:name="android.hardware.touchscreen"
+30-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:28:9-52
+31        android:required="false" />
+31-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:29:9-33
+32
+33    <uses-permission android:name="android.permission.WAKE_LOCK" />
+33-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:23:5-68
+33-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:23:22-65
+34
+35    <permission
+35-->[androidx.core:core:1.18.0] /Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/AndroidManifest.xml:22:5-24:47
+36        android:name="com.nexusblock.debug.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+36-->[androidx.core:core:1.18.0] /Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/AndroidManifest.xml:23:9-81
+37        android:protectionLevel="signature" />
+37-->[androidx.core:core:1.18.0] /Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/AndroidManifest.xml:24:9-44
+38
+39    <uses-permission android:name="com.nexusblock.debug.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+39-->[androidx.core:core:1.18.0] /Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/AndroidManifest.xml:26:5-97
+39-->[androidx.core:core:1.18.0] /Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/AndroidManifest.xml:26:22-94
+40
+41    <application
+41-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:31:5-140:19
+42        android:name="com.nexusblock.NexusBlockApplication"
+42-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:32:9-46
+43        android:allowBackup="true"
+43-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:33:9-35
+44        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+44-->[androidx.core:core:1.18.0] /Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/AndroidManifest.xml:28:18-86
+45        android:banner="@drawable/ic_banner"
+45-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:34:9-45
+46        android:debuggable="true"
+47        android:extractNativeLibs="false"
+48        android:icon="@mipmap/ic_launcher"
+48-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:35:9-43
+49        android:label="ArgusBlock"
+49-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:36:9-35
+50        android:networkSecurityConfig="@xml/network_security_config"
+50-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:40:9-69
+51        android:roundIcon="@mipmap/ic_launcher_round"
+51-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:37:9-54
+52        android:supportsRtl="true"
+52-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:38:9-35
+53        android:theme="@style/Theme.ArgusBlock" >
+53-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:39:9-48
+54
+55        <!-- Main Activity -->
+56        <activity
+56-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:43:9-54:20
+57            android:name="com.nexusblock.ui.MainActivity"
+57-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:44:13-44
+58            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize"
+58-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:45:13-93
+59            android:exported="true"
+59-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:46:13-36
+60            android:launchMode="singleTask"
+60-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:47:13-44
+61            android:theme="@style/Theme.ArgusBlock" >
+61-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:48:13-52
+62            <intent-filter>
+62-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:49:13-53:29
+63                <action android:name="android.intent.action.MAIN" />
+63-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:50:17-69
+63-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:50:25-66
+64
+65                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+65-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:51:17-86
+65-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:51:27-83
+66                <category android:name="android.intent.category.LAUNCHER" />
+66-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:52:17-77
+66-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:52:27-74
+67            </intent-filter>
+68        </activity>
 69
-70                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-70-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:51:17-86
-70-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:51:27-83
-71                <category android:name="android.intent.category.LAUNCHER" />
-71-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:52:17-77
-71-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:52:27-74
-72            </intent-filter>
-73        </activity>
-74
-75        <!-- VPN Service -->
-76        <service
-76-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:57:9-68:19
-77            android:name="com.nexusblock.service.NexusVpnService"
-77-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:58:13-52
-78            android:exported="false"
-78-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:59:13-37
-79            android:foregroundServiceType="specialUse"
-79-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:60:13-55
-80            android:permission="android.permission.BIND_VPN_SERVICE" >
-80-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:61:13-69
-81            <intent-filter>
-81-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:62:13-64:29
-82                <action android:name="android.net.VpnService" />
-82-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:63:17-65
-82-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:63:25-62
-83            </intent-filter>
+70        <!-- VPN Service -->
+71        <service
+71-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:57:9-68:19
+72            android:name="com.nexusblock.service.NexusVpnService"
+72-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:58:13-52
+73            android:exported="false"
+73-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:59:13-37
+74            android:foregroundServiceType="specialUse"
+74-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:60:13-55
+75            android:permission="android.permission.BIND_VPN_SERVICE" >
+75-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:61:13-69
+76            <intent-filter>
+76-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:62:13-64:29
+77                <action android:name="android.net.VpnService" />
+77-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:63:17-65
+77-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:63:25-62
+78            </intent-filter>
+79
+80            <property
+80-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:65:13-67:47
+81                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+81-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:66:17-76
+82                android:value="vpn_adblock" />
+82-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:67:17-44
+83        </service>
 84
-85            <property
-85-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:65:13-67:47
-86                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-86-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:66:17-76
-87                android:value="vpn_adblock" />
-87-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:67:17-44
-88        </service>
-89
-90        <!-- Watchdog Service -->
-91        <service
-91-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:71:9-78:19
-92            android:name="com.nexusblock.service.VpnWatchdogService"
-92-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:72:13-55
-93            android:exported="false"
-93-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:73:13-37
-94            android:foregroundServiceType="specialUse" >
-94-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:74:13-55
-95            <property
-95-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:65:13-67:47
-96                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-96-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:66:17-76
-97                android:value="watchdog" />
-97-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:67:17-44
-98        </service>
-99
-100        <!-- Boot Receiver -->
-101        <receiver
-101-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:81:9-90:20
-102            android:name="com.nexusblock.service.BootReceiver"
-102-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:82:13-49
-103            android:exported="true"
-103-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:83:13-36
-104            android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
-104-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:84:13-75
-105            <intent-filter>
-105-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:85:13-89:29
-106                <action android:name="android.intent.action.BOOT_COMPLETED" />
-106-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:86:17-79
-106-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:86:25-76
-107                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-107-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:87:17-82
-107-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:87:25-79
-108                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
-108-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:88:17-82
-108-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:88:25-79
-109            </intent-filter>
-110        </receiver>
-111
-112        <!-- Uninstall Cleanup Receiver (best-effort) -->
-113        <receiver
-113-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:93:9-103:20
-114            android:name="com.nexusblock.service.UninstallCleanupReceiver"
-114-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:94:13-61
-115            android:exported="false" >
-115-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:95:13-37
-116            <intent-filter>
-116-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:96:13-99:29
-117                <action android:name="android.intent.action.PACKAGE_REMOVED" />
-117-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:97:17-80
-117-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:97:25-77
+85        <!-- Watchdog Service -->
+86        <service
+86-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:71:9-78:19
+87            android:name="com.nexusblock.service.VpnWatchdogService"
+87-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:72:13-55
+88            android:exported="false"
+88-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:73:13-37
+89            android:foregroundServiceType="specialUse" >
+89-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:74:13-55
+90            <property
+90-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:65:13-67:47
+91                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+91-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:66:17-76
+92                android:value="watchdog" />
+92-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:67:17-44
+93        </service>
+94
+95        <!-- Quick Settings Tile -->
+96        <service
+96-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:81:9-90:19
+97            android:name="com.nexusblock.service.AdBlockTileService"
+97-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:82:13-55
+98            android:exported="true"
+98-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:83:13-36
+99            android:icon="@drawable/ic_notification"
+99-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:84:13-53
+100            android:label="Ad Block"
+100-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:85:13-37
+101            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" >
+101-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:86:13-77
+102            <intent-filter>
+102-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:87:13-89:29
+103                <action android:name="android.service.quicksettings.action.QS_TILE" />
+103-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:88:17-87
+103-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:88:25-84
+104            </intent-filter>
+105        </service>
+106
+107        <!-- Boot Receiver -->
+108        <receiver
+108-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:93:9-102:20
+109            android:name="com.nexusblock.service.BootReceiver"
+109-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:94:13-49
+110            android:exported="true"
+110-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:95:13-36
+111            android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
+111-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:96:13-75
+112            <intent-filter>
+112-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:97:13-101:29
+113                <action android:name="android.intent.action.BOOT_COMPLETED" />
+113-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:98:17-79
+113-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:98:25-76
+114                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+114-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:99:17-82
+114-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:99:25-79
+115                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+115-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:100:17-82
+115-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:100:25-79
+116            </intent-filter>
+117        </receiver>
 118
-119                <data android:scheme="package" />
-119-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:98:17-50
-119-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:98:23-47
-120            </intent-filter>
-121            <intent-filter>
-121-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:100:13-102:29
-122                <action android:name="android.intent.action.MY_PACKAGE_SUSPENDED" />
-122-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:101:17-85
-122-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:101:25-82
-123            </intent-filter>
-124        </receiver>
+119        <!-- Uninstall Cleanup Receiver (best-effort) -->
+120        <receiver
+120-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:105:9-115:20
+121            android:name="com.nexusblock.service.UninstallCleanupReceiver"
+121-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:106:13-61
+122            android:exported="false" >
+122-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:107:13-37
+123            <intent-filter>
+123-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:108:13-111:29
+124                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+124-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:109:17-80
+124-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:109:25-77
 125
-126        <!-- Hilt-managed WorkManager initialization (removes default initializer) -->
-127        <provider
-128            android:name="androidx.startup.InitializationProvider"
-128-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:107:13-67
-129            android:authorities="com.nexusblock.debug.androidx-startup"
-129-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:108:13-68
-130            android:exported="false" >
-130-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:109:13-37
-131            <meta-data
-131-->[androidx.emoji2:emoji2:1.4.0] /Users/prabha/.gradle/caches/9.5.1/transforms/b06e6143045e266046af96c48a86a527/transformed/emoji2-1.4.0/AndroidManifest.xml:29:13-31:52
-132                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-132-->[androidx.emoji2:emoji2:1.4.0] /Users/prabha/.gradle/caches/9.5.1/transforms/b06e6143045e266046af96c48a86a527/transformed/emoji2-1.4.0/AndroidManifest.xml:30:17-75
-133                android:value="androidx.startup" />
-133-->[androidx.emoji2:emoji2:1.4.0] /Users/prabha/.gradle/caches/9.5.1/transforms/b06e6143045e266046af96c48a86a527/transformed/emoji2-1.4.0/AndroidManifest.xml:31:17-49
-134            <meta-data
-134-->[androidx.lifecycle:lifecycle-process:2.10.0] /Users/prabha/.gradle/caches/9.5.1/transforms/1afe11fd0a5854f0c4183bcf456543a1/transformed/lifecycle-process-2.10.0/AndroidManifest.xml:29:13-31:52
-135                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-135-->[androidx.lifecycle:lifecycle-process:2.10.0] /Users/prabha/.gradle/caches/9.5.1/transforms/1afe11fd0a5854f0c4183bcf456543a1/transformed/lifecycle-process-2.10.0/AndroidManifest.xml:30:17-78
-136                android:value="androidx.startup" />
-136-->[androidx.lifecycle:lifecycle-process:2.10.0] /Users/prabha/.gradle/caches/9.5.1/transforms/1afe11fd0a5854f0c4183bcf456543a1/transformed/lifecycle-process-2.10.0/AndroidManifest.xml:31:17-49
-137            <meta-data
-137-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:29:13-31:52
-138                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-138-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:30:17-85
-139                android:value="androidx.startup" />
-139-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:31:17-49
-140        </provider>
-141
-142        <activity
-142-->[androidx.compose.ui:ui-tooling-android:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/0bc1439ac1efc855ff6b855abf1b47fb/transformed/ui-tooling/AndroidManifest.xml:23:9-25:39
-143            android:name="androidx.compose.ui.tooling.PreviewActivity"
-143-->[androidx.compose.ui:ui-tooling-android:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/0bc1439ac1efc855ff6b855abf1b47fb/transformed/ui-tooling/AndroidManifest.xml:24:13-71
-144            android:exported="true" />
-144-->[androidx.compose.ui:ui-tooling-android:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/0bc1439ac1efc855ff6b855abf1b47fb/transformed/ui-tooling/AndroidManifest.xml:25:13-36
-145
-146        <service
-146-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:39:9-45:35
-147            android:name="androidx.work.impl.background.systemjob.SystemJobService"
-147-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:40:13-84
-148            android:directBootAware="false"
-148-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:41:13-44
-149            android:enabled="@bool/enable_system_job_service_default"
-149-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:42:13-70
-150            android:exported="true"
-150-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:43:13-36
-151            android:permission="android.permission.BIND_JOB_SERVICE" />
-151-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:44:13-69
-152        <service
-152-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:46:9-52:35
-153            android:name="androidx.work.impl.foreground.SystemForegroundService"
-153-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:47:13-81
-154            android:directBootAware="false"
-154-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:48:13-44
-155            android:enabled="@bool/enable_system_foreground_service_default"
-155-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:49:13-77
-156            android:exported="false" />
-156-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:50:13-37
-157
-158        <receiver
-158-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:54:9-59:35
-159            android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
-159-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:55:13-88
-160            android:directBootAware="false"
-160-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:56:13-44
-161            android:enabled="true"
-161-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:57:13-35
-162            android:exported="false" />
-162-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:58:13-37
-163        <receiver
-163-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:60:9-69:20
-164            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
-164-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:61:13-88
-165            android:directBootAware="false"
-165-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:62:13-44
-166            android:enabled="false"
-166-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:63:13-36
-167            android:exported="false" >
-167-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:64:13-37
-168            <intent-filter>
-168-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:66:13-68:29
-169                <action android:name="android.intent.action.BOOT_COMPLETED" />
-169-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:86:17-79
-169-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:86:25-76
-170            </intent-filter>
-171        </receiver>
-172        <receiver
-172-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:70:9-80:20
-173            android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
-173-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:71:13-78
-174            android:directBootAware="false"
-174-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:72:13-44
-175            android:enabled="true"
-175-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:73:13-35
-176            android:exported="true"
-176-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:74:13-36
-177            android:permission="android.permission.DUMP" >
-177-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:75:13-57
-178            <intent-filter>
-178-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:77:13-79:29
-179                <action android:name="androidx.work.diagnostics.REQUEST_DIAGNOSTICS" />
-179-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:78:17-88
-179-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:78:25-85
-180            </intent-filter>
-181        </receiver>
-182
-183        <uses-library
-183-->[androidx.window:window:1.5.0] /Users/prabha/.gradle/caches/9.5.1/transforms/492548ea976fee14a4f7fe2748a13429/transformed/window-1.5.0/AndroidManifest.xml:23:9-25:40
-184            android:name="androidx.window.extensions"
-184-->[androidx.window:window:1.5.0] /Users/prabha/.gradle/caches/9.5.1/transforms/492548ea976fee14a4f7fe2748a13429/transformed/window-1.5.0/AndroidManifest.xml:24:13-54
-185            android:required="false" />
-185-->[androidx.window:window:1.5.0] /Users/prabha/.gradle/caches/9.5.1/transforms/492548ea976fee14a4f7fe2748a13429/transformed/window-1.5.0/AndroidManifest.xml:25:13-37
-186        <uses-library
-186-->[androidx.window:window:1.5.0] /Users/prabha/.gradle/caches/9.5.1/transforms/492548ea976fee14a4f7fe2748a13429/transformed/window-1.5.0/AndroidManifest.xml:26:9-28:40
-187            android:name="androidx.window.sidecar"
-187-->[androidx.window:window:1.5.0] /Users/prabha/.gradle/caches/9.5.1/transforms/492548ea976fee14a4f7fe2748a13429/transformed/window-1.5.0/AndroidManifest.xml:27:13-51
-188            android:required="false" />
-188-->[androidx.window:window:1.5.0] /Users/prabha/.gradle/caches/9.5.1/transforms/492548ea976fee14a4f7fe2748a13429/transformed/window-1.5.0/AndroidManifest.xml:28:13-37
-189
-190        <activity
-190-->[androidx.compose.ui:ui-test-manifest:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/ef0a0af326214d64edea33085bdab0b2/transformed/ui-test-manifest-1.11.1/AndroidManifest.xml:23:9-26:79
-191            android:name="androidx.activity.ComponentActivity"
-191-->[androidx.compose.ui:ui-test-manifest:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/ef0a0af326214d64edea33085bdab0b2/transformed/ui-test-manifest-1.11.1/AndroidManifest.xml:24:13-63
-192            android:exported="true"
-192-->[androidx.compose.ui:ui-test-manifest:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/ef0a0af326214d64edea33085bdab0b2/transformed/ui-test-manifest-1.11.1/AndroidManifest.xml:25:13-36
-193            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
-193-->[androidx.compose.ui:ui-test-manifest:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/ef0a0af326214d64edea33085bdab0b2/transformed/ui-test-manifest-1.11.1/AndroidManifest.xml:26:13-76
-194
-195        <service
-195-->[androidx.room:room-runtime-android:2.8.4] /Users/prabha/.gradle/caches/9.5.1/transforms/035f8769e4912a22a9937d44e00f3b2b/transformed/room-runtime/AndroidManifest.xml:24:9-28:63
-196            android:name="androidx.room.MultiInstanceInvalidationService"
-196-->[androidx.room:room-runtime-android:2.8.4] /Users/prabha/.gradle/caches/9.5.1/transforms/035f8769e4912a22a9937d44e00f3b2b/transformed/room-runtime/AndroidManifest.xml:25:13-74
-197            android:directBootAware="true"
-197-->[androidx.room:room-runtime-android:2.8.4] /Users/prabha/.gradle/caches/9.5.1/transforms/035f8769e4912a22a9937d44e00f3b2b/transformed/room-runtime/AndroidManifest.xml:26:13-43
-198            android:exported="false" />
-198-->[androidx.room:room-runtime-android:2.8.4] /Users/prabha/.gradle/caches/9.5.1/transforms/035f8769e4912a22a9937d44e00f3b2b/transformed/room-runtime/AndroidManifest.xml:27:13-37
-199
-200        <receiver
-200-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:34:9-52:20
-201            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-201-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:35:13-76
-202            android:directBootAware="false"
-202-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:36:13-44
-203            android:enabled="true"
-203-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:37:13-35
-204            android:exported="true"
-204-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:38:13-36
-205            android:permission="android.permission.DUMP" >
-205-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:39:13-57
-206            <intent-filter>
-206-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:40:13-42:29
-207                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-207-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:41:17-91
-207-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:41:25-88
-208            </intent-filter>
-209            <intent-filter>
-209-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:43:13-45:29
-210                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-210-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:44:17-85
-210-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:44:25-82
-211            </intent-filter>
-212            <intent-filter>
-212-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:46:13-48:29
-213                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-213-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:47:17-88
-213-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:47:25-85
-214            </intent-filter>
-215            <intent-filter>
-215-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:49:13-51:29
-216                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-216-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:50:17-95
-216-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:50:25-92
-217            </intent-filter>
-218        </receiver>
-219    </application>
-220
-221</manifest>
+126                <data android:scheme="package" />
+126-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:110:17-50
+126-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:110:23-47
+127            </intent-filter>
+128            <intent-filter>
+128-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:112:13-114:29
+129                <action android:name="android.intent.action.MY_PACKAGE_SUSPENDED" />
+129-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:113:17-85
+129-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:113:25-82
+130            </intent-filter>
+131        </receiver>
+132
+133        <!-- Hilt-managed WorkManager initialization (removes default initializer) -->
+134        <provider
+135            android:name="androidx.startup.InitializationProvider"
+135-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:119:13-67
+136            android:authorities="com.nexusblock.debug.androidx-startup"
+136-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:120:13-68
+137            android:exported="false" >
+137-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:121:13-37
+138            <meta-data
+138-->[androidx.emoji2:emoji2:1.4.0] /Users/prabha/.gradle/caches/9.5.1/transforms/b06e6143045e266046af96c48a86a527/transformed/emoji2-1.4.0/AndroidManifest.xml:29:13-31:52
+139                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+139-->[androidx.emoji2:emoji2:1.4.0] /Users/prabha/.gradle/caches/9.5.1/transforms/b06e6143045e266046af96c48a86a527/transformed/emoji2-1.4.0/AndroidManifest.xml:30:17-75
+140                android:value="androidx.startup" />
+140-->[androidx.emoji2:emoji2:1.4.0] /Users/prabha/.gradle/caches/9.5.1/transforms/b06e6143045e266046af96c48a86a527/transformed/emoji2-1.4.0/AndroidManifest.xml:31:17-49
+141            <meta-data
+141-->[androidx.lifecycle:lifecycle-process:2.10.0] /Users/prabha/.gradle/caches/9.5.1/transforms/1afe11fd0a5854f0c4183bcf456543a1/transformed/lifecycle-process-2.10.0/AndroidManifest.xml:29:13-31:52
+142                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+142-->[androidx.lifecycle:lifecycle-process:2.10.0] /Users/prabha/.gradle/caches/9.5.1/transforms/1afe11fd0a5854f0c4183bcf456543a1/transformed/lifecycle-process-2.10.0/AndroidManifest.xml:30:17-78
+143                android:value="androidx.startup" />
+143-->[androidx.lifecycle:lifecycle-process:2.10.0] /Users/prabha/.gradle/caches/9.5.1/transforms/1afe11fd0a5854f0c4183bcf456543a1/transformed/lifecycle-process-2.10.0/AndroidManifest.xml:31:17-49
+144            <meta-data
+144-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:29:13-31:52
+145                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+145-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:30:17-85
+146                android:value="androidx.startup" />
+146-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:31:17-49
+147        </provider>
+148
+149        <!-- FileProvider for sharing cert files with system cert installer -->
+150        <provider
+151            android:name="androidx.core.content.FileProvider"
+151-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:131:13-62
+152            android:authorities="com.nexusblock.debug.fileprovider"
+152-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:132:13-64
+153            android:exported="false"
+153-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:133:13-37
+154            android:grantUriPermissions="true" >
+154-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:134:13-47
+155            <meta-data
+155-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:135:13-137:54
+156                android:name="android.support.FILE_PROVIDER_PATHS"
+156-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:136:17-67
+157                android:resource="@xml/file_paths" />
+157-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:137:17-51
+158        </provider>
+159
+160        <activity
+160-->[androidx.compose.ui:ui-tooling-android:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/0bc1439ac1efc855ff6b855abf1b47fb/transformed/ui-tooling/AndroidManifest.xml:23:9-25:39
+161            android:name="androidx.compose.ui.tooling.PreviewActivity"
+161-->[androidx.compose.ui:ui-tooling-android:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/0bc1439ac1efc855ff6b855abf1b47fb/transformed/ui-tooling/AndroidManifest.xml:24:13-71
+162            android:exported="true" />
+162-->[androidx.compose.ui:ui-tooling-android:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/0bc1439ac1efc855ff6b855abf1b47fb/transformed/ui-tooling/AndroidManifest.xml:25:13-36
+163
+164        <service
+164-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:39:9-45:35
+165            android:name="androidx.work.impl.background.systemjob.SystemJobService"
+165-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:40:13-84
+166            android:directBootAware="false"
+166-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:41:13-44
+167            android:enabled="@bool/enable_system_job_service_default"
+167-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:42:13-70
+168            android:exported="true"
+168-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:43:13-36
+169            android:permission="android.permission.BIND_JOB_SERVICE" />
+169-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:44:13-69
+170        <service
+170-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:46:9-52:35
+171            android:name="androidx.work.impl.foreground.SystemForegroundService"
+171-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:47:13-81
+172            android:directBootAware="false"
+172-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:48:13-44
+173            android:enabled="@bool/enable_system_foreground_service_default"
+173-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:49:13-77
+174            android:exported="false" />
+174-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:50:13-37
+175
+176        <receiver
+176-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:54:9-59:35
+177            android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
+177-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:55:13-88
+178            android:directBootAware="false"
+178-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:56:13-44
+179            android:enabled="true"
+179-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:57:13-35
+180            android:exported="false" />
+180-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:58:13-37
+181        <receiver
+181-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:60:9-69:20
+182            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
+182-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:61:13-88
+183            android:directBootAware="false"
+183-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:62:13-44
+184            android:enabled="false"
+184-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:63:13-36
+185            android:exported="false" >
+185-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:64:13-37
+186            <intent-filter>
+186-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:66:13-68:29
+187                <action android:name="android.intent.action.BOOT_COMPLETED" />
+187-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:98:17-79
+187-->/Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:98:25-76
+188            </intent-filter>
+189        </receiver>
+190        <receiver
+190-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:70:9-80:20
+191            android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
+191-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:71:13-78
+192            android:directBootAware="false"
+192-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:72:13-44
+193            android:enabled="true"
+193-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:73:13-35
+194            android:exported="true"
+194-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:74:13-36
+195            android:permission="android.permission.DUMP" >
+195-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:75:13-57
+196            <intent-filter>
+196-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:77:13-79:29
+197                <action android:name="androidx.work.diagnostics.REQUEST_DIAGNOSTICS" />
+197-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:78:17-88
+197-->[androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:78:25-85
+198            </intent-filter>
+199        </receiver>
+200
+201        <uses-library
+201-->[androidx.window:window:1.5.0] /Users/prabha/.gradle/caches/9.5.1/transforms/492548ea976fee14a4f7fe2748a13429/transformed/window-1.5.0/AndroidManifest.xml:23:9-25:40
+202            android:name="androidx.window.extensions"
+202-->[androidx.window:window:1.5.0] /Users/prabha/.gradle/caches/9.5.1/transforms/492548ea976fee14a4f7fe2748a13429/transformed/window-1.5.0/AndroidManifest.xml:24:13-54
+203            android:required="false" />
+203-->[androidx.window:window:1.5.0] /Users/prabha/.gradle/caches/9.5.1/transforms/492548ea976fee14a4f7fe2748a13429/transformed/window-1.5.0/AndroidManifest.xml:25:13-37
+204        <uses-library
+204-->[androidx.window:window:1.5.0] /Users/prabha/.gradle/caches/9.5.1/transforms/492548ea976fee14a4f7fe2748a13429/transformed/window-1.5.0/AndroidManifest.xml:26:9-28:40
+205            android:name="androidx.window.sidecar"
+205-->[androidx.window:window:1.5.0] /Users/prabha/.gradle/caches/9.5.1/transforms/492548ea976fee14a4f7fe2748a13429/transformed/window-1.5.0/AndroidManifest.xml:27:13-51
+206            android:required="false" />
+206-->[androidx.window:window:1.5.0] /Users/prabha/.gradle/caches/9.5.1/transforms/492548ea976fee14a4f7fe2748a13429/transformed/window-1.5.0/AndroidManifest.xml:28:13-37
+207
+208        <activity
+208-->[androidx.compose.ui:ui-test-manifest:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/ef0a0af326214d64edea33085bdab0b2/transformed/ui-test-manifest-1.11.1/AndroidManifest.xml:23:9-26:79
+209            android:name="androidx.activity.ComponentActivity"
+209-->[androidx.compose.ui:ui-test-manifest:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/ef0a0af326214d64edea33085bdab0b2/transformed/ui-test-manifest-1.11.1/AndroidManifest.xml:24:13-63
+210            android:exported="true"
+210-->[androidx.compose.ui:ui-test-manifest:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/ef0a0af326214d64edea33085bdab0b2/transformed/ui-test-manifest-1.11.1/AndroidManifest.xml:25:13-36
+211            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+211-->[androidx.compose.ui:ui-test-manifest:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/ef0a0af326214d64edea33085bdab0b2/transformed/ui-test-manifest-1.11.1/AndroidManifest.xml:26:13-76
+212
+213        <service
+213-->[androidx.room:room-runtime-android:2.8.4] /Users/prabha/.gradle/caches/9.5.1/transforms/035f8769e4912a22a9937d44e00f3b2b/transformed/room-runtime/AndroidManifest.xml:24:9-28:63
+214            android:name="androidx.room.MultiInstanceInvalidationService"
+214-->[androidx.room:room-runtime-android:2.8.4] /Users/prabha/.gradle/caches/9.5.1/transforms/035f8769e4912a22a9937d44e00f3b2b/transformed/room-runtime/AndroidManifest.xml:25:13-74
+215            android:directBootAware="true"
+215-->[androidx.room:room-runtime-android:2.8.4] /Users/prabha/.gradle/caches/9.5.1/transforms/035f8769e4912a22a9937d44e00f3b2b/transformed/room-runtime/AndroidManifest.xml:26:13-43
+216            android:exported="false" />
+216-->[androidx.room:room-runtime-android:2.8.4] /Users/prabha/.gradle/caches/9.5.1/transforms/035f8769e4912a22a9937d44e00f3b2b/transformed/room-runtime/AndroidManifest.xml:27:13-37
+217
+218        <receiver
+218-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:34:9-52:20
+219            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+219-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:35:13-76
+220            android:directBootAware="false"
+220-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:36:13-44
+221            android:enabled="true"
+221-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:37:13-35
+222            android:exported="true"
+222-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:38:13-36
+223            android:permission="android.permission.DUMP" >
+223-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:39:13-57
+224            <intent-filter>
+224-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:40:13-42:29
+225                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+225-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:41:17-91
+225-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:41:25-88
+226            </intent-filter>
+227            <intent-filter>
+227-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:43:13-45:29
+228                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+228-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:44:17-85
+228-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:44:25-82
+229            </intent-filter>
+230            <intent-filter>
+230-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:46:13-48:29
+231                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+231-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:47:17-88
+231-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:47:25-85
+232            </intent-filter>
+233            <intent-filter>
+233-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:49:13-51:29
+234                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+234-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:50:17-95
+234-->[androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gradle/caches/9.5.1/transforms/92440bbe203d1a8a720dafb10114415f/transformed/profileinstaller-1.4.1/AndroidManifest.xml:50:25-92
+235            </intent-filter>
+236        </receiver>
+237    </application>
+238
+239</manifest>

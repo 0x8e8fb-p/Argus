@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="accent">#FFFFC857</color>
-    <color name="background">#FF080B0F</color>
-    <color name="error">#FFFF6B7A</color>
-    <color name="on_background">#FFEAF1F7</color>
-    <color name="on_surface">#FFEAF1F7</color>
-    <color name="primary">#FF66E3D8</color>
-    <color name="primary_dark">#FF123E44</color>
-    <color name="surface">#FF10161D</color>
+    <color name="accent">#FF69F0AE</color>
+    <color name="background">#FF050A08</color>
+    <color name="error">#FFFF5252</color>
+    <color name="on_background">#FFF1F8F4</color>
+    <color name="on_surface">#FFF1F8F4</color>
+    <color name="primary">#FF00E676</color>
+    <color name="primary_dark">#FF0A3D1E</color>
+    <color name="surface">#FF0A1F12</color>
     <string name="accessibility_service_desc">Detects and skips in-stream video ads using audio and visual cues. No personal data is collected.</string>
     <string name="add_rule">Add Rule</string>
     <string name="app_desc">System-wide ad blocker for Android TV</string>
-    <string name="app_name">Argus Ad Blocker</string>
+    <string name="app_name">ArgusBlock</string>
     <string name="blocklist_source_adguard">AdGuard YouTube</string>
     <string name="blocklist_source_firebog">Firebog YouTube Ads</string>
     <string name="blocklist_source_oisd">OISD Big</string>
@@ -48,7 +48,7 @@
     <string name="watchdog_notification_text">Ensuring ad blocking stays active</string>
     <string name="watchdog_notification_title">Argus Watchdog</string>
     <string name="whitelist_description">Select apps to bypass ad blocking</string>
-    <style name="Theme.NexusBlock" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.ArgusBlock" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/background</item>
         <item name="android:colorPrimary">@color/primary</item>
         <item name="android:colorPrimaryDark">@color/primary_dark</item>
