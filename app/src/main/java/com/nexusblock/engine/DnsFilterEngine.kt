@@ -113,7 +113,10 @@ class DnsFilterEngine @Inject constructor(
     private var startJob: Job? = null
     private var customRulesJob: Job? = null
 
-    private val dnsCache = ConcurrentHashMap<String, Message>(4096)
+    // Cache stores raw wire-format bytes so the immutable payload is safe.
+    // A new Message is parsed from bytes on every retrieval, preventing
+    // mutation of shared objects.
+    private val dnsCache = ConcurrentHashMap<String, ByteArray>(4096)
 
     // Negative cache: NXDOMAIN/SERVFAIL responses cached for 60s to prevent
     // repeated upstream queries for blocked/failed domains (apps retry 3-5x).
@@ -155,6 +158,12 @@ class DnsFilterEngine @Inject constructor(
 
     fun start(dnsAddress: InetAddress) {
         if (_isRunning.value || startJob?.isActive == true) return
+        // Recreate scope in case it was cancelled by a previous stop()
+        if (!scope.isActive) {
+            // Cannot restart a cancelled scope; safe-guard by not recreating here
+            // because scope is a val. Instead we ensure stop() never cancels the
+            // top-level scope — it only cancels children.
+        }
         startJob = scope.launch {
             upstreamManager = DnsUpstreamManager(okHttpClient, dnsProfileManager)
             reloadRules()
@@ -177,6 +186,8 @@ class DnsFilterEngine @Inject constructor(
         startJob?.cancel()
         startJob = null
         logJob?.cancel()
+        // Cancel customRulesJob so it doesn't leak across restarts
+        customRulesJob?.cancel()
         clearCache()
         Log.i(TAG, "DNS engine stopped")
     }
@@ -238,16 +249,13 @@ class DnsFilterEngine @Inject constructor(
             }
         }
 
-        // 1. Check cache
-        val cached = dnsCache[cacheKey]
-        if (cached != null) {
-            val response = Message(query.header.id)
+        // 1. Check cache (raw bytes → new Message each time to avoid mutation)
+        val cachedBytes = dnsCache[cacheKey]
+        if (cachedBytes != null) {
+            val response = Message(cachedBytes)
+            response.header.id = query.header.id
             response.header.setFlag(Flags.QR.toInt())
             response.header.setFlag(Flags.RA.toInt())
-            response.addRecord(question, Section.QUESTION)
-            for (record in cached.getSectionArray(Section.ANSWER)) {
-                response.addRecord(record, Section.ANSWER)
-            }
             queriesAllowed++
             return response.toWire()
         }
@@ -258,6 +266,8 @@ class DnsFilterEngine @Inject constructor(
         if (negTs != null && System.currentTimeMillis() - negTs < NEGATIVE_CACHE_TTL_MS) {
             return buildServFail(query)
         }
+        // Prune stale negative entries opportunistically to avoid unbounded growth
+        pruneNegativeCache()
 
         // 2. Critical allows — bypass ALL blocking (local + upstream) and use
         //    plain unfiltered DNS so video playback isn't broken by AdGuard.
@@ -361,9 +371,22 @@ class DnsFilterEngine @Inject constructor(
         try {
             val response = Message(responseBytes)
             if (response.rcode == Rcode.NOERROR) {
-                dnsCache[cacheKey] = response
+                dnsCache[cacheKey] = responseBytes.copyOf()
             }
         } catch (_: Exception) {}
+    }
+
+    /** Opportunistic TTL eviction so negativeDnsCache doesn't grow forever. */
+    private fun pruneNegativeCache() {
+        if (negativeDnsCache.size < 512) return
+        val now = System.currentTimeMillis()
+        val iter = negativeDnsCache.entries.iterator()
+        while (iter.hasNext()) {
+            val entry = iter.next()
+            if (now - entry.value > NEGATIVE_CACHE_TTL_MS) {
+                iter.remove()
+            }
+        }
     }
 
     /**

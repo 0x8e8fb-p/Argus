@@ -5,13 +5,31 @@ import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import androidx.annotation.RequiresApi
+import kotlinx.coroutines.*
 
 @RequiresApi(Build.VERSION_CODES.N)
 class AdBlockTileService : TileService() {
 
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var observeJob: Job? = null
+
     override fun onStartListening() {
         super.onStartListening()
-        updateTile()
+        observeJob?.cancel()
+        observeJob = scope.launch {
+            NexusVpnService.runningState.collect { running ->
+                qsTile?.let { tile ->
+                    tile.state = if (running) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+                    tile.label = "Ad Block"
+                    tile.updateTile()
+                }
+            }
+        }
+    }
+
+    override fun onStopListening() {
+        observeJob?.cancel()
+        super.onStopListening()
     }
 
     override fun onClick() {
@@ -25,18 +43,6 @@ class AdBlockTileService : TileService() {
         } else {
             startService(intent)
         }
-        // Delay tile update slightly to let service state change
-        qsTile?.let { tile ->
-            tile.state = if (running) Tile.STATE_INACTIVE else Tile.STATE_ACTIVE
-            tile.updateTile()
-        }
-    }
-
-    private fun updateTile() {
-        qsTile?.let { tile ->
-            tile.state = if (NexusVpnService.isRunning) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
-            tile.label = "Ad Block"
-            tile.updateTile()
-        }
+        // State refresh is handled by onStartListening + collected flow above.
     }
 }

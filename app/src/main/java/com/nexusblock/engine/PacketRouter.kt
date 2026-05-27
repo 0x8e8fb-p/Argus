@@ -252,18 +252,24 @@ class PacketRouter @Inject constructor(
                             buffer.get(queryPayload)
                             buffer.position(mark)
 
-                            // Process DNS inline on the router thread to avoid
-                            // coroutine explosion under burst loads.
-                            val responsePayload = try {
-                                runBlocking(Dispatchers.IO) { dnsEngine.resolveDns(queryPayload) }
-                            } catch (e: Exception) {
-                                if (isRunning) Log.w(TAG, "DNS resolution error", e)
-                                null
+                            // Offload DNS to a coroutine so the TUN reader never blocks.
+                            // dnsEngine already caps concurrent upstream queries (Semaphore).
+                            scope.launch {
+                                val responsePayload = try {
+                                    dnsEngine.resolveDns(queryPayload)
+                                } catch (e: Exception) {
+                                    if (isRunning) Log.w(TAG, "DNS resolution error", e)
+                                    null
+                                }
+                                if (responsePayload != null && isRunning) {
+                                    try {
+                                        sendDnsResponse(output, srcIp, dstIp, srcPort, dstPort, responsePayload)
+                                    } catch (e: Exception) {
+                                        if (isRunning) Log.w(TAG, "DNS response injection error", e)
+                                    }
+                                }
                             }
-                            if (responsePayload != null) {
-                                sendDnsResponse(output, srcIp, dstIp, srcPort, dstPort, responsePayload)
-                            }
-                            return // drop original, response injected above
+                            return // drop original, response injected async above
                         }
                     }
 
@@ -321,7 +327,7 @@ class PacketRouter @Inject constructor(
 
     private fun processIPv6(buffer: ByteBuffer, output: FileChannel) {
         if (buffer.remaining() < 40) {
-            packetsBlocked++
+            // Malformed/short IPv6 packet — drop silently without counting as blocked
             return
         }
         val pos = buffer.position()
@@ -346,15 +352,20 @@ class PacketRouter @Inject constructor(
                     buffer.get(dstIp)
                     val srcPort = buffer.getShort(udpOffset).toInt() and 0xFFFF
 
-                    // Process DNS inline to avoid coroutine explosion
-                    val responsePayload = try {
-                        runBlocking(Dispatchers.IO) { dnsEngine.resolveDns(queryPayload) }
-                    } catch (e: Exception) {
-                        if (isRunning) Log.w(TAG, "IPv6 DNS resolution error", e)
-                        null
-                    }
-                    if (responsePayload != null) {
-                        sendDnsResponseV6(output, srcIp, dstIp, srcPort, dstPort, responsePayload)
+                    scope.launch {
+                        val responsePayload = try {
+                            dnsEngine.resolveDns(queryPayload)
+                        } catch (e: Exception) {
+                            if (isRunning) Log.w(TAG, "IPv6 DNS resolution error", e)
+                            null
+                        }
+                        if (responsePayload != null && isRunning) {
+                            try {
+                                sendDnsResponseV6(output, srcIp, dstIp, srcPort, dstPort, responsePayload)
+                            } catch (e: Exception) {
+                                if (isRunning) Log.w(TAG, "IPv6 DNS response injection error", e)
+                            }
+                        }
                     }
                     return // DNS handled; don't count as blocked
                 }
@@ -517,6 +528,9 @@ class PacketRouter @Inject constructor(
             synchronized(outputLock) {
                 output.write(packet)
             }
+        } catch (e: java.nio.channels.ClosedChannelException) {
+            Log.w(TAG, "TUN channel closed, triggering router stop")
+            isRunning = false
         } catch (_: Exception) {}
     }
 

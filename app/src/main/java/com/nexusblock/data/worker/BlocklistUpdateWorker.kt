@@ -37,6 +37,12 @@ class BlocklistUpdateWorker @AssistedInject constructor(
         private const val TAG = "NexusBlock/Updater"
         private const val ETAG_PREFIX = "blocklist_etag_"
 
+        /** Work output keys */
+        const val KEY_UPDATED = "updated_sources"
+        const val KEY_SKIPPED = "skipped_sources"
+        const val KEY_FAILED = "failed_sources"
+        const val KEY_TOTAL_RULES = "total_rules"
+
         fun schedule(context: Context) {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -70,7 +76,7 @@ class BlocklistUpdateWorker @AssistedInject constructor(
 
             WorkManager.getInstance(context).enqueueUniqueWork(
                 "${Constants.WORK_TAG_BLOCKLIST}_initial",
-                ExistingWorkPolicy.KEEP,
+                ExistingWorkPolicy.REPLACE,
                 request
             )
         }
@@ -78,8 +84,10 @@ class BlocklistUpdateWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         Log.i(TAG, "Starting blocklist update")
-        var successCount = 0
-        var failureCount = 0
+        val updatedSources = mutableListOf<String>()
+        val skippedSources = mutableListOf<String>()
+        val failedSources = mutableListOf<String>()
+        var totalRules = 0
 
         for (source in BlocklistSources.remote) {
             val url = source.url ?: continue
@@ -97,18 +105,19 @@ class BlocklistUpdateWorker @AssistedInject constructor(
                 )
                 if (domains == null) {
                     // 304 Not Modified — already up to date
-                    successCount++
+                    skippedSources.add(source.name)
                 } else if (domains.isNotEmpty()) {
                     blocklistRepo.replaceSource(source.id, domains, source.defaultEnabled)
+                    totalRules += domains.size
+                    updatedSources.add("${source.name} (${domains.size})")
                     Log.i(TAG, "Updated ${source.id} with ${domains.size} domains")
-                    successCount++
                 } else {
                     Log.w(TAG, "${source.id} returned no domains")
-                    failureCount++
+                    failedSources.add(source.name)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to update ${source.id}", e)
-                failureCount++
+                failedSources.add(source.name)
             }
         }
 
@@ -120,9 +129,12 @@ class BlocklistUpdateWorker @AssistedInject constructor(
                 builtins,
                 BlocklistSources.builtin.defaultEnabled
             )
+            totalRules += builtins.size
+            updatedSources.add("Built-in (${builtins.size})")
             Log.i(TAG, "Updated built-in rules: ${builtins.size}")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to update built-in domains", e)
+            failedSources.add("Built-in")
         }
 
         // Reload engine rules if VPN is running
@@ -135,8 +147,15 @@ class BlocklistUpdateWorker @AssistedInject constructor(
             }
         }
 
-        if (successCount > 0) {
-            Result.success()
+        val output = workDataOf(
+            KEY_UPDATED to updatedSources.joinToString(", "),
+            KEY_SKIPPED to skippedSources.joinToString(", "),
+            KEY_FAILED to failedSources.joinToString(", "),
+            KEY_TOTAL_RULES to totalRules
+        )
+
+        return@withContext if (updatedSources.isNotEmpty() || skippedSources.isNotEmpty()) {
+            Result.success(output)
         } else {
             Result.retry()
         }

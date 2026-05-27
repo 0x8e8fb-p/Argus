@@ -19,6 +19,9 @@ class NexusBlockApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
+    @Inject
+    lateinit var settingsRepo: com.nexusblock.data.repository.SettingsRepository
+
     private val applicationScope = CoroutineScope(SupervisorJob())
 
     override fun onCreate() {
@@ -26,6 +29,9 @@ class NexusBlockApplication : Application(), Configuration.Provider {
         // BouncyCastle provider removed — no proxy/MitM layer needs it anymore.
         createNotificationChannels()
         initializeWorkManager()
+
+        // Ensure default streaming-app bypass rules are applied on first launch
+        settingsRepo.initDefaultBypassIfEmpty()
 
         // Blocklist updates are manual-only via Settings to avoid
         // network hit and SQLite churn on every cold start.

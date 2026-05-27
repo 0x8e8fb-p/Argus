@@ -106,10 +106,6 @@
             android:name=".service.UninstallCleanupReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_REMOVED" />
-                <data android:scheme="package" />
-            </intent-filter>
-            <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_SUSPENDED" />
             </intent-filter>
         </receiver>

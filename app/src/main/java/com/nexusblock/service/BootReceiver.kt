@@ -5,7 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
 @AndroidEntryPoint(BroadcastReceiver::class)
 class BootReceiver : BroadcastReceiver() {
@@ -14,6 +20,9 @@ class BootReceiver : BroadcastReceiver() {
         private const val TAG = "NexusBlock/Boot"
     }
 
+    @Inject
+    lateinit var dataStore: DataStore<Preferences>
+
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED ||
             intent.action == "android.intent.action.QUICKBOOT_POWERON" ||
@@ -21,11 +30,13 @@ class BootReceiver : BroadcastReceiver() {
         ) {
             Log.i(TAG, "Boot completed received")
 
-            // Hilt injection in BroadcastReceiver
-            // We can't fully inject in onReceive for receivers, so use a fallback
-            val prefs = context.getSharedPreferences("nexusblock_prefs", Context.MODE_PRIVATE)
-            val autoStart = prefs.getBoolean("auto_start", true)
-            val wasActive = prefs.getBoolean("vpn_active", false)
+            val autoStart: Boolean
+            val wasActive: Boolean
+            runBlocking {
+                val prefs = dataStore.data.first()
+                autoStart = prefs[booleanPreferencesKey("auto_start")] ?: true
+                wasActive = prefs[booleanPreferencesKey("vpn_active")] ?: false
+            }
 
             if (autoStart && wasActive) {
                 Log.i(TAG, "Auto-starting VPN service")

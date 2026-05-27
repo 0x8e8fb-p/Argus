@@ -153,6 +153,7 @@ private fun TechniqueToggleRow(
 private fun BlocklistsContent(viewModel: BlocklistViewModel) {
     val sources by viewModel.sources.collectAsState()
     val isUpdating by viewModel.isUpdating.collectAsState()
+    val updateResult by viewModel.lastUpdateResult.collectAsState()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -162,8 +163,40 @@ private fun BlocklistsContent(viewModel: BlocklistViewModel) {
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                // Update status pill
+                if (!updateResult.isIdle) {
+                    val statusColor = when (updateResult.status) {
+                        androidx.work.WorkInfo.State.SUCCEEDED -> MaterialTheme.colorScheme.secondary
+                        androidx.work.WorkInfo.State.FAILED -> MaterialTheme.colorScheme.error
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                    val statusText = when (updateResult.status) {
+                        androidx.work.WorkInfo.State.SUCCEEDED -> {
+                            val parts = buildList {
+                                if (updateResult.updated.isNotBlank()) add("Updated: ${updateResult.updated}")
+                                if (updateResult.skipped.isNotBlank()) add("No change: ${updateResult.skipped}")
+                                if (updateResult.failed.isNotBlank()) add("Failed: ${updateResult.failed}")
+                            }
+                            if (parts.isEmpty()) "Up to date" else parts.joinToString("  •  ")
+                        }
+                        androidx.work.WorkInfo.State.FAILED -> "Update failed"
+                        androidx.work.WorkInfo.State.RUNNING -> "Updating blocklists..."
+                        else -> "Checking for updates..."
+                    }
+                    Text(
+                        text = statusText,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = statusColor,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f).padding(end = 12.dp)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
                 Button(
                     onClick = { viewModel.updateNow() },
                     enabled = !isUpdating

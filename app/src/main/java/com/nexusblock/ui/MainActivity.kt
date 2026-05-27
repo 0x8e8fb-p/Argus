@@ -1,6 +1,5 @@
 package com.nexusblock.ui
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.VpnService
@@ -9,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.EaseInOutCubic
 import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.animation.core.tween
@@ -46,13 +46,24 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         private const val TAG = "ArgusBlock/Main"
-        private const val REQUEST_VPN = 1001
     }
 
     private var pendingVpnStart = false
 
     @Inject
     lateinit var settingsRepo: SettingsRepository
+
+    private val vpnPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        pendingVpnStart = false
+        if (result.resultCode == Activity.RESULT_OK) {
+            Log.i(TAG, "VPN permission granted by user")
+            startVpnService()
+        } else {
+            Log.w(TAG, "VPN permission denied or cancelled by user")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +72,7 @@ class MainActivity : ComponentActivity() {
             if (intent != null) {
                 Log.i(TAG, "Auto-requesting VPN permission on launch")
                 pendingVpnStart = true
-                startActivityForResult(intent, REQUEST_VPN)
+                vpnPermissionLauncher.launch(intent)
             } else {
                 Log.i(TAG, "VPN permission already granted, auto-starting service")
                 if (!NexusVpnService.isRunning) startVpnService()
@@ -75,7 +86,7 @@ class MainActivity : ComponentActivity() {
                         if (intent != null) {
                             Log.i(TAG, "Launching VPN permission dialog")
                             pendingVpnStart = true
-                            startActivityForResult(intent, REQUEST_VPN)
+                            vpnPermissionLauncher.launch(intent)
                         } else {
                             Log.i(TAG, "VPN permission already granted, starting service")
                             startVpnService()
@@ -95,21 +106,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == REQUEST_VPN) {
-            pendingVpnStart = false
-            if (resultCode == Activity.RESULT_OK) {
-                Log.i(TAG, "VPN permission granted by user")
-                startVpnService()
-            } else {
-                Log.w(TAG, "VPN permission denied or cancelled by user")
-            }
-            return
-        }
-        super.onActivityResult(requestCode, resultCode, data)
-    }
-
-    @SuppressLint("NewApi")
     private fun startVpnService() {
         val serviceIntent = Intent(this, NexusVpnService::class.java).apply {
             action = NexusVpnService.ACTION_START

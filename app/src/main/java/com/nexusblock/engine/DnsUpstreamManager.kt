@@ -21,16 +21,15 @@ import java.util.concurrent.TimeUnit
  * [DnsProviderProfile] from [DnsProfileManager].
  *
  * Strategy:
- * 1. Try DoH (most private, ads already blocked by the resolver).
- * 2. If DoH fails, try DoT (encrypted, fast).
- * 3. If DoT fails, fall back to plain UDP (fastest, least private).
- * 4. If plain UDP fails, try the built-in fallback servers (8.8.8.8, 1.1.1.1).
+ * 1. Try plain UDP (fastest, single round-trip ~5-15ms).
+ * 2. If plain fails, try DoH (encrypted, ads blocked by resolver).
+ * 3. If DoH fails, fall back to generic plain UDP servers (8.8.8.8, 1.1.1.1).
  *
  * Resolution order is chosen because:
- * - DoH = maximum ad-blocking effectiveness (the resolver sees the full hostname).
- * - DoT = good balance of speed + privacy.
- * - Plain UDP = fastest, works on all networks (some mobile/carrier Wi-Fi
- *   blocks DoH/DoT entirely).
+ * - Plain UDP resolves in ~5-15ms while DoH needs TCP+TLS+HTTP (200-500ms).
+ * - The upstream AdGuard/Quad9 plain server still performs ad-blocking at
+ *   the resolver level, so filtering quality is NOT reduced.
+ * - Some mobile/carrier Wi-Fi blocks DoH entirely, making plain essential.
  *
  * All DNS queries are sent through VpnProtector so they exit via the
  * underlying (non-VPN) network, avoiding recursive loops.
