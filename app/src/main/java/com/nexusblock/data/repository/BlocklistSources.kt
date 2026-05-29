@@ -27,19 +27,22 @@ object BlocklistSources {
             id = "oisd",
             name = "OISD Big",
             url = Constants.BLOCKLIST_OISD,
-            format = BlocklistFormat.ADGUARD
+            format = BlocklistFormat.ADGUARD,
+            defaultEnabled = false
         ),
         BlocklistSourceDefinition(
             id = "hagezi_pro",
             name = "HaGeZi Multi Pro",
             url = Constants.BLOCKLIST_HAGEZI_PRO,
-            format = BlocklistFormat.ADGUARD
+            format = BlocklistFormat.ADGUARD,
+            defaultEnabled = false
         ),
         BlocklistSourceDefinition(
             id = "hagezi_pro_plus",
             name = "HaGeZi Multi Pro++",
             url = Constants.BLOCKLIST_HAGEZI_PRO_PLUS,
-            format = BlocklistFormat.ADGUARD
+            format = BlocklistFormat.ADGUARD,
+            defaultEnabled = false
         ),
         BlocklistSourceDefinition(
             id = "hagezi_doh",
@@ -63,13 +66,15 @@ object BlocklistSources {
             id = "stevenblack",
             name = "StevenBlack Hosts",
             url = Constants.BLOCKLIST_STEVENBLACK,
-            format = BlocklistFormat.HOSTS
+            format = BlocklistFormat.HOSTS,
+            defaultEnabled = false
         ),
         BlocklistSourceDefinition(
             id = "firebog",
             name = "Firebog Ads",
             url = Constants.BLOCKLIST_FIREBOG,
-            format = BlocklistFormat.HOSTS
+            format = BlocklistFormat.HOSTS,
+            defaultEnabled = false
         ),
         BlocklistSourceDefinition(
             id = "perflyst_android",
@@ -99,7 +104,8 @@ object BlocklistSources {
             id = "hagezi_tif",
             name = "HaGeZi Threat Intelligence",
             url = Constants.BLOCKLIST_HAGEZI_TIF,
-            format = BlocklistFormat.ADGUARD
+            format = BlocklistFormat.ADGUARD,
+            defaultEnabled = false
         ),
         BlocklistSourceDefinition(
             id = "1hosts_lite",

@@ -1,6 +1,6 @@
 -- Merging decision tree log ---
 provider#androidx.startup.InitializationProvider
-INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:118:9-127:20
+INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:113:9-122:20
 MERGED from [androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:29:9-37:20
 MERGED from [androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:29:9-37:20
 MERGED from [androidx.emoji2:emoji2:1.4.0] /Users/prabha/.gradle/caches/9.5.1/transforms/b06e6143045e266046af96c48a86a527/transformed/emoji2-1.4.0/AndroidManifest.xml:24:9-32:20
@@ -12,30 +12,30 @@ MERGED from [androidx.profileinstaller:profileinstaller:1.4.1] /Users/prabha/.gr
 MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/prabha/.gradle/caches/9.5.1/transforms/fcf6dfbc6e3eda01d87a06915b5a90a1/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
 MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/prabha/.gradle/caches/9.5.1/transforms/fcf6dfbc6e3eda01d87a06915b5a90a1/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
 	tools:node
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:122:13-31
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:117:13-31
 	android:authorities
 		INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:120:13-68
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:115:13-68
 	android:exported
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:121:13-37
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:116:13-37
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:119:13-67
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:114:13-67
 provider#androidx.core.content.FileProvider
-INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:130:9-138:20
+INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:125:9-133:20
 	android:grantUriPermissions
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:134:13-47
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:129:13-47
 	android:authorities
 		INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:132:13-64
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:127:13-64
 	android:exported
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:133:13-37
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:128:13-37
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:131:13-62
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:126:13-62
 manifest
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:2:1-142:12
-INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:2:1-142:12
-INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:2:1-142:12
-INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:2:1-142:12
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:2:1-137:12
+INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:2:1-137:12
+INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:2:1-137:12
+INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:2:1-137:12
 MERGED from [androidx.tv:tv-foundation:1.0.0] /Users/prabha/.gradle/caches/9.5.1/transforms/450b351726a47202b6c5fd1efe5c411c/transformed/tv-foundation-1.0.0/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.tv:tv-material:1.1.0] /Users/prabha/.gradle/caches/9.5.1/transforms/98c366776f45d4c4bf7907e0e518f52d/transformed/tv-material-1.1.0/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.hilt:hilt-navigation-compose:1.3.0] /Users/prabha/.gradle/caches/9.5.1/transforms/f741d5696591df7d83cd290491fa3323/transformed/hilt-navigation-compose-1.3.0/AndroidManifest.xml:2:1-7:12
@@ -127,7 +127,6 @@ MERGED from [androidx.print:print:1.0.0] /Users/prabha/.gradle/caches/9.5.1/tran
 MERGED from [androidx.annotation:annotation-experimental:1.5.0] /Users/prabha/.gradle/caches/9.5.1/transforms/923081c5840b3adb544acf15a6a27752/transformed/annotation-experimental-1.5.0/AndroidManifest.xml:2:1-7:12
 MERGED from [com.google.dagger:dagger-lint-aar:2.54] /Users/prabha/.gradle/caches/9.5.1/transforms/bba19b49b2d0ccbef896670edfd26be8/transformed/dagger-lint-aar-2.54/AndroidManifest.xml:16:1-19:12
 	package
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:4:5-29
 		INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml
 	android:versionName
 		INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml
@@ -138,80 +137,80 @@ MERGED from [com.google.dagger:dagger-lint-aar:2.54] /Users/prabha/.gradle/cache
 	xmlns:android
 		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:2:11-69
 uses-permission#android.permission.INTERNET
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:7:5-67
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:6:5-67
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:7:22-64
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:6:22-64
 uses-permission#android.permission.ACCESS_NETWORK_STATE
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:8:5-79
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:7:5-79
 MERGED from [androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:24:5-79
 MERGED from [androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:24:5-79
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:8:22-76
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:7:22-76
 uses-permission#android.permission.ACCESS_WIFI_STATE
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:9:5-76
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:8:5-76
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:9:22-73
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:8:22-73
 uses-permission#android.permission.FOREGROUND_SERVICE
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:10:5-77
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:9:5-77
 MERGED from [androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:26:5-77
 MERGED from [androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:26:5-77
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:10:22-74
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:9:22-74
 uses-permission#android.permission.FOREGROUND_SERVICE_SPECIAL_USE
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:11:5-89
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:10:5-89
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:11:22-86
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:10:22-86
 uses-permission#android.permission.POST_NOTIFICATIONS
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:12:5-77
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:11:5-77
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:12:22-74
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:11:22-74
 uses-permission#android.permission.RECEIVE_BOOT_COMPLETED
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:13:5-81
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:12:5-81
 MERGED from [androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:25:5-81
 MERGED from [androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:25:5-81
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:13:22-78
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:12:22-78
 uses-permission#android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:14:5-95
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:13:5-95
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:14:22-92
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:13:22-92
 uses-permission#android.permission.SCHEDULE_EXACT_ALARM
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:15:5-79
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:14:5-79
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:15:22-76
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:14:22-76
 uses-permission#android.permission.QUERY_ALL_PACKAGES
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:16:5-17:53
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:15:5-16:53
 	tools:ignore
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:17:9-50
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:16:9-50
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:16:22-74
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:15:22-74
 uses-permission#android.permission.BIND_VPN_SERVICE
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:18:5-19:47
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:17:5-18:47
 	tools:ignore
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:19:9-44
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:18:9-44
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:18:22-72
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:17:22-72
 uses-permission#android.permission.WRITE_SECURE_SETTINGS
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:20:5-21:47
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:19:5-20:47
 	tools:ignore
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:21:9-44
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:20:9-44
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:20:22-77
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:19:22-77
 uses-feature#android.software.leanback
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:24:5-26:35
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:23:5-25:35
 	android:required
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:26:9-32
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:25:9-32
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:25:9-49
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:24:9-49
 uses-feature#android.hardware.touchscreen
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:27:5-29:36
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:26:5-28:36
 	android:required
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:29:9-33
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:28:9-33
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:28:9-52
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:27:9-52
 application
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:31:5-140:19
-INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:31:5-140:19
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:30:5-135:19
+INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:30:5-135:19
 MERGED from [androidx.compose.ui:ui-tooling-android:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/0bc1439ac1efc855ff6b855abf1b47fb/transformed/ui-tooling/AndroidManifest.xml:22:5-26:19
 MERGED from [androidx.compose.ui:ui-tooling-android:1.11.1] /Users/prabha/.gradle/caches/9.5.1/transforms/0bc1439ac1efc855ff6b855abf1b47fb/transformed/ui-tooling/AndroidManifest.xml:22:5-26:19
 MERGED from [androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:28:5-81:19
@@ -239,156 +238,146 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/prab
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.18.0] /Users/prabha/.gradle/caches/9.5.1/transforms/32eed959d002fa4ef56d330e9bad7c62/transformed/core-1.18.0/AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:38:9-35
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:37:9-35
 	android:label
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:36:9-35
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:35:9-30
 	android:roundIcon
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:37:9-54
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:36:9-54
 	android:icon
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:35:9-43
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:34:9-43
 	android:allowBackup
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:33:9-35
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:32:9-35
 	android:banner
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:34:9-45
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:33:9-45
 	android:theme
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:39:9-48
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:38:9-43
 	android:networkSecurityConfig
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:40:9-69
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:39:9-69
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:32:9-46
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:31:9-41
 activity#com.nexusblock.ui.MainActivity
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:43:9-54:20
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:42:9-53:20
 	android:launchMode
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:47:13-44
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:46:13-44
 	android:exported
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:46:13-36
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:45:13-36
 	android:configChanges
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:45:13-93
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:44:13-93
 	android:theme
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:48:13-52
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:47:13-47
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:44:13-44
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:43:13-44
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER+category:name:android.intent.category.LEANBACK_LAUNCHER
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:49:13-53:29
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:48:13-52:29
 action#android.intent.action.MAIN
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:50:17-69
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:49:17-69
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:50:25-66
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:49:25-66
 category#android.intent.category.LEANBACK_LAUNCHER
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:51:17-86
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:50:17-86
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:51:27-83
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:50:27-83
 category#android.intent.category.LAUNCHER
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:52:17-77
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:51:17-77
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:52:27-74
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:51:27-74
 service#com.nexusblock.service.NexusVpnService
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:57:9-68:19
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:56:9-67:19
 	android:exported
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:59:13-37
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:58:13-37
 	android:permission
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:61:13-69
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:60:13-69
 	android:foregroundServiceType
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:60:13-55
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:59:13-55
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:58:13-52
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:57:13-52
 intent-filter#action:name:android.net.VpnService
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:62:13-64:29
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:61:13-63:29
 action#android.net.VpnService
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:63:17-65
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:62:17-65
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:63:25-62
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:62:25-62
 property#android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:65:13-67:47
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:64:13-66:47
 	android:value
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:67:17-44
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:66:17-44
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:66:17-76
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:65:17-76
 service#com.nexusblock.service.VpnWatchdogService
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:71:9-78:19
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:70:9-77:19
 	android:exported
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:73:13-37
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:72:13-37
 	android:foregroundServiceType
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:74:13-55
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:73:13-55
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:72:13-55
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:71:13-55
 service#com.nexusblock.service.AdBlockTileService
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:81:9-90:19
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:80:9-89:19
 	android:label
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:85:13-37
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:84:13-37
 	android:exported
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:83:13-36
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:82:13-36
 	android:permission
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:86:13-77
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:85:13-77
 	android:icon
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:84:13-53
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:83:13-53
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:82:13-55
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:81:13-55
 intent-filter#action:name:android.service.quicksettings.action.QS_TILE
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:87:13-89:29
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:86:13-88:29
 action#android.service.quicksettings.action.QS_TILE
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:88:17-87
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:87:17-87
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:88:25-84
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:87:25-84
 receiver#com.nexusblock.service.BootReceiver
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:93:9-102:20
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:92:9-101:20
 	android:exported
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:95:13-36
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:94:13-36
 	android:permission
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:96:13-75
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:95:13-75
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:94:13-49
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:93:13-49
 intent-filter#action:name:android.intent.action.BOOT_COMPLETED+action:name:android.intent.action.QUICKBOOT_POWERON+action:name:com.htc.intent.action.QUICKBOOT_POWERON
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:97:13-101:29
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:96:13-100:29
 action#android.intent.action.BOOT_COMPLETED
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:98:17-79
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:97:17-79
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:98:25-76
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:97:25-76
 action#android.intent.action.QUICKBOOT_POWERON
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:98:17-82
+	android:name
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:98:25-79
+action#com.htc.intent.action.QUICKBOOT_POWERON
 ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:99:17-82
 	android:name
 		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:99:25-79
-action#com.htc.intent.action.QUICKBOOT_POWERON
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:100:17-82
-	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:100:25-79
 receiver#com.nexusblock.service.UninstallCleanupReceiver
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:105:9-115:20
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:104:9-110:20
 	android:exported
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:107:13-37
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:106:13-37
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:106:13-61
-intent-filter#action:name:android.intent.action.PACKAGE_REMOVED+data:scheme:package
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:108:13-111:29
-action#android.intent.action.PACKAGE_REMOVED
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:109:17-80
-	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:109:25-77
-data
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:110:17-50
-	android:scheme
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:110:23-47
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:105:13-61
 intent-filter#action:name:android.intent.action.MY_PACKAGE_SUSPENDED
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:112:13-114:29
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:107:13-109:29
 action#android.intent.action.MY_PACKAGE_SUSPENDED
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:113:17-85
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:108:17-85
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:113:25-82
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:108:25-82
 meta-data#androidx.work.WorkManagerInitializer
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:123:13-126:39
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:118:13-121:39
 REJECTED from [androidx.work:work-runtime:2.11.2] /Users/prabha/.gradle/caches/9.5.1/transforms/ddd5af9c7fd9d18a2a285b724851c000/transformed/work-runtime-2.11.2/AndroidManifest.xml:34:13-36:52
 	tools:node
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:126:17-36
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:121:17-36
 	android:value
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:125:17-49
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:120:17-49
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:124:17-68
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:119:17-68
 meta-data#android.support.FILE_PROVIDER_PATHS
-ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:135:13-137:54
+ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:130:13-132:54
 	android:resource
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:137:17-51
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:132:17-51
 	android:name
-		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:136:17-67
+		ADDED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml:131:17-67
 uses-sdk
 INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /Users/prabha/Desktop/cod/NexusBlock-AndroidTV/app/src/main/AndroidManifest.xml

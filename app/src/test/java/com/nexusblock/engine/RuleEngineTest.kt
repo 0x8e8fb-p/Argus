@@ -94,6 +94,28 @@ class RuleEngineTest {
     }
 
     @Test
+    fun primeVideoAdCdnPatternsBypassBloomFastFail() {
+        val engine = RuleEngine()
+
+        engine.loadRules(emptyList())
+
+        assertTrue(engine.isBlocked("s3-iad-ww.cf.videorolls.row.aiv-cdn.net"))
+        assertTrue(engine.isBlocked("d3p8zr0ffa9t17.cloudfront.net"))
+        assertFalse(engine.isBlocked("api.us-east-1.aiv-delivery.net"))
+    }
+
+    @Test
+    fun hotstarAndJioAdCdnPatternsBypassBloomFastFail() {
+        val engine = RuleEngine()
+
+        engine.loadRules(emptyList())
+
+        assertTrue(engine.isBlocked("hotstarads.akamaized.net"))
+        assertTrue(engine.isBlocked("jiohotstar-ads.akamaized.net"))
+        assertFalse(engine.isBlocked("img.jiohotstar.com"))
+    }
+
+    @Test
     fun hostParserNormalizesSinkholeEntries() {
         val rules = BlocklistParsers.parseHostFile(
             """

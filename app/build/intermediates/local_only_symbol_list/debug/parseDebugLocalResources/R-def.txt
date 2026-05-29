@@ -63,6 +63,6 @@ string vpn_notification_title
 string watchdog_notification_text
 string watchdog_notification_title
 string whitelist_description
-style Theme.ArgusBlock
+style Theme.Argus
 xml file_paths
 xml network_security_config

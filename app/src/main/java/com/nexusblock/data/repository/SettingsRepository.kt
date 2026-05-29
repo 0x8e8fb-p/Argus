@@ -33,7 +33,7 @@ enum class VpnRoutingMode(val storageKey: String) {
 
     companion object {
         fun fromStorageKey(value: String?): VpnRoutingMode = entries.firstOrNull { it.storageKey == value }
-            ?: DNS_ONLY
+            ?: FULL_ROUTE
     }
 }
 
@@ -72,7 +72,7 @@ class SettingsRepository @Inject constructor(
 
     private val vpnRoutingModeFlow = dataStore.data
         .map { VpnRoutingMode.fromStorageKey(it[KEY_VPN_ROUTING_MODE]) }
-        .stateIn(scope, SharingStarted.Eagerly, VpnRoutingMode.DNS_ONLY)
+        .stateIn(scope, SharingStarted.Eagerly, VpnRoutingMode.FULL_ROUTE)
 
     private val techniquesFlow = dataStore.data
         .map { prefs ->
@@ -154,21 +154,48 @@ class SettingsRepository @Inject constructor(
     fun observeVpnRoutingMode(): StateFlow<VpnRoutingMode> = vpnRoutingModeFlow
 
     // ─────────────────────────────────────────────────────────────
-    // Default bypass packages for streaming apps
+    // First-launch / upgrade defaults
     // ─────────────────────────────────────────────────────────────
 
-    val defaultBypassPackages = setOf(
+    private val streamingPackagesThatMustStayFiltered = setOf(
         "com.netflix.mediaclient",
         "com.disney.disneyplus",
         "com.amazon.aiv.AIVApp",
         "in.startv.hotstar",
         "com.sonyliv",
+        "com.graymatrix.did",
+        "com.jio.media.ondemand",
+        "com.mxtech.videoplayer.ad",
+        "com.tv.v18.viola",
+        "com.discovery.discoveryplus.mobile",
     )
 
-    fun initDefaultBypassIfEmpty() {
-        if (firewallModesFlow.value.isEmpty()) {
-            val defaults = defaultBypassPackages.associateWith { FirewallMode.ALLOW }
-            firewallModes = defaults
+    /**
+     * Older builds initialized major streaming apps as [FirewallMode.ALLOW],
+     * which maps to VpnService.addDisallowedApplication() and therefore
+     * excludes exactly the apps users expect us to filter. Repair that state
+     * on startup and default fresh installs to full-route filtering so SNI and
+     * QUIC downgrade logic can work.
+     */
+    fun installAdBlockingDefaults() {
+        scope.launch {
+            dataStore.edit { prefs ->
+                if (prefs[KEY_VPN_ROUTING_MODE] == null) {
+                    prefs[KEY_VPN_ROUTING_MODE] = VpnRoutingMode.FULL_ROUTE.storageKey
+                }
+
+                val repairedModes = parseFirewallModes(prefs[KEY_FIREWALL_MODES] ?: "{}").toMutableMap()
+                var changed = false
+                for (pkg in streamingPackagesThatMustStayFiltered) {
+                    if (repairedModes[pkg] == FirewallMode.ALLOW) {
+                        repairedModes.remove(pkg)
+                        changed = true
+                    }
+                }
+                if (changed) {
+                    prefs[KEY_FIREWALL_MODES] = serializeFirewallModes(repairedModes)
+                }
+            }
         }
     }
 

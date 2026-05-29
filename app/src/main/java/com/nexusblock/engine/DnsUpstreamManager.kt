@@ -196,7 +196,10 @@ class DnsUpstreamManager(
         for (server in servers) {
             try {
                 DatagramSocket().use { socket ->
-                    VpnProtector.protect(socket)
+                    if (!VpnProtector.protect(socket)) {
+                        Log.w(TAG, "VpnProtector.protect() failed for $server — socket not bound to underlying network, skipping to prevent routing loop")
+                        return@use
+                    }
                     socket.soTimeout = PLAIN_DNS_TIMEOUT_MS
 
                     val packet = DatagramPacket(

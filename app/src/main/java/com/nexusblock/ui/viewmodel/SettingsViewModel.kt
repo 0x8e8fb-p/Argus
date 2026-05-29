@@ -33,7 +33,7 @@ class SettingsViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "adguard_standard")
 
     val vpnRoutingMode: StateFlow<VpnRoutingMode> = settingsRepo.observeVpnRoutingMode()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), VpnRoutingMode.DNS_ONLY)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), VpnRoutingMode.FULL_ROUTE)
 
     private val _isBatteryOptimized = MutableStateFlow(false)
     val isBatteryOptimized: StateFlow<Boolean> = _isBatteryOptimized.asStateFlow()

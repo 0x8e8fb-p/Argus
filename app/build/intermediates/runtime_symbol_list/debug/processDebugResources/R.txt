@@ -436,7 +436,7 @@ int style TextAppearance_Compat_Notification_Info 0x7f0f0005
 int style TextAppearance_Compat_Notification_Line2 0x7f0f0006
 int style TextAppearance_Compat_Notification_Time 0x7f0f0007
 int style TextAppearance_Compat_Notification_Title 0x7f0f0008
-int style Theme_ArgusBlock 0x7f0f0009
+int style Theme_Argus 0x7f0f0009
 int style Widget_Compat_NotificationActionContainer 0x7f0f000a
 int style Widget_Compat_NotificationActionText 0x7f0f000b
 int[] styleable ActivityFilter { 0x7f030001, 0x7f030002 }

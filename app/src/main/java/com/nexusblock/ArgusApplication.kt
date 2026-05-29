@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.WorkManager
+import com.nexusblock.data.worker.BlocklistUpdateWorker
 import com.nexusblock.data.worker.VpnWatchdogWorker
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
@@ -32,12 +33,14 @@ class ArgusApplication : Application(), Configuration.Provider {
         initializeWorkManager()
         VpnWatchdogWorker.enqueue(this)
 
-        // Ensure default streaming-app bypass rules are applied on first launch
-        settingsRepo.initDefaultBypassIfEmpty()
+        // Repair older defaults that accidentally bypassed streaming apps,
+        // and enable full-route mode for fresh installs.
+        settingsRepo.installAdBlockingDefaults()
 
-        // Blocklist updates are manual-only via Settings to avoid
-        // network hit and SQLite churn on every cold start.
-        // Built-in emergency rules are loaded synchronously on first VPN start.
+        // Built-in emergency rules are loaded synchronously on VPN start; the
+        // remote lists update in WorkManager so the TV stays responsive.
+        BlocklistUpdateWorker.schedule(this)
+        BlocklistUpdateWorker.runNow(this)
     }
 
     override fun onTerminate() {

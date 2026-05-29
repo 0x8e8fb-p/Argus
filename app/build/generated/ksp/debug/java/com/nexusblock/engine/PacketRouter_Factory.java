@@ -2,6 +2,7 @@ package com.nexusblock.engine;
 
 import com.nexusblock.data.repository.SettingsRepository;
 import com.nexusblock.data.repository.StatsRepository;
+import com.nexusblock.engine.network.FlowCache;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
 import dagger.internal.QualifierMetadata;
@@ -35,31 +36,35 @@ public final class PacketRouter_Factory implements Factory<PacketRouter> {
 
   private final Provider<UdpRelayEngine> udpRelayProvider;
 
+  private final Provider<FlowCache> flowCacheProvider;
+
   public PacketRouter_Factory(Provider<DnsFilterEngine> dnsEngineProvider,
       Provider<StatsRepository> statsRepoProvider,
       Provider<SettingsRepository> settingsRepoProvider, Provider<TcpRelayEngine> tcpRelayProvider,
-      Provider<UdpRelayEngine> udpRelayProvider) {
+      Provider<UdpRelayEngine> udpRelayProvider, Provider<FlowCache> flowCacheProvider) {
     this.dnsEngineProvider = dnsEngineProvider;
     this.statsRepoProvider = statsRepoProvider;
     this.settingsRepoProvider = settingsRepoProvider;
     this.tcpRelayProvider = tcpRelayProvider;
     this.udpRelayProvider = udpRelayProvider;
+    this.flowCacheProvider = flowCacheProvider;
   }
 
   @Override
   public PacketRouter get() {
-    return newInstance(dnsEngineProvider.get(), statsRepoProvider.get(), settingsRepoProvider.get(), tcpRelayProvider.get(), udpRelayProvider.get());
+    return newInstance(dnsEngineProvider.get(), statsRepoProvider.get(), settingsRepoProvider.get(), tcpRelayProvider.get(), udpRelayProvider.get(), flowCacheProvider.get());
   }
 
   public static PacketRouter_Factory create(Provider<DnsFilterEngine> dnsEngineProvider,
       Provider<StatsRepository> statsRepoProvider,
       Provider<SettingsRepository> settingsRepoProvider, Provider<TcpRelayEngine> tcpRelayProvider,
-      Provider<UdpRelayEngine> udpRelayProvider) {
-    return new PacketRouter_Factory(dnsEngineProvider, statsRepoProvider, settingsRepoProvider, tcpRelayProvider, udpRelayProvider);
+      Provider<UdpRelayEngine> udpRelayProvider, Provider<FlowCache> flowCacheProvider) {
+    return new PacketRouter_Factory(dnsEngineProvider, statsRepoProvider, settingsRepoProvider, tcpRelayProvider, udpRelayProvider, flowCacheProvider);
   }
 
   public static PacketRouter newInstance(DnsFilterEngine dnsEngine, StatsRepository statsRepo,
-      SettingsRepository settingsRepo, TcpRelayEngine tcpRelay, UdpRelayEngine udpRelay) {
-    return new PacketRouter(dnsEngine, statsRepo, settingsRepo, tcpRelay, udpRelay);
+      SettingsRepository settingsRepo, TcpRelayEngine tcpRelay, UdpRelayEngine udpRelay,
+      FlowCache flowCache) {
+    return new PacketRouter(dnsEngine, statsRepo, settingsRepo, tcpRelay, udpRelay, flowCache);
   }
 }

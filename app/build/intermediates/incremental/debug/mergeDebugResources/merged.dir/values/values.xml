@@ -213,7 +213,7 @@
     <string name="androidx_compose_ui_autofill">Autofill</string>
     <string name="androidx_startup" translatable="false">androidx.startup</string>
     <string name="app_desc">System-wide ad blocker for Android TV</string>
-    <string name="app_name">ArgusBlock</string>
+    <string name="app_name">Argus</string>
     <string name="blocklist_source_adguard">AdGuard YouTube</string>
     <string name="blocklist_source_firebog">Firebog YouTube Ads</string>
     <string name="blocklist_source_oisd">OISD Big</string>
@@ -375,7 +375,7 @@
     <style name="TextAppearance.Compat.Notification.Line2" parent="TextAppearance.Compat.Notification.Info"/>
     <style name="TextAppearance.Compat.Notification.Time" parent="@android:style/TextAppearance.Material.Notification.Time"/>
     <style name="TextAppearance.Compat.Notification.Title" parent="@android:style/TextAppearance.Material.Notification.Title"/>
-    <style name="Theme.ArgusBlock" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.Argus" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/background</item>
         <item name="android:colorPrimary">@color/primary</item>
         <item name="android:colorPrimaryDark">@color/primary_dark</item>

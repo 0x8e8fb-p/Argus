@@ -30,6 +30,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.nexusblock.data.repository.SettingsRepository
+import com.nexusblock.data.worker.BlocklistUpdateWorker
 import com.nexusblock.service.NexusVpnService
 import com.nexusblock.service.VpnWatchdogService
 import com.nexusblock.ui.components.ArgusBackground
@@ -67,6 +68,17 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Schedule periodic blocklist updates and trigger an immediate first update.
+        // The periodic worker was accidentally never scheduled in previous builds.
+        BlocklistUpdateWorker.schedule(this)
+        val prefs = getSharedPreferences("argus_first_launch", MODE_PRIVATE)
+        if (!prefs.getBoolean("blocklist_initialized", false)) {
+            Log.i(TAG, "First launch — triggering immediate blocklist update")
+            BlocklistUpdateWorker.runNow(this)
+            prefs.edit().putBoolean("blocklist_initialized", true).apply()
+        }
+
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             val intent = VpnService.prepare(this)
             if (intent != null) {

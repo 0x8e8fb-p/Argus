@@ -36,19 +36,23 @@ object PacketParser {
         return buffer.get(pos + OFFSET_PROTOCOL).toInt() and 0xFF
     }
 
-    /** Source IPv4 address as 4 packed bytes. */
+    /** Source IPv4 address as 4 packed bytes. Position-safe absolute read. */
     fun srcIpBytes(buffer: ByteBuffer, pos: Int): ByteArray {
         val ip = ByteArray(4)
-        buffer.position(pos + OFFSET_SRC_IP)
-        buffer.get(ip)
+        ip[0] = buffer.get(pos + OFFSET_SRC_IP)
+        ip[1] = buffer.get(pos + OFFSET_SRC_IP + 1)
+        ip[2] = buffer.get(pos + OFFSET_SRC_IP + 2)
+        ip[3] = buffer.get(pos + OFFSET_SRC_IP + 3)
         return ip
     }
 
-    /** Destination IPv4 address as 4 packed bytes. */
+    /** Destination IPv4 address as 4 packed bytes. Position-safe absolute read. */
     fun dstIpBytes(buffer: ByteBuffer, pos: Int): ByteArray {
         val ip = ByteArray(4)
-        buffer.position(pos + OFFSET_DST_IP)
-        buffer.get(ip)
+        ip[0] = buffer.get(pos + OFFSET_DST_IP)
+        ip[1] = buffer.get(pos + OFFSET_DST_IP + 1)
+        ip[2] = buffer.get(pos + OFFSET_DST_IP + 2)
+        ip[3] = buffer.get(pos + OFFSET_DST_IP + 3)
         return ip
     }
 

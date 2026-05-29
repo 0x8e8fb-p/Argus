@@ -75,6 +75,16 @@ class DnsProfileManager @Inject constructor(
             loadPersistedProfiles()
             maybeRefreshProfiles()
         }
+        scope.launch {
+            settingsRepo.observeDnsProfile().collect { selected ->
+                if (cachedProfiles.any { it.id == selected }) {
+                    activeProfileId = selected
+                    Log.i(TAG, "Active DNS profile observed from settings: $selected")
+                } else {
+                    Log.w(TAG, "Ignoring unknown DNS profile from settings: $selected")
+                }
+            }
+        }
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -96,6 +106,7 @@ class DnsProfileManager @Inject constructor(
             return
         }
         activeProfileId = id
+        settingsRepo.dnsProfile = id
         dataStore.edit { prefs ->
             prefs[PREFS_KEY_ACTIVE_PROFILE] = id
         }

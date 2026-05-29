@@ -316,10 +316,20 @@ class RuleEngine {
                    lower.startsWith("jiocinema-ad") ||
                    lower.startsWith("jiocinema-ads") ||
                    lower.startsWith("jioads") ||
+                   lower.startsWith("jiohotstar-ads") ||
+                   lower.startsWith("jiohotstarads") ||
+                   lower.startsWith("jiocdn-ads") ||
+                   lower.startsWith("jio-ad") ||
+                   lower.startsWith("jio-ads") ||
+                   lower.startsWith("jio-analytics") ||
+                   lower.startsWith("jio-tracking") ||
                    lower.startsWith("sonyliv-ads") ||
+                   lower.startsWith("sonyliv-ad") ||
                    lower.startsWith("zee5ads") ||
                    lower.startsWith("zee5-ads") ||
                    lower.startsWith("vootads") ||
+                   lower.startsWith("voot-ads") ||
+                   lower.startsWith("voot-ad") ||
                    lower.startsWith("adserver") ||
                    lower.startsWith("speee-ad") ||
                    lower.startsWith("freewheel") ||

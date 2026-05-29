@@ -144,6 +144,11 @@ class DnsFilterEngine @Inject constructor(
     private var queriesAllowed = 0L
 
     init {
+        ensureCustomRulesObserver()
+    }
+
+    private fun ensureCustomRulesObserver() {
+        if (customRulesJob?.isActive == true) return
         customRulesJob = scope.launch {
             customRuleDao.observeEnabled()
                 .drop(1)
@@ -158,6 +163,7 @@ class DnsFilterEngine @Inject constructor(
 
     fun start(dnsAddress: InetAddress) {
         if (_isRunning.value || startJob?.isActive == true) return
+        ensureCustomRulesObserver()
         // Recreate scope in case it was cancelled by a previous stop()
         if (!scope.isActive) {
             // Cannot restart a cancelled scope; safe-guard by not recreating here
@@ -186,8 +192,6 @@ class DnsFilterEngine @Inject constructor(
         startJob?.cancel()
         startJob = null
         logJob?.cancel()
-        // Cancel customRulesJob so it doesn't leak across restarts
-        customRulesJob?.cancel()
         clearCache()
         Log.i(TAG, "DNS engine stopped")
     }
@@ -648,6 +652,11 @@ class DnsFilterEngine @Inject constructor(
             "api.hotstar.com",
             "www.jiohotstar.com",
             "api.jiohotstar.com",
+            "cdn.jiohotstar.com",
+            "live.jiohotstar.com",
+            "playback.jiohotstar.com",
+            "img.jiohotstar.com",
+            "thumbs.jiohotstar.com",
             // SonyLiv content delivery
             "www.sonyliv.com",
             "api.sonyliv.com",
@@ -675,10 +684,21 @@ class DnsFilterEngine @Inject constructor(
         // Load incrementally per source to avoid OOM from accumulating all
         // domains in a single list (can exceed 256MB heap on Android TV).
         val newRuleEngine = RuleEngine()
-        newRuleEngine.loadRules(allRules)  // custom rules first
 
+        // 3a. Built-in emergency rules FIRST — these are lightweight (~750 rules)
+        // and critical for Indian OTT ad blocking. Loading them before the
+        // 200K-cap remote blocklists ensures they are never skipped.
+        val builtins = com.nexusblock.data.repository.BuiltInBlockRules.emergencyRules()
+        newRuleEngine.addRules(builtins)
+        var builtinCount = builtins.size
+
+        // 3b. Custom user rules
+        newRuleEngine.addRules(allRules)
+
+        // 3c. Remote blocklist sources from DB. Skip the built-in source since
+        // we already loaded emergency rules directly (avoids double-loading).
         val enabledSources = blocklistRepo.observeSourceStates().first()
-            .filter { it.enabled }
+            .filter { it.enabled && it.source != "builtin_ads" }
         var blocklistCount = 0
         for (source in enabledSources) {
             val domains = blocklistRepo.getDomainsBySource(source.source)
@@ -686,7 +706,7 @@ class DnsFilterEngine @Inject constructor(
             blocklistCount += domains.size
         }
 
-        Log.i(TAG, "Loaded ${customRules.size} custom rules + ${criticalAllows.size} critical allows + $blocklistCount blocklist domains from ${enabledSources.size} sources")
+        Log.i(TAG, "Loaded ${customRules.size} custom rules + ${criticalAllows.size} critical allows + $builtinCount built-in + $blocklistCount blocklist domains from ${enabledSources.size} sources")
 
         ruleEngine = newRuleEngine
         clearCache()

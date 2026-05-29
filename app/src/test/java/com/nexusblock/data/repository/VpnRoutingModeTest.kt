@@ -12,8 +12,8 @@ class VpnRoutingModeTest {
     }
 
     @Test
-    fun fromStorageKeyDefaultsToDnsOnly() {
-        assertEquals(VpnRoutingMode.DNS_ONLY, VpnRoutingMode.fromStorageKey(null))
-        assertEquals(VpnRoutingMode.DNS_ONLY, VpnRoutingMode.fromStorageKey("unknown"))
+    fun fromStorageKeyDefaultsToFullRoute() {
+        assertEquals(VpnRoutingMode.FULL_ROUTE, VpnRoutingMode.fromStorageKey(null))
+        assertEquals(VpnRoutingMode.FULL_ROUTE, VpnRoutingMode.fromStorageKey("unknown"))
     }
 }
